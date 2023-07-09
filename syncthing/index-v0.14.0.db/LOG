@@ -1,0 +1,49 @@
+=============== Jul 8, 2023 (+08) ===============
+13:57:32.460767 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+13:57:32.465377 db@open opening
+13:57:32.465798 version@stat F·[] S·0B[] Sc·[]
+13:57:32.467279 db@janitor F·2 G·0
+13:57:32.467289 db@open done T·1.904126ms
+13:57:33.824570 memdb@flush N·46 S·1KiB
+13:57:33.826644 memdb@flush created L0@3 N·46 S·597B "\ndb..ion,v46":"\nla..ime,v19"
+13:57:33.826692 version@stat F·[1] S·597B[597B] Sc·[0.25]
+13:57:33.828491 memdb@flush committed F·1 T·3.887252ms
+13:57:33.828533 journal@remove removed @1
+13:57:33.828545 table@compaction range L-1 "":""
+13:57:33.828553 table@compaction L0·1 -> L1·0 S·597B Q·46
+13:57:33.830312 table@build created L1@4 N·4 S·207B "\ndb..ion,v46":"\nla..ime,v19"
+13:57:33.830347 version@stat F·[0 1] S·207B[0B 207B] Sc·[0.00 0.00]
+13:57:33.832054 table@compaction committed F~ S-390B Ke·0 D·42 T·3.487024ms
+13:57:33.832266 table@remove removed @3
+14:30:26.830558 db@close closing
+14:30:26.830641 db@close done T·82.939µs
+=============== Jul 8, 2023 (+08) ===============
+14:30:27.846597 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+14:30:27.846659 version@stat F·[0 1] S·207B[0B 207B] Sc·[0.00 0.00]
+14:30:27.846670 db@open opening
+14:30:27.846690 journal@recovery F·1
+14:30:27.847044 journal@recovery recovering @2
+14:30:27.852572 memdb@flush created L0@5 N·1775 S·70KiB "\x00\x00\x00..git,v71":"\x11\xa2\xa6..\x04K\x7f,v57"
+14:30:27.852949 version@stat F·[1 1] S·71KiB[70KiB 207B] Sc·[0.25 0.00]
+14:30:27.859495 db@janitor F·4 G·0
+14:30:27.859508 db@open done T·12.834326ms
+15:01:24.119716 db@close closing
+15:01:24.119896 db@close done T·177.36µs
+=============== Jul 8, 2023 (+08) ===============
+20:04:20.991041 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+20:04:20.991971 version@stat F·[1 1] S·71KiB[70KiB 207B] Sc·[0.25 0.00]
+20:04:20.991981 db@open opening
+20:04:20.992005 journal@recovery F·1
+20:04:20.992758 journal@recovery recovering @6
+20:04:20.995249 memdb@flush created L0@8 N·164 S·5KiB "\x00\x00\x00..son,v1878":"\x0e\x00\x00..son,v1974"
+20:04:20.995431 version@stat F·[2 1] S·76KiB[76KiB 207B] Sc·[0.50 0.00]
+20:04:21.002174 db@janitor F·5 G·0
+20:04:21.002186 db@open done T·10.201674ms
+20:04:22.367930 table@compaction L0·2 -> L1·1 S·76KiB Q·1987
+20:04:22.370680 table@build created L1@11 N·869 S·55KiB "\x00\x00\x00..git,v71":"\x0e\x00\x00..ple,v321"
+20:04:22.370714 version@stat F·[0 1] S·55KiB[0B 55KiB] Sc·[0.00 0.00]
+20:04:22.371872 table@compaction committed F-2 S-20KiB Ke·0 D·1074 T·3.915342ms
+20:04:22.373744 table@remove removed @5
+20:04:22.373762 table@remove removed @4
+20:11:23.351444 db@close closing
+20:11:23.351620 db@close done T·172.012µs

@@ -1,0 +1,5 @@
+- [ ] Shopee
+    - [ ] make shopee account
+- [ ] Shein
+    - [ ] make shein account
+- [ ] Change coins to cash

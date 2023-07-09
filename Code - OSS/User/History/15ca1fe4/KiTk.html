@@ -1,0 +1,138 @@
+<html lang="en"><head>
+		<title>the fernsite!</title>
+		<meta charset="utf-8">
+		<meta name="description" content="hey hi! it's the website of fern!">
+		<meta property="og:description" content="hey hi! it's the website of fern!">
+		<meta property="og:title" content="the fernsite!">
+		<meta property="og:site_name" content="the fernsite!">
+		<meta property="og:type" content="website">
+		<link rel="stylesheet" href="style.min.css">
+		<script src="script.min.js"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	</head>
+	<body>
+		<div id="container">
+			<nav id="navbox">
+				<ul>
+					<li><a href="javascript:showpage('home')" class="url pagelink">Home</a></li>
+					<li><a href="javascript:showpage('socials')" class="url pagelink">Socials</a></li>
+					<li><a href="javascript:showpage('aboutme')" class="url pagelink">About Me</a></li>
+					<li><a href="javascript:showpage('stuffimade')" class="url pagelink">Stuff I've Made</a></li>
+				</ul>
+			</nav>
+			<div id="main">
+				<div id="inner">
+					<div id="nameandimage">
+						<div id="wrapper">
+							<img src="/media/banner.png" class="banner" alt="fern's profile picture" width="1920" height="1080">
+							<h1 id="username">fern!</h1>
+						</div>
+					</div>
+					<hr id="seperatortop">
+					<div id="home" style="display: block;">
+						<p>Hi! I'm Fern (sometimes ffernn) and this is a lil site I put together to kinda collate a bunch of info about me and what I've done!</p>
+						<p>There's a navbar to the left to get around and a theme switcher at the bottom for those who prefer light mode (or just want to see the cool colour change)</p>
+						<p>Some info about this site:</p>
+						<ul id="siteinfo">
+							<li>It's pretty tiny, weighing in at just under 200kb</li>
+							<li>It gets a perfect Google Lighthouse score (well, almost. I get marked down for the layout shift due to hiding and showing content sections)</li>
+							<li>And it took me probably 3 weeks on and off to make</li>
+							<li>Oh and I think some regulation says that I need to let you know I use 1 cookie to store what theme you prefer for next time :&gt;</li>
+						</ul>
+					</div>
+					<div id="socials" style="display: none;">
+						<div class="list-button">
+							<a href="https://github.com/ffernn-dev" class="button-href" id="github-button">
+								<svg viewBox="0 0 98 96" class="button-logo" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" fill="#fff"></path></svg>
+								<span class="label">Github</span></a>
+						</div>
+						<div class="list-button">
+							<a href="https://www.youtube.com/channel/UCML242reim253tInH3ClhOA" class="button-href" id="youtube-button">
+								<svg viewBox="0 0 121.485 85.039" class="button-logo">
+									<path class="svg" xmlns="http://www.w3.org/2000/svg" d="M118.9,13.3L118.9,13.3c-1.4-5.2-5.5-9.3-10.7-10.7C98.7,0,60.7,0,60.7,0s-38,0-47.5,2.5C8,3.9,3.9,8,2.5,13.3  C0,22.8,0,42.5,0,42.5s0,19.8,2.5,29.2C3.9,77,8,81.1,13.3,82.5C22.8,85,60.7,85,60.7,85s38,0,47.5-2.5c5.2-1.4,9.3-5.5,10.7-10.7  c2.5-9.5,2.5-29.2,2.5-29.2S121.5,22.8,118.9,13.3z M48.6,60.7V24.3l31.6,18.2L48.6,60.7z" fill="#f7fff7"></path>
+								</svg>
+								<span class="label">Youtube</span></a>
+						</div>
+						<div class="list-button">
+							<a href="https://www.twitter.com/its_ffernn" class="button-href" id="twitter-button">
+								<svg viewBox="0 0 248 204" class="button-logo">
+									<path class="svg" d="M221.95 51.29l.15 6.53c0 66.73-50.8 143.69-143.69 143.69v-.04c-27.44.04-54.31-7.82-77.41-22.64 3.99.48 8 .72 12.02.73 22.74.02 44.83-7.61 62.72-21.66-21.61-.41-40.56-14.5-47.18-35.07a50.34 50.34 0 0 0 22.8-.87 50.51 50.51 0 0 1-40.51-49.5v-.64a50.18 50.18 0 0 0 22.92 6.32C11.58 63.31 4.74 33.79 18.14 10.71c25.64 31.55 63.47 50.73 104.08 52.76-4.07-17.54 1.49-35.92 14.61-48.25 20.34-19.12 52.33-18.14 71.45 2.19 11.31-2.23 22.15-6.38 32.07-12.26a50.69 50.69 0 0 1-22.2 27.93c10.01-1.18 19.79-3.86 29-7.95-6.78 10.16-15.32 19.01-25.2 26.16z" fill="#f7fff7"></path>
+								</svg>
+								<span class="label">Twitter</span></a>
+						</div>
+						<div class="list-button">
+							<a href="https://www.twitch.tv/ffernnlive" class="button-href" id="twitch-button">
+								<svg viewBox="0 0 2400 2800" class="button-logo">
+									<path class="svg" d="M500 0L0 500v1800h600v500l500-500h400l900-900V0H500zm1700 1300l-400 400h-400l-350 350v-350H600V200h1600v1100zm-500-750h200v600h-200zm-550 0h200v600h-200z" fill="#f7fff7"></path>
+								</svg>
+								<span class="label">Twitch</span></a>
+						</div>
+					</div>
+					<div id="aboutme" style="display: none;">
+						<p>Getting up close and personal 😳</p>
+						<h2>The basics</h2>
+						<p>I'm <span id="age">16.0949</span> years old and I was born and live in Australia. I love coding, music and video games. (including making music and video games). I've also started to do a lot of 3D archviz and VFX stuff which I'm really enjoying</p>
+						<h2>Pronouns?</h2>
+						<p>Quick answer: he/him or she/her</p>
+						<p>Long answer: I dunno how I came to this conclusion but I don't mind which pronouns people refer to me with. Basically just use whichever ones you want lol. Obviously that won't work for people who don't know me too well, so if you're not sure just use he/him. For more information check out my <a href="https://en.pronouns.page/@hihi.fernguy" class="url inlineurl">pronouns.page</a>.</p>
+						<h2>Gender Identity</h2>
+						<p>Right. So I'm genderfluid, which means my gender is not fixed. It's not the best but <a href="https://www.webmd.com/sex/what-is-fluid" class="url inlineurl">ths WebMD article</a> kinda explains it a bit better. My birth certificate says male but I swing hither and thither a lot hehe.</p>
+					</div>
+					<div id="stuffimade" style="display: none;">
+						<h2>Games!</h2>
+						<p>(All of these can be downloaded on my <a href="https://ffernn.itch.io" class="url inlineurl">itch page</a>)</p>
+						<div class="itchbox">
+						<img class="itchimage" alt="Procrastination Simulator Banner Image" src="/media/itch_proc_sim.png" width="315" height="250">
+						<h2>Procrastination Simulator</h2>
+						<p>A game about procrastination made for LD 50</p>
+						<a class="itchbutton" href="https://ffernn.itch.io/procrastination-simulator">Play now</a>
+					</div>
+					<div class="itchbox">
+						<img class="itchimage" alt="IDIAPIG Banner Image" src="/media/itch_unstable.png" width="315" height="250">
+						<h2>Unstable (adj.)</h2>
+						<p>A short game for Ludum Dare 49 about words</p>
+						<a class="itchbutton" href="https://ffernn.itch.io/unstable-adj">Play now</a>
+					</div>
+					<div class="itchbox">
+						<img class="itchimage" alt="IDIAPIG Banner Image" src="/media/itch_bongocat.png" width="315" height="250">
+						<h2>Bongo Cat 3D</h2>
+						<p>A cute 3D bongo simulator made as a secret santa gift</p>
+						<a class="itchbutton" href="https://ffernn.itch.io/bongo-cat-3d">Play now</a>
+					</div>
+						<h2>Web thingies</h2>
+						<h3><a href="https://ffernn-dev.github.io/" class="url inlineurl">This website! (does that count? idk).</a></h3>
+						<p>The goal of this site was to be a kind of portfolio for stuff I do, and also I just wanted to make a website</p>
+						<p>I somehow got an idea in my head that I wanted it to be as small as possible and so I sacrificed a whole lot of maintanability to make it all in one page. I got a lot of help from my friends so thx for that :)</p>
+						<h3><a href="https://app.chargd.social" class="url inlineurl">Chargd</a></h3>
+						<img class="banner" alt="The Chargd website main page." src="/media/chargd.png">
+						<p>I'm working on this with <a href="https://bucketfish.me" class="url inlineurl">my friend Bucketfish</a>, the plan is for it to be a social media where the 'posts' are only when you charge or unplug your phone. In some small testing it's quite fun and it becomes a tiny little blog e.g. "Just got home from school 😮‍💨" or "oh no forgot to plug in my phone last night!" There's a lot of work to go, but I hope it comes to fuition.</p>
+						<h3><a href="https://ffernn-dev.github.io/SaveCodr/" class="url inlineurl">SaveCodr</a></h3>
+						<p>A VERY work in progress save code generator for some games. At the moment it only works for <a href="https://kodiqi.itch.io/idle-breakout" class="url inlineurl">Idle Breakout</a></p>
+						<p>Again, got a couple things WIP that I hope to put here, I'll keep this page updated.</p>
+						<h2>♫ Music ♫</h2>
+						<h3><a href="https://www.youtube.com/watch?v=dlqc2lCFK4U" class="url inlineurl">The synth, Hector</a></h3>
+						<p>A funky song I made for a music class once, the name is just the first thing that popped into my head. (No, I don't know anyone called Hector and no, it's not a reference)</p>
+						<h3><a href="https://www.youtube.com/watch?v=KQAerXb0C_8" class="url inlineurl">Fern's panpipes</a></h3>
+						<p>A tiny tune I made using only kids' instruments. I have a <a href="https://www.youtube.com/watch?v=a-hTWMLpbbQ" class="url inlineurl">"making of"</a> video on my channel</p>
+						<h3><a href="https://www.youtube.com/watch?v=MHno-3wnqrY" class="url inlineurl">aaaaaa - Island Song</a></h3>
+						<p>A cover I arranged and mixed of Island Song from Adventure Time with some friends</p>
+						<p>Wow there's not much here. I plan to fill this list some more, but I'm very bad at finishing projects so who knows :/</p>
+					</div>
+					<hr id="seperatorbottom">
+					<div id="footer">
+						<div id="bucket-webring">
+							<span id="left">⥼ <a href="https://webring.bucketfish.me/redirect.html?to=prev&amp;name=Fern" id="prev" class="url">prev</a></span>
+							<span id="mid"> 🏳️‍🌈 <a href="https://webring.bucketfish.me" id="header" class="url">bucket webring</a> 🏳️‍🌈 </span>
+							<span id="right"><a href="https://webring.bucketfish.me/redirect.html?to=next&amp;name=Fern" id="next" class="url">next</a> ⥽</span>
+						</div>
+						<p id="footertext">© Copyright 2023 Fern</p>
+					</div>
+				</div>
+			</div>
+			<svg viewBox="0 0 100 100" class="themeswitch" onclick="switchtheme()">
+				<path class="svg" d="M0,50A50,50,0,1,0,50,0,50.0567,50.0567,0,0,0,0,50ZM50,8.8261V91.1739A41.1739,41.1739,0,0,1,50,8.8261Z" fill="#f7fff7"></path>
+			</svg>
+		</div>
+	
+
+</body></html>
