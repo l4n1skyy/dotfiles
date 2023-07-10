@@ -10,8 +10,7 @@
             "file:///home/l4n1skyy/Projects/p-web/fern": "__default__profile__"
         },
         "emptyWindows": {
-            "1688951396513": "__default__profile__",
-            "1688951792317": "__default__profile__"
+            "1688951898175": "__default__profile__"
         }
     },
     "profileAssociationsMigration": true,
@@ -21,7 +20,7 @@
         "folders": [],
         "emptyWindows": [
             {
-                "backupFolder": "1688951792317"
+                "backupFolder": "1688951898175"
             }
         ]
     },
@@ -63,8 +62,7 @@
                             "items": [
                                 {
                                     "id": "workbench.action.reopenClosedEditor",
-                                    "label": "&&Reopen Closed Editor",
-                                    "enabled": false
+                                    "label": "&&Reopen Closed Editor"
                                 },
                                 {
                                     "id": "vscode.menubar.separator"
@@ -148,6 +146,17 @@
                                 },
                                 {
                                     "id": "vscode.menubar.separator"
+                                },
+                                {
+                                    "id": "openRecentFile",
+                                    "uri": {
+                                        "$mid": 1,
+                                        "external": "file:///home/l4n1skyy/.config/.gitignore",
+                                        "path": "/home/l4n1skyy/.config/.gitignore",
+                                        "scheme": "file"
+                                    },
+                                    "enabled": true,
+                                    "label": "~/.config/.gitignore"
                                 },
                                 {
                                     "id": "openRecentFile",
@@ -249,17 +258,6 @@
                                     "label": "~/.emacs.d/packages.example.el"
                                 },
                                 {
-                                    "id": "openRecentFile",
-                                    "uri": {
-                                        "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/.doom.d/config.el",
-                                        "path": "/home/l4n1skyy/.doom.d/config.el",
-                                        "scheme": "file"
-                                    },
-                                    "enabled": true,
-                                    "label": "~/.doom.d/config.el"
-                                },
-                                {
                                     "id": "vscode.menubar.separator"
                                 },
                                 {
@@ -296,11 +294,13 @@
                     },
                     {
                         "id": "workbench.action.files.save",
-                        "label": "&&Save"
+                        "label": "&&Save",
+                        "enabled": false
                     },
                     {
                         "id": "workbench.action.files.saveAs",
-                        "label": "Save &&As..."
+                        "label": "Save &&As...",
+                        "enabled": false
                     },
                     {
                         "id": "saveAll",
@@ -435,11 +435,13 @@
                     },
                     {
                         "id": "workbench.action.files.revert",
-                        "label": "Re&&vert File"
+                        "label": "Re&&vert File",
+                        "enabled": false
                     },
                     {
                         "id": "workbench.action.closeActiveEditor",
-                        "label": "&&Close Editor"
+                        "label": "&&Close Editor",
+                        "enabled": false
                     },
                     {
                         "id": "workbench.action.closeWindow",
@@ -484,11 +486,13 @@
                     },
                     {
                         "id": "actions.find",
-                        "label": "&&Find"
+                        "label": "&&Find",
+                        "enabled": false
                     },
                     {
                         "id": "editor.action.startFindReplaceAction",
-                        "label": "&&Replace"
+                        "label": "&&Replace",
+                        "enabled": false
                     },
                     {
                         "id": "vscode.menubar.separator"
@@ -869,7 +873,8 @@
                     },
                     {
                         "id": "editor.action.toggleWordWrap",
-                        "label": "&&Word Wrap"
+                        "label": "&&Word Wrap",
+                        "enabled": false
                     },
                     {
                         "id": "editor.action.toggleStickyScroll",
@@ -881,8 +886,7 @@
                 "items": [
                     {
                         "id": "workbench.action.navigateBack",
-                        "label": "&&Back",
-                        "enabled": false
+                        "label": "&&Back"
                     },
                     {
                         "id": "workbench.action.navigateForward",
@@ -1791,7 +1795,7 @@
     },
     "windowsState": {
         "lastActiveWindow": {
-            "backupPath": "/home/l4n1skyy/.config/Code - OSS/Backups/1688951792317",
+            "backupPath": "/home/l4n1skyy/.config/Code - OSS/Backups/1688951898175",
             "uiState": {
                 "mode": 1,
                 "x": 966,
