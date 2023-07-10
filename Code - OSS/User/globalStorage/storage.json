@@ -10,7 +10,8 @@
             "file:///home/l4n1skyy/Projects/p-web/fern": "__default__profile__"
         },
         "emptyWindows": {
-            "1688951898175": "__default__profile__"
+            "1688952653608": "__default__profile__",
+            "1688952709596": "__default__profile__"
         }
     },
     "profileAssociationsMigration": true,
@@ -20,7 +21,7 @@
         "folders": [],
         "emptyWindows": [
             {
-                "backupFolder": "1688951898175"
+                "backupFolder": "1688952709596"
             }
         ]
     },
@@ -62,7 +63,8 @@
                             "items": [
                                 {
                                     "id": "workbench.action.reopenClosedEditor",
-                                    "label": "&&Reopen Closed Editor"
+                                    "label": "&&Reopen Closed Editor",
+                                    "enabled": false
                                 },
                                 {
                                     "id": "vscode.menubar.separator"
@@ -151,23 +153,34 @@
                                     "id": "openRecentFile",
                                     "uri": {
                                         "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/.config/.gitignore",
-                                        "path": "/home/l4n1skyy/.config/.gitignore",
-                                        "scheme": "file"
-                                    },
-                                    "enabled": true,
-                                    "label": "~/.config/.gitignore"
-                                },
-                                {
-                                    "id": "openRecentFile",
-                                    "uri": {
-                                        "$mid": 1,
                                         "external": "file:///home/l4n1skyy/.config/gh/hosts.yml",
                                         "path": "/home/l4n1skyy/.config/gh/hosts.yml",
                                         "scheme": "file"
                                     },
                                     "enabled": true,
                                     "label": "~/.config/gh/hosts.yml"
+                                },
+                                {
+                                    "id": "openRecentFile",
+                                    "uri": {
+                                        "$mid": 1,
+                                        "external": "file:///home/l4n1skyy/.config/gh/config.yml",
+                                        "path": "/home/l4n1skyy/.config/gh/config.yml",
+                                        "scheme": "file"
+                                    },
+                                    "enabled": true,
+                                    "label": "~/.config/gh/config.yml"
+                                },
+                                {
+                                    "id": "openRecentFile",
+                                    "uri": {
+                                        "$mid": 1,
+                                        "external": "file:///home/l4n1skyy/.config/.gitignore",
+                                        "path": "/home/l4n1skyy/.config/.gitignore",
+                                        "scheme": "file"
+                                    },
+                                    "enabled": true,
+                                    "label": "~/.config/.gitignore"
                                 },
                                 {
                                     "id": "openRecentFile",
@@ -247,17 +260,6 @@
                                     "label": "~/.doom.d/packages.el"
                                 },
                                 {
-                                    "id": "openRecentFile",
-                                    "uri": {
-                                        "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/.emacs.d/packages.example.el",
-                                        "path": "/home/l4n1skyy/.emacs.d/packages.example.el",
-                                        "scheme": "file"
-                                    },
-                                    "enabled": true,
-                                    "label": "~/.emacs.d/packages.example.el"
-                                },
-                                {
                                     "id": "vscode.menubar.separator"
                                 },
                                 {
@@ -294,13 +296,11 @@
                     },
                     {
                         "id": "workbench.action.files.save",
-                        "label": "&&Save",
-                        "enabled": false
+                        "label": "&&Save"
                     },
                     {
                         "id": "workbench.action.files.saveAs",
-                        "label": "Save &&As...",
-                        "enabled": false
+                        "label": "Save &&As..."
                     },
                     {
                         "id": "saveAll",
@@ -435,13 +435,11 @@
                     },
                     {
                         "id": "workbench.action.files.revert",
-                        "label": "Re&&vert File",
-                        "enabled": false
+                        "label": "Re&&vert File"
                     },
                     {
                         "id": "workbench.action.closeActiveEditor",
-                        "label": "&&Close Editor",
-                        "enabled": false
+                        "label": "&&Close Editor"
                     },
                     {
                         "id": "workbench.action.closeWindow",
@@ -486,13 +484,11 @@
                     },
                     {
                         "id": "actions.find",
-                        "label": "&&Find",
-                        "enabled": false
+                        "label": "&&Find"
                     },
                     {
                         "id": "editor.action.startFindReplaceAction",
-                        "label": "&&Replace",
-                        "enabled": false
+                        "label": "&&Replace"
                     },
                     {
                         "id": "vscode.menubar.separator"
@@ -873,8 +869,7 @@
                     },
                     {
                         "id": "editor.action.toggleWordWrap",
-                        "label": "&&Word Wrap",
-                        "enabled": false
+                        "label": "&&Word Wrap"
                     },
                     {
                         "id": "editor.action.toggleStickyScroll",
@@ -886,7 +881,8 @@
                 "items": [
                     {
                         "id": "workbench.action.navigateBack",
-                        "label": "&&Back"
+                        "label": "&&Back",
+                        "enabled": false
                     },
                     {
                         "id": "workbench.action.navigateForward",
@@ -895,7 +891,8 @@
                     },
                     {
                         "id": "workbench.action.navigateToLastEditLocation",
-                        "label": "&&Last Edit Location"
+                        "label": "&&Last Edit Location",
+                        "enabled": false
                     },
                     {
                         "id": "vscode.menubar.separator"
@@ -1795,7 +1792,7 @@
     },
     "windowsState": {
         "lastActiveWindow": {
-            "backupPath": "/home/l4n1skyy/.config/Code - OSS/Backups/1688951898175",
+            "backupPath": "/home/l4n1skyy/.config/Code - OSS/Backups/1688952709596",
             "uiState": {
                 "mode": 1,
                 "x": 966,

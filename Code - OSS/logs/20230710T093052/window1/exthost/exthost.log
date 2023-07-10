@@ -1,0 +1,10 @@
+2023-07-10 09:30:54.222 [info] Extension host with pid 7954 started
+2023-07-10 09:30:54.307 [info] ExtensionService#_doActivateExtension vscode.emmet, startup: false, activationEvent: 'onLanguage'
+2023-07-10 09:30:54.338 [info] ExtensionService#_doActivateExtension vscode.git-base, startup: true, activationEvent: '*'
+2023-07-10 09:30:54.340 [info] ExtensionService#_doActivateExtension Catppuccin.catppuccin-vsc, startup: true, activationEvent: '*'
+2023-07-10 09:30:54.347 [info] ExtensionService#_doActivateExtension vscode.github, startup: true, activationEvent: '*'
+2023-07-10 09:30:54.351 [info] Eager extensions activated
+2023-07-10 09:30:54.354 [info] ExtensionService#_doActivateExtension vscode.debug-auto-launch, startup: false, activationEvent: 'onStartupFinished'
+2023-07-10 09:30:54.356 [info] ExtensionService#_doActivateExtension vscode.merge-conflict, startup: false, activationEvent: 'onStartupFinished'
+2023-07-10 09:31:38.001 [info] Extension host terminating: renderer closed the MessagePort
+2023-07-10 09:31:38.003 [info] Extension host with pid 7954 exiting with code 0
