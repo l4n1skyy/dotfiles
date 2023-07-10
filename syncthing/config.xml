@@ -1,10 +1,13 @@
 <configuration version="37">
-    <folder id="Productivity" label="Productivity" path="/home/l4n1skyy/Documents/Productivity" type="sendreceive" rescanIntervalS="3600" fsWatcherEnabled="true" fsWatcherDelayS="10" ignorePerms="false" autoNormalize="true">
+    <folder id="Productivity" label="Productivity" path="/home/l4n1skyy/Productivity" type="sendreceive" rescanIntervalS="3600" fsWatcherEnabled="true" fsWatcherDelayS="10" ignorePerms="false" autoNormalize="true">
         <filesystemType>basic</filesystemType>
         <device id="AVALQKP-QSTN5FF-MZCSQKV-S37EZEH-FLJJ7CP-MOW2ALA-JFO7DAY-RPGCXAW" introducedBy="">
             <encryptionPassword></encryptionPassword>
         </device>
         <device id="UKTMAND-RAMKNDO-KNYNDJ3-AKMUWLM-PET242M-A2CGBRN-77XBD2C-YEJN7QM" introducedBy="">
+            <encryptionPassword></encryptionPassword>
+        </device>
+        <device id="Y6ELF7U-QIBUWIF-SQ6RJBQ-3YF34RT-NUPED2Z-TZE6NAC-NIC5GOT-Y5BUUAE" introducedBy="">
             <encryptionPassword></encryptionPassword>
         </device>
         <minDiskFree unit="%">1</minDiskFree>
@@ -54,6 +57,16 @@
         <remoteGUIPort>0</remoteGUIPort>
     </device>
     <device id="UKTMAND-RAMKNDO-KNYNDJ3-AKMUWLM-PET242M-A2CGBRN-77XBD2C-YEJN7QM" name="l4n1skyy-samsung" compression="metadata" introducer="false" skipIntroductionRemovals="false" introducedBy="">
+        <address>dynamic</address>
+        <paused>false</paused>
+        <autoAcceptFolders>false</autoAcceptFolders>
+        <maxSendKbps>0</maxSendKbps>
+        <maxRecvKbps>0</maxRecvKbps>
+        <maxRequestKiB>0</maxRequestKiB>
+        <untrusted>false</untrusted>
+        <remoteGUIPort>0</remoteGUIPort>
+    </device>
+    <device id="Y6ELF7U-QIBUWIF-SQ6RJBQ-3YF34RT-NUPED2Z-TZE6NAC-NIC5GOT-Y5BUUAE" name="l4n1skyy-desktop-arch" compression="metadata" introducer="false" skipIntroductionRemovals="false" introducedBy="">
         <address>dynamic</address>
         <paused>false</paused>
         <autoAcceptFolders>false</autoAcceptFolders>

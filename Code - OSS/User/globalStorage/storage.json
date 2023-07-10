@@ -10,7 +10,7 @@
             "file:///home/l4n1skyy/Projects/p-web/fern": "__default__profile__"
         },
         "emptyWindows": {
-            "1688797471889": "__default__profile__"
+            "1688951396513": "__default__profile__"
         }
     },
     "profileAssociationsMigration": true,
@@ -20,7 +20,7 @@
         "folders": [],
         "emptyWindows": [
             {
-                "backupFolder": "1688797471889"
+                "backupFolder": "1688951396513"
             }
         ]
     },
@@ -152,6 +152,28 @@
                                     "id": "openRecentFile",
                                     "uri": {
                                         "$mid": 1,
+                                        "external": "file:///home/l4n1skyy/.config/i3/config",
+                                        "path": "/home/l4n1skyy/.config/i3/config",
+                                        "scheme": "file"
+                                    },
+                                    "enabled": true,
+                                    "label": "~/.config/i3/config"
+                                },
+                                {
+                                    "id": "openRecentFile",
+                                    "uri": {
+                                        "$mid": 1,
+                                        "external": "file:///home/l4n1skyy/.gitconfig",
+                                        "path": "/home/l4n1skyy/.gitconfig",
+                                        "scheme": "file"
+                                    },
+                                    "enabled": true,
+                                    "label": "~/.gitconfig"
+                                },
+                                {
+                                    "id": "openRecentFile",
+                                    "uri": {
+                                        "$mid": 1,
                                         "external": "file:///home/l4n1skyy/Documents/Productivity/test.md",
                                         "path": "/home/l4n1skyy/Documents/Productivity/test.md",
                                         "scheme": "file"
@@ -169,17 +191,6 @@
                                     },
                                     "enabled": true,
                                     "label": "~/.bash_profile"
-                                },
-                                {
-                                    "id": "openRecentFile",
-                                    "uri": {
-                                        "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/.config/i3/config",
-                                        "path": "/home/l4n1skyy/.config/i3/config",
-                                        "scheme": "file"
-                                    },
-                                    "enabled": true,
-                                    "label": "~/.config/i3/config"
                                 },
                                 {
                                     "id": "openRecentFile",
@@ -248,17 +259,6 @@
                                     "label": "~/.doom.d/init.el"
                                 },
                                 {
-                                    "id": "openRecentFile",
-                                    "uri": {
-                                        "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/.gitconfig",
-                                        "path": "/home/l4n1skyy/.gitconfig",
-                                        "scheme": "file"
-                                    },
-                                    "enabled": true,
-                                    "label": "~/.gitconfig"
-                                },
-                                {
                                     "id": "vscode.menubar.separator"
                                 },
                                 {
@@ -303,7 +303,8 @@
                     },
                     {
                         "id": "saveAll",
-                        "label": "Save A&&ll"
+                        "label": "Save A&&ll",
+                        "enabled": false
                     },
                     {
                         "id": "vscode.menubar.separator"
@@ -433,8 +434,7 @@
                     },
                     {
                         "id": "workbench.action.files.revert",
-                        "label": "Re&&vert File",
-                        "enabled": false
+                        "label": "Re&&vert File"
                     },
                     {
                         "id": "workbench.action.closeActiveEditor",
@@ -868,8 +868,7 @@
                     },
                     {
                         "id": "editor.action.toggleWordWrap",
-                        "label": "&&Word Wrap",
-                        "checked": true
+                        "label": "&&Word Wrap"
                     },
                     {
                         "id": "editor.action.toggleStickyScroll",
@@ -881,8 +880,7 @@
                 "items": [
                     {
                         "id": "workbench.action.navigateBack",
-                        "label": "&&Back",
-                        "enabled": false
+                        "label": "&&Back"
                     },
                     {
                         "id": "workbench.action.navigateForward",
@@ -891,8 +889,7 @@
                     },
                     {
                         "id": "workbench.action.navigateToLastEditLocation",
-                        "label": "&&Last Edit Location",
-                        "enabled": false
+                        "label": "&&Last Edit Location"
                     },
                     {
                         "id": "vscode.menubar.separator"
@@ -1792,13 +1789,13 @@
     },
     "windowsState": {
         "lastActiveWindow": {
-            "backupPath": "/home/l4n1skyy/.config/Code - OSS/Backups/1688797471889",
+            "backupPath": "/home/l4n1skyy/.config/Code - OSS/Backups/1688951396513",
             "uiState": {
                 "mode": 1,
                 "x": 966,
-                "y": 62,
-                "width": 464,
-                "height": 1000
+                "y": 106,
+                "width": 936,
+                "height": 956
             }
         },
         "openedWindows": []

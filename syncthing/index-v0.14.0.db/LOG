@@ -47,3 +47,39 @@
 20:04:22.373762 table@remove removed @4
 20:11:23.351444 db@close closing
 20:11:23.351620 db@close done T·172.012µs
+=============== Jul 9, 2023 (+08) ===============
+11:40:43.271812 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+11:40:43.271960 version@stat F·[0 1] S·55KiB[0B 55KiB] Sc·[0.00 0.00]
+11:40:43.271973 db@open opening
+11:40:43.272022 journal@recovery F·1
+11:40:43.273391 journal@recovery recovering @9
+11:40:43.276231 memdb@flush created L0@12 N·130 S·5KiB "\x00\x00\x00..son,v2004":"\x0e\x00\x00..son,d1995"
+11:40:43.276488 version@stat F·[1 1] S·60KiB[5KiB 55KiB] Sc·[0.25 0.00]
+11:40:43.283785 db@janitor F·5 G·1
+11:40:43.283793 db@janitor removing table-8
+11:40:43.283813 db@open done T·11.835442ms
+11:40:44.651445 table@compaction L0·1 -> L1·1 S·60KiB Q·2118
+11:40:44.655024 table@build created L1@15 N·869 S·55KiB "\x00\x00\x00..git,v71":"\x0e\x00\x00..ple,v321"
+11:40:44.655116 version@stat F·[0 1] S·55KiB[0B 55KiB] Sc·[0.00 0.00]
+11:40:44.658704 table@compaction committed F-1 S-4KiB Ke·0 D·130 T·7.181452ms
+11:40:44.662370 table@remove removed @11
+12:33:04.009661 db@close closing
+12:33:04.011916 db@close done T·2.253769ms
+=============== Jul 9, 2023 (+08) ===============
+12:33:57.644728 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+12:33:57.644971 version@stat F·[0 1] S·55KiB[0B 55KiB] Sc·[0.00 0.00]
+12:33:57.644979 db@open opening
+12:33:57.645016 journal@recovery F·1
+12:33:57.645781 journal@recovery recovering @13
+12:33:57.648003 memdb@flush created L0@16 N·219 S·5KiB "\x00\x00\x00..son,v2161":"\x0e\x00\x00...md,v2126"
+12:33:57.648178 version@stat F·[1 1] S·60KiB[5KiB 55KiB] Sc·[0.25 0.00]
+12:33:57.654741 db@janitor F·5 G·1
+12:33:57.654747 db@janitor removing table-12
+12:33:57.654764 db@open done T·9.782451ms
+12:34:42.683674 table@compaction L0·1 -> L1·1 S·60KiB Q·3202
+12:34:42.686160 table@build created L1@19 N·872 S·56KiB "\x00\x00\x00..git,v71":"\x0e\x00\x00..ple,v321"
+12:34:42.686185 version@stat F·[0 1] S·56KiB[0B 56KiB] Sc·[0.00 0.00]
+12:34:42.687629 table@compaction committed F-1 S-4KiB Ke·0 D·216 T·3.926967ms
+12:34:42.687894 table@remove removed @15
+12:38:41.382317 db@close closing
+12:38:41.382481 db@close done T·162.493µs
