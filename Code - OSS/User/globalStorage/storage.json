@@ -10,7 +10,8 @@
             "file:///home/l4n1skyy/Projects/p-web/fern": "__default__profile__"
         },
         "emptyWindows": {
-            "1688951396513": "__default__profile__"
+            "1688951396513": "__default__profile__",
+            "1688951792317": "__default__profile__"
         }
     },
     "profileAssociationsMigration": true,
@@ -20,7 +21,7 @@
         "folders": [],
         "emptyWindows": [
             {
-                "backupFolder": "1688951396513"
+                "backupFolder": "1688951792317"
             }
         ]
     },
@@ -152,6 +153,17 @@
                                     "id": "openRecentFile",
                                     "uri": {
                                         "$mid": 1,
+                                        "external": "file:///home/l4n1skyy/.config/gh/hosts.yml",
+                                        "path": "/home/l4n1skyy/.config/gh/hosts.yml",
+                                        "scheme": "file"
+                                    },
+                                    "enabled": true,
+                                    "label": "~/.config/gh/hosts.yml"
+                                },
+                                {
+                                    "id": "openRecentFile",
+                                    "uri": {
+                                        "$mid": 1,
                                         "external": "file:///home/l4n1skyy/.config/i3/config",
                                         "path": "/home/l4n1skyy/.config/i3/config",
                                         "scheme": "file"
@@ -246,17 +258,6 @@
                                     },
                                     "enabled": true,
                                     "label": "~/.doom.d/config.el"
-                                },
-                                {
-                                    "id": "openRecentFile",
-                                    "uri": {
-                                        "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/.doom.d/init.el",
-                                        "path": "/home/l4n1skyy/.doom.d/init.el",
-                                        "scheme": "file"
-                                    },
-                                    "enabled": true,
-                                    "label": "~/.doom.d/init.el"
                                 },
                                 {
                                     "id": "vscode.menubar.separator"
@@ -880,7 +881,8 @@
                 "items": [
                     {
                         "id": "workbench.action.navigateBack",
-                        "label": "&&Back"
+                        "label": "&&Back",
+                        "enabled": false
                     },
                     {
                         "id": "workbench.action.navigateForward",
@@ -1789,7 +1791,7 @@
     },
     "windowsState": {
         "lastActiveWindow": {
-            "backupPath": "/home/l4n1skyy/.config/Code - OSS/Backups/1688951396513",
+            "backupPath": "/home/l4n1skyy/.config/Code - OSS/Backups/1688951792317",
             "uiState": {
                 "mode": 1,
                 "x": 966,
