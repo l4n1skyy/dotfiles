@@ -7,11 +7,12 @@
             "file:///home/l4n1skyy/.config/neofetch": "__default__profile__",
             "file:///home/l4n1skyy/Documents/P": "__default__profile__",
             "file:///home/l4n1skyy/.config/i3": "__default__profile__",
-            "file:///home/l4n1skyy/Projects/p-web/fern": "__default__profile__"
+            "file:///home/l4n1skyy/Projects/p-web/fern": "__default__profile__",
+            "file:///home/l4n1skyy/.config": "__default__profile__",
+            "file:///home/l4n1skyy/.config/polybar": "__default__profile__"
         },
         "emptyWindows": {
-            "1688952653608": "__default__profile__",
-            "1688952709596": "__default__profile__"
+            "1689298476365": "__default__profile__"
         }
     },
     "profileAssociationsMigration": true,
@@ -21,7 +22,7 @@
         "folders": [],
         "emptyWindows": [
             {
-                "backupFolder": "1688952709596"
+                "backupFolder": "1689298476365"
             }
         ]
     },
@@ -63,11 +64,32 @@
                             "items": [
                                 {
                                     "id": "workbench.action.reopenClosedEditor",
-                                    "label": "&&Reopen Closed Editor",
-                                    "enabled": false
+                                    "label": "&&Reopen Closed Editor"
                                 },
                                 {
                                     "id": "vscode.menubar.separator"
+                                },
+                                {
+                                    "id": "openRecentFolder",
+                                    "uri": {
+                                        "$mid": 1,
+                                        "external": "file:///home/l4n1skyy/.config/polybar",
+                                        "path": "/home/l4n1skyy/.config/polybar",
+                                        "scheme": "file"
+                                    },
+                                    "enabled": true,
+                                    "label": "~/.config/polybar"
+                                },
+                                {
+                                    "id": "openRecentFolder",
+                                    "uri": {
+                                        "$mid": 1,
+                                        "external": "file:///home/l4n1skyy/.config",
+                                        "path": "/home/l4n1skyy/.config",
+                                        "scheme": "file"
+                                    },
+                                    "enabled": true,
+                                    "label": "~/.config"
                                 },
                                 {
                                     "id": "openRecentFolder",
@@ -153,28 +175,6 @@
                                     "id": "openRecentFile",
                                     "uri": {
                                         "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/.config/gh/hosts.yml",
-                                        "path": "/home/l4n1skyy/.config/gh/hosts.yml",
-                                        "scheme": "file"
-                                    },
-                                    "enabled": true,
-                                    "label": "~/.config/gh/hosts.yml"
-                                },
-                                {
-                                    "id": "openRecentFile",
-                                    "uri": {
-                                        "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/.config/gh/config.yml",
-                                        "path": "/home/l4n1skyy/.config/gh/config.yml",
-                                        "scheme": "file"
-                                    },
-                                    "enabled": true,
-                                    "label": "~/.config/gh/config.yml"
-                                },
-                                {
-                                    "id": "openRecentFile",
-                                    "uri": {
-                                        "$mid": 1,
                                         "external": "file:///home/l4n1skyy/.config/.gitignore",
                                         "path": "/home/l4n1skyy/.config/.gitignore",
                                         "scheme": "file"
@@ -197,67 +197,89 @@
                                     "id": "openRecentFile",
                                     "uri": {
                                         "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/.gitconfig",
-                                        "path": "/home/l4n1skyy/.gitconfig",
+                                        "external": "file:///home/l4n1skyy/Downloads/README.txt",
+                                        "path": "/home/l4n1skyy/Downloads/README.txt",
                                         "scheme": "file"
                                     },
                                     "enabled": true,
-                                    "label": "~/.gitconfig"
+                                    "label": "~/Downloads/README.txt"
                                 },
                                 {
                                     "id": "openRecentFile",
                                     "uri": {
                                         "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/Documents/Productivity/test.md",
-                                        "path": "/home/l4n1skyy/Documents/Productivity/test.md",
+                                        "external": "file:///home/l4n1skyy/.config/polybar/modules.ini",
+                                        "path": "/home/l4n1skyy/.config/polybar/modules.ini",
                                         "scheme": "file"
                                     },
                                     "enabled": true,
-                                    "label": "~/Documents/Productivity/test.md"
+                                    "label": "~/.config/polybar/modules.ini"
                                 },
                                 {
                                     "id": "openRecentFile",
                                     "uri": {
                                         "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/.bash_profile",
-                                        "path": "/home/l4n1skyy/.bash_profile",
+                                        "external": "file:///etc/bluetooth/main.conf",
+                                        "path": "/etc/bluetooth/main.conf",
                                         "scheme": "file"
                                     },
                                     "enabled": true,
-                                    "label": "~/.bash_profile"
+                                    "label": "/etc/bluetooth/main.conf"
                                 },
                                 {
                                     "id": "openRecentFile",
                                     "uri": {
                                         "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/.bashrc",
-                                        "path": "/home/l4n1skyy/.bashrc",
+                                        "external": "file:///home/l4n1skyy/.config/picom/picom.conf",
+                                        "path": "/home/l4n1skyy/.config/picom/picom.conf",
                                         "scheme": "file"
                                     },
                                     "enabled": true,
-                                    "label": "~/.bashrc"
+                                    "label": "~/.config/picom/picom.conf"
                                 },
                                 {
                                     "id": "openRecentFile",
                                     "uri": {
                                         "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/.config/i3/load.json",
-                                        "path": "/home/l4n1skyy/.config/i3/load.json",
+                                        "external": "file:///home/l4n1skyy/.config/.config/picom.conf",
+                                        "path": "/home/l4n1skyy/.config/.config/picom.conf",
                                         "scheme": "file"
                                     },
                                     "enabled": true,
-                                    "label": "~/.config/i3/load.json"
+                                    "label": "~/.config/.config/picom.conf"
                                 },
                                 {
                                     "id": "openRecentFile",
                                     "uri": {
                                         "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/.doom.d/packages.el",
-                                        "path": "/home/l4n1skyy/.doom.d/packages.el",
+                                        "external": "file:///etc/xdg/picom.conf",
+                                        "path": "/etc/xdg/picom.conf",
                                         "scheme": "file"
                                     },
                                     "enabled": true,
-                                    "label": "~/.doom.d/packages.el"
+                                    "label": "/etc/xdg/picom.conf"
+                                },
+                                {
+                                    "id": "openRecentFile",
+                                    "uri": {
+                                        "$mid": 1,
+                                        "external": "file:///home/l4n1skyy/.config/polybar/mocha.ini",
+                                        "path": "/home/l4n1skyy/.config/polybar/mocha.ini",
+                                        "scheme": "file"
+                                    },
+                                    "enabled": true,
+                                    "label": "~/.config/polybar/mocha.ini"
+                                },
+                                {
+                                    "id": "openRecentFile",
+                                    "uri": {
+                                        "$mid": 1,
+                                        "external": "file:///home/l4n1skyy/.config/config.ini",
+                                        "path": "/home/l4n1skyy/.config/config.ini",
+                                        "scheme": "file"
+                                    },
+                                    "enabled": true,
+                                    "label": "~/.config/config.ini"
                                 },
                                 {
                                     "id": "vscode.menubar.separator"
@@ -891,8 +913,7 @@
                     },
                     {
                         "id": "workbench.action.navigateToLastEditLocation",
-                        "label": "&&Last Edit Location",
-                        "enabled": false
+                        "label": "&&Last Edit Location"
                     },
                     {
                         "id": "vscode.menubar.separator"
@@ -1792,13 +1813,13 @@
     },
     "windowsState": {
         "lastActiveWindow": {
-            "backupPath": "/home/l4n1skyy/.config/Code - OSS/Backups/1688952709596",
+            "backupPath": "/home/l4n1skyy/.config/Code - OSS/Backups/1689298476365",
             "uiState": {
                 "mode": 1,
                 "x": 966,
-                "y": 106,
+                "y": 75,
                 "width": 936,
-                "height": 956
+                "height": 477
             }
         },
         "openedWindows": []

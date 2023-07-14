@@ -1,8 +1,14 @@
 
 >
-'spotify:playlist:37i9dQZF1DWW2hj3ZtMbuO	nb„ªøx@ ´Æ™¥
+'spotify:playlist:37i9dQZF1E36kfP2ohPBZl	†rf!µy@ ó­´¥
 >
-'spotify:playlist:37i9dQZF1EVGJJ3r00UGAt	{ž.Ûîx@ ¯êã¤
+'spotify:playlist:37i9dQZF1DX4geSlFB9288	©@•¦èx@ ¢æ²¥
+>
+'spotify:playlist:37i9dQZF1DX0CIO5EOSHeD	äÇø—¦èx@ ­æ²¥
+>
+'spotify:playlist:37i9dQZF1DWSPMbB1kcXmo	öþ7;Üy@ µæ²¥
+>
+'spotify:playlist:37i9dQZF1DWW2hj3ZtMbuO	nb„ªøx@ ´Æ™¥
 >
 'spotify:playlist:37i9dQZF1EQn1VBR3CMMWb	mäs/Äãx@ ìêã¤
 >
@@ -13,61 +19,62 @@
 >
 'spotify:playlist:37i9dQZF1DWZMWLrh2UzwC	p¾õðÛâx@ ²•Õ¤
 >
-'spotify:playlist:37i9dQZF1DWSPMbB1kcXmo	ëÞšy@ Î¢æ¤
->
 'spotify:playlist:78nCgShjf5WfhmUJiJcv4t	–ÌtÅ[y@ ÈðÞ¢
 >
 'spotify:playlist:54qHsgWNP2hktsTUZtqEGC	ÏxtLÖ
 y@ Í›ã¢
 >
-'spotify:playlist:71xSqyjtLRcMAgufpp3mXB		ô!êfy@" ù½™¥
+'spotify:playlist:37i9dQZF1EVGJJ3r00UGAt	¶‡m`ày@ ðç³¥
 >
-'spotify:playlist:3vSu289zhWMfOyR9S8nnom	4í Œy@! Ùéæ¢
+'spotify:playlist:71xSqyjtLRcMAgufpp3mXB	ðZLKy@, ù½™¥
 >
-'spotify:playlist:4zz7suQPttDCE1HAbg5rBe	Ÿcðy@! ëñæ¢
+'spotify:playlist:3vSu289zhWMfOyR9S8nnom	škcºKy@+ Ùéæ¢
 >
-'spotify:playlist:37i9dQZF1E37rl4OmxbV9r	sîÜ›ùy@! ºø•£
+'spotify:playlist:4zz7suQPttDCE1HAbg5rBe	â2¼Ly@+ ëñæ¢
 >
-'spotify:playlist:37i9dQZF1E35hLeByvdGQm	hã¶ùy@! ¤ù•£
+'spotify:playlist:37i9dQZF1E37rl4OmxbV9r	ÙlÊ5y@+ ºø•£
 >
-'spotify:playlist:37i9dQZF1EVHGWrwldPRtj	RdIy@$ ÜÊ¨¥
+'spotify:playlist:37i9dQZF1E35hLeByvdGQm	ÎaYä5y@+ ¤ù•£
 >
-'spotify:playlist:37i9dQZF1E38DkNCjuZeFm	3Ë{y@" ÿ˜æ¤
+'spotify:playlist:37i9dQZF1EVHGWrwldPRtj	x‰Zî!y@. ÜÊ¨¥
 >
-'spotify:playlist:37i9dQZF1EIcXHUE8HmdcU	j¡\y@! §ÿÆ£
+'spotify:playlist:37i9dQZF1E38DkNCjuZeFm	ÙN)¿y@, ÿ˜æ¤
 >
-'spotify:playlist:37i9dQZF1DWWQRwui0ExPn	Æý#Ùy@! £±ã¢
+'spotify:playlist:37i9dQZF1EIcXHUE8HmdcU	ÐŽãŠ>y@+ §ÿÆ£
+>
+'spotify:playlist:37i9dQZF1DWWQRwui0ExPn	,|f>y@+ £±ã¢
 >
 'spotify:playlist:37i9dQZF1DX2yvmlOdMYzV	oK[l y@ Á›ã¢
 >
-'spotify:playlist:37i9dQZF1E39CsjcPkoNop	¤%?—y@- ¦¾™¥
+'spotify:playlist:37i9dQZF1E39CsjcPkoNop	ŠN­£!#y@8 Ñõ³¥
 >
-'spotify:playlist:37i9dQZF1EIhfi1MenzevC	:‘Uy@! Þ Ç£
+'spotify:playlist:37i9dQZF1EIhfi1MenzevC	 ˜­By@+ Þ Ç£
 >
-'spotify:playlist:37i9dQZF1DWYkztttC1w38	4Œ%ù;y@! ÷ûË¤
+'spotify:playlist:37i9dQZF1DWYkztttC1w38	š
+h'xy@+ ÷ûË¤
 >
-'spotify:playlist:37i9dQZF1DX5RENKHfXV7R	súbäy@! ÓÊõ£
+'spotify:playlist:37i9dQZF1DX5RENKHfXV7R	Ùx¥C y@+ ÓÊõ£
 >
-'spotify:playlist:5SW7lbMOx6RY2DsEr3D1go	3÷ê¨Œy@! ª€¤
+'spotify:playlist:5SW7lbMOx6RY2DsEr3D1go	™u-×Èy@+ ª€¤
 >
 'spotify:playlist:37i9dQZF1DXa8LbKi2hqz1	{›•ÿçx@ ´Ø™¥
 >
-'spotify:playlist:37i9dQZF1DWXe9gFZP0gtP	›Îù)xy@ òŽ‹¥
+'spotify:playlist:37i9dQZF1DWXe9gFZP0gtP	A"•×] y@& òŽ‹¥
 >
-'spotify:playlist:11SrrAHBTrrYgtRqbJYTGE	8^d[y@! ¢ÿÆ£
+'spotify:playlist:11SrrAHBTrrYgtRqbJYTGE	žÜ¦‰>y@+ ¢ÿÆ£
 >
-'spotify:playlist:37i9dQZF1DWSsObZRzO8Xw	ÆÙ"¤y@! éšÑ£
+'spotify:playlist:37i9dQZF1DWSsObZRzO8Xw	,XeKày@+ éšÑ£
 >
-'spotify:playlist:12rjCFxeO1DFy2XSpg9AK4	OÖräy@! »Êõ£
+'spotify:playlist:12rjCFxeO1DFy2XSpg9AK4	µTµ= y@+ »Êõ£
 >
 'spotify:playlist:37i9dQZEVXbh1BgCCn2pU4	NšëÛâx@ ¡•Õ¤
 >
-'spotify:playlist:6kZJ6LEso1qL8VmPbA8mRF		«ÑÎŸy@$ áà¤
+'spotify:playlist:6kZJ6LEso1qL8VmPbA8mRF	m¾¨B…y@. áà¤
 >
-'spotify:playlist:37i9dQZF1E39g22qIe7XlT	iüd™'y@M ¿Þ‰¥
+'spotify:playlist:37i9dQZF1E39g22qIe7XlT	2wªåk)y@Y Çî³¥
 >
-'spotify:playlist:1AquQ2vvX0BQMX6DD8MmSf	\é[\]y@! ˆôû¢
+'spotify:playlist:1AquQ2vvX0BQMX6DD8MmSf	ÂgžŠ™y@+ ˆôû¢
 >
-'spotify:playlist:4IbWyrR3ouFCXj1SWVLPkx	dsí‰ôy@! ¿ºÇ¤
+'spotify:playlist:4IbWyrR3ouFCXj1SWVLPkx	Êñ/¸0y@+ ¿ºÇ¤
 >
-'spotify:playlist:37i9dQZEVXcFqmt8yKUhVC	ÓFp›&y@< ÿî¨¥
+'spotify:playlist:37i9dQZEVXcFqmt8yKUhVC	9©Ó+y@O é®¥

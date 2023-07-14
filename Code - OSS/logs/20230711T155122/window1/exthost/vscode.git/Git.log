@@ -1,0 +1,46 @@
+2023-07-11 15:51:24.203 [info] Log level: Info
+2023-07-11 15:51:24.203 [info] Validating found git in: "git"
+2023-07-11 15:51:24.203 [info] Using git "2.41.0" from "git"
+2023-07-11 15:51:24.203 [info] > git rev-parse --show-toplevel [3ms]
+2023-07-11 15:51:24.206 [info] > git rev-parse --show-toplevel [3ms]
+2023-07-11 15:51:24.213 [info] > git rev-parse --show-toplevel [2ms]
+2023-07-11 15:51:24.219 [info] > git rev-parse --git-dir --git-common-dir [1ms]
+2023-07-11 15:51:24.232 [info] Open repository: /home/l4n1skyy/.config/polybar/polybar-spotify
+2023-07-11 15:51:24.266 [info] > git config --get commit.template [20ms]
+2023-07-11 15:51:24.267 [info] > git rev-parse --show-toplevel [29ms]
+2023-07-11 15:51:24.282 [info] > git rev-parse --git-dir --git-common-dir [11ms]
+2023-07-11 15:51:24.286 [info] Open repository: /home/l4n1skyy/.config/polybar/polypomo
+2023-07-11 15:51:24.310 [info] > git rev-parse --show-toplevel [16ms]
+2023-07-11 15:51:24.311 [info] > git config --get commit.template [2ms]
+2023-07-11 15:51:24.311 [info] > git for-each-ref --format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref) refs/heads/master refs/remotes/master [8ms]
+2023-07-11 15:51:24.319 [info] > git status -z -uall [3ms]
+2023-07-11 15:51:24.348 [info] > git for-each-ref --format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref) refs/heads/master refs/remotes/master [8ms]
+2023-07-11 15:51:24.354 [info] > git config --get commit.template [7ms]
+2023-07-11 15:51:24.359 [info] > git status -z -uall [6ms]
+2023-07-11 15:51:24.369 [info] > git for-each-ref --format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref) refs/heads/master refs/remotes/master [11ms]
+2023-07-11 15:51:24.375 [info] > git status -z -uall [1ms]
+2023-07-11 15:51:24.375 [info] > git config --get commit.template [7ms]
+2023-07-11 15:51:24.385 [info] > git for-each-ref --format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)%00%(upstream:remotename)%00%(upstream:remoteref) refs/heads/master refs/remotes/master [3ms]
+2023-07-11 15:51:24.392 [info] > git status -z -uall [2ms]
+2023-07-11 15:51:24.434 [info] > git rev-parse --show-toplevel [0ms]
+2023-07-11 15:51:24.545 [info] > git rev-parse --show-toplevel [1ms]
+2023-07-11 15:51:24.681 [info] > git rev-parse --show-toplevel [3ms]
+2023-07-11 15:51:24.892 [info] > git check-ignore -v -z --stdin [10ms]
+2023-07-11 15:51:24.893 [info] > git check-ignore -v -z --stdin [2ms]
+2023-07-11 15:51:27.531 [info] > git rev-parse --show-toplevel [1ms]
+2023-07-11 16:23:06.104 [info] > git rev-parse --show-toplevel [1ms]
+2023-07-11 16:24:44.224 [info] > git rev-parse --show-toplevel [1ms]
+2023-07-11 16:28:51.201 [info] > git rev-parse --show-toplevel [1ms]
+2023-07-11 16:28:51.201 [info] fatal: not a git repository (or any of the parent directories): .git
+2023-07-11 16:29:30.419 [info] > git rev-parse --show-toplevel [1ms]
+2023-07-11 16:29:33.116 [info] > git rev-parse --show-toplevel [1ms]
+2023-07-11 16:29:35.235 [info] > git rev-parse --show-toplevel [1ms]
+2023-07-11 16:29:51.479 [info] > git rev-parse --show-toplevel [1ms]
+2023-07-11 16:29:51.479 [info] fatal: not a git repository (or any of the parent directories): .git
+2023-07-11 16:29:53.925 [info] > git rev-parse --show-toplevel [1ms]
+2023-07-11 16:29:57.019 [info] > git rev-parse --show-toplevel [1ms]
+2023-07-11 16:29:57.019 [info] fatal: not a git repository (or any of the parent directories): .git
+2023-07-11 16:30:20.417 [info] > git rev-parse --show-toplevel [1ms]
+2023-07-11 16:34:23.187 [info] > git rev-parse --show-toplevel [3ms]
+2023-07-11 16:35:33.170 [info] > git rev-parse --show-toplevel [1ms]
+2023-07-11 16:39:07.856 [info] > git rev-parse --show-toplevel [1ms]
