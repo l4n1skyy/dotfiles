@@ -1,13 +1,8 @@
-gh/
-cef_user_data/
-dconf/
-syncthing/
-yay/
-flameshot/
-obsidian/
-pulse/
-libreoffice/
-nautilus/
-QtProject.conf
-mimeapps.list
-Code - OSS/
+*
+!.gitignore
+!neofetch
+!alacritty
+!spicetify
+!polybar
+!picom
+!i3
