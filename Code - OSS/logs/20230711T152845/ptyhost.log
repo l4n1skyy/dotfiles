@@ -1,3 +1,0 @@
-2023-07-11 15:28:50.544 [warning] Persistent process "1": Process had no disconnect runners but was an orphan
-2023-07-11 15:28:50.549 [info] Persistent process reconnection "1"
-2023-07-11 15:28:50.579 [info] Persistent process "1": Replaying 7837 chars and 1 size events

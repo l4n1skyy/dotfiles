@@ -12,7 +12,7 @@
             "file:///home/l4n1skyy/.config/polybar": "__default__profile__"
         },
         "emptyWindows": {
-            "1689298476365": "__default__profile__"
+            "1689299941222": "__default__profile__"
         }
     },
     "profileAssociationsMigration": true,
@@ -22,7 +22,7 @@
         "folders": [],
         "emptyWindows": [
             {
-                "backupFolder": "1689298476365"
+                "backupFolder": "1689299941222"
             }
         ]
     },
@@ -64,7 +64,8 @@
                             "items": [
                                 {
                                     "id": "workbench.action.reopenClosedEditor",
-                                    "label": "&&Reopen Closed Editor"
+                                    "label": "&&Reopen Closed Editor",
+                                    "enabled": false
                                 },
                                 {
                                     "id": "vscode.menubar.separator"
@@ -186,6 +187,17 @@
                                     "id": "openRecentFile",
                                     "uri": {
                                         "$mid": 1,
+                                        "external": "file:///home/l4n1skyy/.config/syncthing/config.xml",
+                                        "path": "/home/l4n1skyy/.config/syncthing/config.xml",
+                                        "scheme": "file"
+                                    },
+                                    "enabled": true,
+                                    "label": "~/.config/syncthing/config.xml"
+                                },
+                                {
+                                    "id": "openRecentFile",
+                                    "uri": {
+                                        "$mid": 1,
                                         "external": "file:///home/l4n1skyy/.config/i3/config",
                                         "path": "/home/l4n1skyy/.config/i3/config",
                                         "scheme": "file"
@@ -269,17 +281,6 @@
                                     },
                                     "enabled": true,
                                     "label": "~/.config/polybar/mocha.ini"
-                                },
-                                {
-                                    "id": "openRecentFile",
-                                    "uri": {
-                                        "$mid": 1,
-                                        "external": "file:///home/l4n1skyy/.config/config.ini",
-                                        "path": "/home/l4n1skyy/.config/config.ini",
-                                        "scheme": "file"
-                                    },
-                                    "enabled": true,
-                                    "label": "~/.config/config.ini"
                                 },
                                 {
                                     "id": "vscode.menubar.separator"
@@ -1813,13 +1814,13 @@
     },
     "windowsState": {
         "lastActiveWindow": {
-            "backupPath": "/home/l4n1skyy/.config/Code - OSS/Backups/1689298476365",
+            "backupPath": "/home/l4n1skyy/.config/Code - OSS/Backups/1689299941222",
             "uiState": {
                 "mode": 1,
-                "x": 966,
+                "x": 1283,
                 "y": 75,
-                "width": 936,
-                "height": 477
+                "width": 619,
+                "height": 987
             }
         },
         "openedWindows": []
