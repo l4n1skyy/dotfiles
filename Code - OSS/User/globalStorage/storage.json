@@ -12,7 +12,7 @@
             "file:///home/l4n1skyy/.config/polybar": "__default__profile__"
         },
         "emptyWindows": {
-            "1689299941222": "__default__profile__"
+            "1689300722030": "__default__profile__"
         }
     },
     "profileAssociationsMigration": true,
@@ -22,7 +22,7 @@
         "folders": [],
         "emptyWindows": [
             {
-                "backupFolder": "1689299941222"
+                "backupFolder": "1689300722030"
             }
         ]
     },
@@ -1814,7 +1814,7 @@
     },
     "windowsState": {
         "lastActiveWindow": {
-            "backupPath": "/home/l4n1skyy/.config/Code - OSS/Backups/1689299941222",
+            "backupPath": "/home/l4n1skyy/.config/Code - OSS/Backups/1689300722030",
             "uiState": {
                 "mode": 1,
                 "x": 1283,
