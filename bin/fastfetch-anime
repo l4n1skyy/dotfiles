@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# 1. Your Anime Favorites (Change these to whatever you like!)
+ANIME_LIST=("2557-zoroconfused")
+
+# 2. Setup (Anime art is usually bigger, so we use more WIDTH)
+FETCHER="fastfetch --logo none"
+FETCHER_HEIGHT=$($FETCHER | wc -l)
+WIDTH=55 
+
+# 3. Get the Anime Art
+SELECTED="${ANIME_LIST[$RANDOM % ${#ANIME_LIST[@]}]}"
+sprite=$(anime-colorscripts -n $SELECTED)
+height=$(echo "$sprite" | wc -l)
+
+# 4. Centering Math
+pad_top=$((($FETCHER_HEIGHT - $height) / 2 + 1))
+(( pad_top < 0 )) && pad_top=0
+
+sprite_width=$(printf '%s\n' "$sprite" | sed 's/\x1b\[[0-9;]*m//g' | awk '{ if (length > max) max = length } END { print max }')
+pad_Left=$((($WIDTH - sprite_width) / 2))
+(( pad_Left < 0 )) && pad_Left=0
+
+# 5. Launch
+echo "$sprite" | $FETCHER --file-raw - --logo-padding-top $pad_top --logo-padding-left $pad_Left
