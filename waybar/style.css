@@ -1,0 +1,178 @@
+@import "../omarchy/current/theme/waybar.css";
+
+* {
+  background-color: @background;
+  color: @foreground;
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+  font-family: 'CozetteVector','JetBrainsMono Nerd Font';
+  font-size: 13px;
+}
+
+.modules-left {
+  margin-left: 8px;
+}
+
+.modules-right {
+  margin-right: 8px;
+}
+
+#workspaces button {
+  all: initial;
+  padding: 0 6px;
+  margin: 0 1.5px;
+  min-width: 9px;
+}
+
+#workspaces button.empty {
+  opacity: 0.5;
+}
+
+#custom-autostart,
+#custom-gpu,
+#cpu,
+#battery,
+#network,
+#pulseaudio,
+#custom-omarchy,
+#custom-update {
+  min-width: 12px;
+  margin: 0 7.5px;
+}
+
+#custom-autostart {
+    font-size: 18.5px; 
+}
+
+#cpu {
+  margin-right: 8px;
+}
+#cpu {
+    color: #a6e3a1; /* Green */
+}
+#cpu.warning {
+    color: #f9e2af; /* Yellow */
+}
+#cpu.critical {
+    color: #f38ba8; /* Red */
+}
+
+#custom-gpu {
+    margin-right: 8px;
+}
+#custom-gpu {
+    color: #f5c2e7; /* Pink */
+}
+
+#memory {
+  margin: 0 6 0 6;
+}
+#memory {
+    color: #89dceb; /* Sky Blue */
+}
+#memory.warning {
+    color: #fab387; /* Orange */
+}
+#memory.critical {
+    color: #f38ba8; /* Red */
+}
+
+#battery {
+    margin-top: 2px;
+    margin-right: 5px;
+}
+
+
+#pulseaudio {
+  font-size: 25px;
+}
+#pulseaudio.muted {
+    font-size: 15px; /* Adjust this until it looks the same height as the speakers */
+    color: #6c7086;  /* Dim it out so it looks inactive */
+}
+
+#bluetooth.connected {
+  font-size: 13px;
+}
+
+#tray {
+  margin-right: 16px;
+}
+
+#bluetooth {
+  margin-right: 10px;
+  font-size: 19px;
+}
+
+
+#network {
+    color: #a6e3a1; /* Green */
+}
+#network.warning {
+    color: #f9e2af; /* Yellow/Orange */
+}
+#network.critical {
+    color: #f38ba8; /* Red */
+}
+#network.disconnected {
+    color: #6c7086; /* Grey */
+}
+
+#custom-expand-icon {
+  margin-right: 18px;
+}
+
+tooltip {
+  padding: 2px;
+}
+
+#custom-update {
+  font-size: 10px;
+}
+
+#clock {
+  margin-left: 8.75px;
+}
+
+.hidden {
+  opacity: 0;
+}
+
+#custom-screenrecording-indicator,
+#custom-idle-indicator,
+#custom-notification-silencing-indicator {
+  min-width: 12px;
+  margin-left: 5px;
+  margin-right: 0;
+  font-size: 10px;
+  padding-bottom: 1px;
+}
+
+#custom-screenrecording-indicator.active {
+  color: #a55555;
+}
+
+#custom-idle-indicator.active,
+#custom-notification-silencing-indicator.active {
+  color: #a55555;
+}
+
+#custom-voxtype {
+  min-width: 12px;
+  margin: 0 0 0 7.5px;
+}
+
+#custom-voxtype.recording {
+  color: #a55555;
+}
+
+
+/* --- Custom --- */
+
+/* #workspaces button:nth-child(n+6) label{
+    color: #c3a5e6;
+}
+
+*/
+

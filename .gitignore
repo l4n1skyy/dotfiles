@@ -1,0 +1,55 @@
+# ==========================================
+# 1. THE "BLOCK EVERYTHING" RULE
+# ==========================================
+/*
+
+# ==========================================
+# 2. ALLOWED DIRECTORIES (CONFIGS)
+# ==========================================
+!/nvim/
+!/hypr/
+!/waybar/
+!/fastfetch/
+!/kitty/
+!/alacritty/
+!/ghostty/
+!/btop/
+!/lazygit/
+!/mako/
+!/swayosd/
+!/walker/
+!/uwsm/
+!/tmux/
+!/spicetify/
+
+# ==========================================
+# 3. ALLOWED INDIVIDUAL FILES
+# ==========================================
+!/.gitignore
+!/starship.toml
+!/bashrc
+
+# ==========================================
+# 4. SUB-DIRECTORY CLEANUP (EXCLUSIONS)
+# ==========================================
+
+# Spicetify cleanup: Keep themes/extensions, ignore binaries and backups
+/spicetify/Backup/
+/spicetify/Extracted/
+/spicetify/CustomApps/
+
+# Neovim cleanup: Ignore local state files
+**/nvim/undo/
+**/nvim/spell/
+**/nvim/.netrwhist
+
+# ==========================================
+# 5. GLOBAL SAFETY RULES (NEVER TRACK)
+# ==========================================
+**/.git/
+**/*.bak
+**/*.log
+**/github-copilot/
+**/node_modules/
+**/cache/
+**/.DS_Store

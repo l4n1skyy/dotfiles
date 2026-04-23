@@ -1,0 +1,1 @@
+/home/l4n1skyy/.bashrc
