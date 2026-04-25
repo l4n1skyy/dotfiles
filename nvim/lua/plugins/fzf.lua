@@ -1,29 +1,36 @@
 return {
   "ibhagwan/fzf-lua",
   config = function()
-    require("fzf-lua").setup({
+    local fzf = require("fzf-lua")
+    fzf.setup({
       "telescope",
-
       winopts = {
-        height = 0.80,
-        width = 0.80,
-        border = "none", -- THIS KILLS THE OUTER DOUBLE BORDER
-        preview = { hidden = "hidden" }, -- No file preview
+        height = 0.80, width = 0.80, border = "none",
+        preview = { hidden = "hidden" },
       },
-
-      fzf_opts = {
+      fzf_opts = { 
         ["--info"] = "inline-right",
-        ["--border"] = "rounded", -- Keeps the rounded detached boxes
+        ["--border"] = "rounded",
+        ["--multi"] = true 
       },
-
       files = {
-        -- Blocks fzf from scanning Steam games, Windows emulators, and Trash!
-        fd_opts = "--color=never --type f --hidden --follow --exclude .git --exclude .local --exclude .Trash-1000 --exclude .steam --exclude .var",
-      },
+        -- Keep those heavy Bottles and Steam folders out!
+        fd_opts = "--color=never --type f --hidden --follow " ..
+                  "--exclude .git --exclude .local --exclude .Trash-1000 " ..
+                  "--exclude .steam --exclude .var",
 
-      oldfiles = {
-        cwd_only = true,
-        stat_file = true,
+        actions = {
+          ["default"] = function(selected)
+            for _, entry in ipairs(selected) do
+              local path = fzf.path.entry_to_file(entry).path
+              
+              -- Use pcall (protected call) to prevent the "ATTENTION" red screen
+              pcall(function()
+                vim.cmd("edit " .. vim.fn.fnameescape(path))
+              end)
+            end
+          end,
+        },
       },
     })
   end,
