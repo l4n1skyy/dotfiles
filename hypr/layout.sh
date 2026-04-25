@@ -7,10 +7,15 @@ while ! hyprctl clients | grep -q "class: obsidian"; do sleep 0.2; done
 # --- STEP 1: WORKSPACE 1 (DEV SETUP) ---
 hyprctl dispatch workspace 1
 sleep 0.5
-# Ensure cbonsai isn't swallowed, then resize
+# Focus cbonsai
 hyprctl dispatch focuswindow "class:^cbonsai-term$"
+# THE FIX: Force cbonsai to the left side if it ended up on the right
+hyprctl dispatch movewindow l 
+sleep 0.2
+# Ensure it isn't swallowed, then resize
 hyprctl dispatch moveoutofgroup 
 sleep 0.2
+# Now that it's on the left, -600 shrinks it correctly
 hyprctl dispatch resizeactive -600 0 
 
 # --- STEP 2: WORKSPACE 9 (WAKE WEB APPS & GROUP) ---
@@ -33,25 +38,33 @@ for dir in l r u d; do hyprctl dispatch moveintogroup $dir; done
 # Final focus on Obsidian for this workspace
 hyprctl dispatch focuswindow "class:^obsidian$"
 
-# --- STEP 3: WORKSPACE 10 (WAIT FOR BEEPER) ---
-# We do Discord and Spotify first while waiting
+# --- STEP 3: WORKSPACE 10 (PARTIAL SOCIAL) ---
 hyprctl dispatch workspace 10
 sleep 0.5
 hyprctl dispatch focuswindow "class:^vesktop$"
 hyprctl dispatch togglegroup
+sleep 0.2
 hyprctl dispatch focuswindow "class:^Spotify$"
 for dir in l r u d; do hyprctl dispatch moveintogroup $dir; done
 
-# NOW we wait for Beeper to join the party
+# --- STEP 4: INTERIM FOCUS (Start Working) ---
+# This lands you on Nvim so you can start coding while Beeper loads
+hyprctl dispatch workspace 1
+sleep 0.2
+hyprctl dispatch focuswindow "class:^org\.omarchy\.nvim$"
+
+# --- STEP 5: THE BEEPER WATCH ---
 while ! hyprctl clients | grep -q "class: BeeperTexts"; do sleep 0.5; done
 
-# Beeper has arrived: Move it into the Discord/Spotify group
+# Beeper has arrived: Quick jump to 10 to group it
+hyprctl dispatch workspace 10
+sleep 0.2
 hyprctl dispatch focuswindow "class:^BeeperTexts$"
 for dir in l r u d; do hyprctl dispatch moveintogroup $dir; done
-# Re-order focus to Beeper if you want it first in the tabs
+# Focus Beeper as the active tab on 10
 hyprctl dispatch focuswindow "class:^BeeperTexts$"
 
-# --- STEP 4: FINAL FOCUS ---
+# --- STEP 6: FINAL FOCUS ---
 hyprctl dispatch workspace 1
 sleep 0.2
 hyprctl dispatch focuswindow "class:^org\.omarchy\.nvim$"
