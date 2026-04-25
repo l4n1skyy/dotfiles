@@ -1,32 +1,70 @@
 return {
-  "nvim-telescope/telescope.nvim",
-  opts = function(_, opts)
-    local actions = require("telescope.actions")
-    local action_state = require("telescope.actions.state")
+  "ibhagwan/fzf-lua",
+  config = function()
+    local fzf = require("fzf-lua")
 
-    local custom_enter = function(prompt_bufnr)
-      local picker = action_state.get_current_picker(prompt_bufnr)
-      local multi = picker:get_multi_selection()
+    -- Your custom multi-open logic (Ported from your Telescope script)
+    local custom_enter = function(selected)
+      if not selected or #selected == 0 then
+        return
+      end
 
-      -- If you selected multiple things using Tab
-      if not vim.tbl_isempty(multi) then
-        actions.close(prompt_bufnr)
-        for _, j in pairs(multi) do
-          if j.path ~= nil then
-            -- Open them quietly in the background
-            vim.cmd(string.format("edit %s", j.path))
-          end
+      -- If you selected multiple files with Tab
+      if #selected > 1 then
+        for i = 1, #selected do
+          -- Add each file to the buffer list quietly
+          vim.cmd(string.format("badd %s", selected[i]))
         end
+        -- Focus the first selected file
+        vim.cmd(string.format("edit %s", selected[1]))
       else
-        -- Otherwise, just do the normal Enter behavior
-        actions.select_default(prompt_bufnr)
+        -- Normal Enter behavior for a single file
+        fzf.actions.file_edit(selected)
       end
     end
 
-    -- Tell Telescope to use this function when you press Enter in Insert mode
-    opts.defaults = opts.defaults or {}
-    opts.defaults.mappings = opts.defaults.mappings or {}
-    opts.defaults.mappings.i = opts.defaults.mappings.i or {}
-    opts.defaults.mappings.i["<CR>"] = custom_enter
+    fzf.setup({
+      "telescope",
+
+      winopts = {
+        height = 0.80,
+        width = 0.80,
+        border = "none",
+        preview = { hidden = "hidden" },
+      },
+
+      fzf_opts = {
+        ["--info"] = "inline-right",
+        ["--border"] = "rounded",
+        ["--multi"] = true, -- Enables the Tab selection ability
+      },
+
+      -- Set the Enter key (<CR>) to use your custom script
+      actions = {
+        files = {
+          ["default"] = custom_enter,
+        },
+        -- Also apply it to recent files (oldfiles)
+        oldfiles = {
+          ["default"] = custom_enter,
+        },
+      },
+
+      keymap = {
+        fzf = {
+          ["tab"] = "toggle",
+          ["shift-tab"] = "toggle-all",
+        },
+      },
+
+      files = {
+        fd_opts = "--color=never --type f --hidden --follow --exclude .git --exclude .local --exclude .Trash-1000 --exclude .steam --exclude .var",
+      },
+
+      oldfiles = {
+        cwd_only = true,
+        stat_file = true,
+      },
+    })
   end,
 }
