@@ -1,1 +1,9 @@
-/home/l4n1skyy/.config/omarchy/current/theme/neovim.lua
+return {
+  { "neanias/everforest-nvim" },
+  {
+    "LazyVim/LazyVim",
+    opts = {
+      colorscheme = "everforest",
+    },
+  },
+}

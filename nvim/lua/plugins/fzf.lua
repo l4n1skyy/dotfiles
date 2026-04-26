@@ -5,28 +5,34 @@ return {
     fzf.setup({
       "telescope",
       winopts = {
-        height = 0.80, width = 0.80, border = "none",
+        height = 0.80,
+        width = 0.80,
+        border = "none",
         preview = { hidden = "hidden" },
       },
-      fzf_opts = { 
+      fzf_opts = {
         ["--info"] = "inline-right",
         ["--border"] = "rounded",
-        ["--multi"] = true 
+        ["--multi"] = true, -- Multi-select enabled
       },
       files = {
-        -- Keep those heavy Bottles and Steam folders out!
-        fd_opts = "--color=never --type f --hidden --follow " ..
-                  "--exclude .git --exclude .local --exclude .Trash-1000 " ..
-                  "--exclude .steam --exclude .var",
+        fd_opts = "--color=never --type f --hidden --follow "
+          .. "--exclude .git --exclude .local --exclude .Trash-1000 "
+          .. "--exclude .steam --exclude .var",
 
         actions = {
-          ["default"] = function(selected)
-            for _, entry in ipairs(selected) do
-              local path = fzf.path.entry_to_file(entry).path
-              
-              -- Use pcall (protected call) to prevent the "ATTENTION" red screen
+          ["default"] = function(selected, opts)
+            for i, entry in ipairs(selected) do
+              local file_data = fzf.path.entry_to_file(entry, opts)
+              -- Expand to full absolute path so Neovim finds it regardless of CWD
+              local absolute_path = vim.fn.fnamemodify(file_data.path, ":p")
+
               pcall(function()
-                vim.cmd("edit " .. vim.fn.fnameescape(path))
+                if i == 1 then
+                  vim.cmd("edit " .. vim.fn.fnameescape(absolute_path))
+                else
+                  vim.cmd("badd " .. vim.fn.fnameescape(absolute_path))
+                end
               end)
             end
           end,
@@ -35,3 +41,4 @@ return {
     })
   end,
 }
+
