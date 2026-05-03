@@ -10,14 +10,17 @@ source ~/.local/share/omarchy/default/bash/rc
 # Make an alias for invoking commands you use constantly
 # alias p='python'
 
-
 export PATH=$PATH:/home/l4n1skyy/.spicetify
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+export PATH="/usr/local/bin:$PATH"
+export PATH="$HOME/.npm-global/bin:$PATH"
 
 alias bottles='flatpak run com.usebottles.bottles'
-
 unalias ff 2>/dev/null
-
 alias nv='nvim'
+alias ccc='cc -Wall -Wextra -Werror'
 
 ff() {
   case "$1" in
@@ -45,10 +48,4 @@ function cdd {
   fi
 }
 
-alias ccc='cc -Wall -Wextra -Werror'
 
-# Pyenv Setup
-export PYENV_ROOT="$HOME/.pyenv"
-[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-export PATH="/usr/local/bin:$PATH"

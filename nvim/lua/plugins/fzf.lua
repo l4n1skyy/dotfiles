@@ -13,10 +13,11 @@ return {
       fzf_opts = {
         ["--info"] = "inline-right",
         ["--border"] = "rounded",
-        ["--multi"] = true, -- Multi-select enabled
+        ["--multi"] = true,
       },
       files = {
-        fd_opts = "--color=never --type f --hidden --follow "
+        -- Added --no-ignore to show .log and other gitignored files
+        fd_opts = "--color=never --type f --hidden --follow --no-ignore "
           .. "--exclude .git --exclude .local --exclude .Trash-1000 "
           .. "--exclude .steam --exclude .var",
 
@@ -41,4 +42,3 @@ return {
     })
   end,
 }
-
