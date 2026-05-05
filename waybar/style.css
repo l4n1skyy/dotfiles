@@ -66,7 +66,7 @@
 }
 
 #memory {
-  margin: 0 6 0 6;
+  margin: 0 6px 0 6px;
 }
 #memory {
     color: #89dceb; /* Sky Blue */
@@ -170,9 +170,19 @@ tooltip {
 
 /* --- Custom --- */
 
-/* #workspaces button:nth-child(n+6) label{
-    color: #c3a5e6;
-}
+/* Pomoru Module */
+#custom-pomoru { margin: 0 7.5px; min-width: 12px; }
 
-*/
+/* Active States */
+#custom-pomoru.pomoru-work { color: #a78bfa; }
+#custom-pomoru.pomoru-break { color: #89b4fa; }
+#custom-pomoru.pomoru-long-break { color: #a6e3a1; }
+
+/* Paused States (Hyphenated) */
+#custom-pomoru.pomoru-work-paused { color: #8a7ed1; }
+#custom-pomoru.pomoru-break-paused { color: #7684ad; }
+#custom-pomoru.pomoru-long-break-paused { color: #889c8f; }
+
+/* Inactive State */
+#custom-pomoru.pomoru-inactive { color: #6c7086; }
 
