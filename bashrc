@@ -19,6 +19,7 @@ alias bottles='flatpak run com.usebottles.bottles'
 unalias ff 2>/dev/null
 alias nv='nvim'
 alias ccc='cc -Wall -Wextra -Werror'
+alias p='python3'
 
 ff() {
   case "$1" in
@@ -46,7 +47,6 @@ function cdd {
   fi
 }
 
-set -h
 # >>> mamba initialize >>>
 # !! Contents within this block are managed by 'micromamba shell init' !!
 export MAMBA_EXE='/usr/bin/micromamba';

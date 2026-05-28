@@ -1,0 +1,39 @@
+# ~/.config/hypr/hyprlock.conf
+
+background {
+    monitor =
+    color = rgb(24, 25, 26) 
+}
+
+input-field {
+    monitor =
+    size = 400, 50
+    outline_thickness = 0
+    
+    # Camouflage the input box to match the background
+    outer_color = rgb(24, 25, 26)
+    inner_color = rgb(24, 25, 26)
+    check_color = rgb(24, 25, 26)
+    fail_color = rgb(24, 25, 26)
+    
+    # Hide the typing dots to create the stealth effect
+    font_color = rgb(24, 25, 26)
+    
+    # The default text
+    placeholder_text = <span font_family="CozetteVector" foreground="white">shoo, goaway &gt;:(</span>
+    
+    # The error text
+    fail_text = <span font_family="CozetteVector" foreground="red">YOU SHALL NOT PASS D:&lt;</span>
+    
+    # THE FIX: 300ms transition to prevent the frame drop on the first attempt
+    fail_transition = 300
+    fail_timeout = 1000
+    
+    fade_on_empty = false
+    hide_input = false
+    
+    # Centered perfectly
+    position = 0, 0
+    halign = center
+    valign = center
+}

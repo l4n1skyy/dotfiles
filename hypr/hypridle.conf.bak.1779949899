@@ -1,0 +1,11 @@
+general {
+    lock_cmd = pidof hyprlock || hyprlock       # Trigger native hyprlock directly
+    before_sleep_cmd = loginctl lock-session    # Use standard systemd lock
+    after_sleep_cmd = hyprctl dispatch dpms on  # Wake display natively
+}
+
+# Lock the system after 5 minutes of inactivity
+listener {
+    timeout = 300
+    on-timeout = loginctl lock-session
+}
