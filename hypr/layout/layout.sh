@@ -22,11 +22,59 @@ get_window_data() {
     echo "$CLIENTS_CACHE" | jq -c ".[] | select((.class | contains(\"$class\")) and .workspace.id == $ws)" | head -n 1
 }
 
+get_window_data_anyws() {
+    local class="$1"
+    echo "$CLIENTS_CACHE" | jq -c ".[] | select(.class | contains(\"$class\"))" | head -n 1
+}
+
+get_grouped_len() {
+    local addr="$1"
+    echo "$CLIENTS_CACHE" | jq -r ".[] | select(.address == \"$addr\") | (if .grouped != null then (.grouped | length) else 0 end)" | head -n 1
+}
+
+ensure_ungrouped() {
+    local addr="$1"
+    local grouped_len
+
+    grouped_len=$(get_grouped_len "$addr")
+    if [[ "$grouped_len" -gt 1 ]]; then
+        log "ACTION" "Ungrouping $addr before move"
+        run_hypr dispatch focuswindow "address:$addr"
+        run_hypr dispatch moveoutofgroup
+        sleep 0.1
+    fi
+}
+
 get_monitor_data() {
     local ws="$1"
     local mon=$(echo "$MONITORS_CACHE" | jq -c ".[] | select(.activeWorkspace.id == $ws)" | head -n 1)
     [[ -z "$mon" ]] && mon=$(echo "$MONITORS_CACHE" | jq -c ".[0]")
     echo "$mon"
+}
+
+get_monitor_data_by_addr() {
+    local addr="$1"
+    local mon_id
+    mon_id=$(echo "$CLIENTS_CACHE" | jq -r ".[] | select(.address == \"$addr\") | .monitor" | head -n 1)
+    [[ -z "$mon_id" ]] && return
+    echo "$MONITORS_CACHE" | jq -c ".[] | select(.id == $mon_id)" | head -n 1
+}
+
+get_monitor_layout_width() {
+    local mon_json="$1"
+    local raw_w=$(echo "$mon_json" | jq -r '.width // 0')
+    local scale=$(echo "$mon_json" | jq -r '.scale // 1')
+    local reserved_right=$(echo "$mon_json" | jq -r '.reserved[1] // 0')
+    local reserved_left=$(echo "$mon_json" | jq -r '.reserved[3] // 0')
+    local scaled_w
+
+    scaled_w=$(awk "BEGIN {printf \"%d\", ($raw_w / $scale)}")
+    if [[ "$scaled_w" -le 0 ]]; then
+        echo "$raw_w"
+        return
+    fi
+
+    echo $((scaled_w - reserved_left - reserved_right))
 }
 
 # --- INITIALIZATION ---
@@ -40,7 +88,7 @@ while read -r line; do
             ALIAS_MAP["${args[1]}"]="${args[2]}"
             CMD_MAP["${args[1]}"]="${args[*]:3}"
             ;;
-        "RATIO"|"GROUP")
+        "RATIO"|"GROUP"|"SPAWN")
             for app in "${args[@]:2}"; do WS_MAP["$app"]="${args[1]}"; done
             ;;
         "FOCUS")
@@ -92,12 +140,16 @@ process_rule() {
 
     [[ -n "${PROCESSED_RULES[$rule_id]}" ]] && return
 
-    local mon_json=$(get_monitor_data "$ws")
-    local mon_w=$(echo "$mon_json" | jq -r '.width')
+    local mon_json=$(get_monitor_data_by_addr "$addr")
+    [[ -z "$mon_json" ]] && mon_json=$(get_monitor_data "$ws")
+    local mon_w=$(get_monitor_layout_width "$mon_json")
     local mon_x=$(echo "$mon_json" | jq -r '.x')
     local master_threshold=$((mon_x + 100))
 
     case "$type" in
+        "SPAWN")
+            PROCESSED_RULES["$rule_id"]=1
+            ;;
         "RATIO")
             local move_dir="${args[0]}"
             local x_pct=$(echo "${args[2]}" | tr -d '%')
@@ -131,6 +183,30 @@ process_rule() {
             ;;
 
         "GROUP")
+            local moved_tail=0
+            for tail in "${args[@]}"; do
+                local t_class="${ALIAS_MAP[$tail]:-$tail}"
+                local t_json=$(get_window_data "$t_class" "$ws")
+
+                if [[ -z "$t_json" ]]; then
+                    local any_json=$(get_window_data_anyws "$t_class")
+                    if [[ -n "$any_json" ]]; then
+                        local any_addr=$(echo "$any_json" | jq -r '.address // empty')
+                        local any_ws=$(echo "$any_json" | jq -r '.workspace.id // empty')
+
+                        if [[ -n "$any_addr" && "$any_ws" != "$ws" && -z "${MOVED_ADDR[$any_addr]}" ]]; then
+                            log "ACTION" "WS $ws: Moving $tail from ws $any_ws"
+                            ensure_ungrouped "$any_addr"
+                            run_hypr dispatch movetoworkspacesilent "$ws,address:$any_addr"
+                            MOVED_ADDR["$any_addr"]=1
+                            moved_tail=1
+                        fi
+                    fi
+                fi
+            done
+
+            [[ "$moved_tail" -eq 1 ]] && return
+
             if [[ -z "${WS_GROUP_LOCKED[$ws]}" ]]; then
                 log "ACTION" "WS $ws: Initializing Group (Anchor: $alias)"
                 run_hypr dispatch focuswindow "address:$addr"
@@ -191,8 +267,8 @@ MAX_ATTEMPTS=3
 for (( attempt=1; attempt<=MAX_ATTEMPTS; attempt++ )); do
     log "INFO" "--- RUNNING LAYOUT PASS $attempt ---"
     
-    unset PROCESSED_RULES WS_GEOMETRY_LOCKED WS_GROUP_LOCKED
-    declare -A PROCESSED_RULES WS_GEOMETRY_LOCKED WS_GROUP_LOCKED
+    unset PROCESSED_RULES WS_GEOMETRY_LOCKED WS_GROUP_LOCKED MOVED_ADDR
+    declare -A PROCESSED_RULES WS_GEOMETRY_LOCKED WS_GROUP_LOCKED MOVED_ADDR
 
     pass_start=$SECONDS
     while true; do
@@ -206,7 +282,7 @@ for (( attempt=1; attempt<=MAX_ATTEMPTS; attempt++ )); do
             [[ "$line" =~ ^[[:space:]]*# ]] || [[ -z "$line" ]] && continue
             read -ra args <<< "$line"
             type="${args[0]}"
-            [[ ! "$type" =~ ^(RATIO|GROUP)$ ]] && continue
+            [[ ! "$type" =~ ^(RATIO|GROUP|SPAWN)$ ]] && continue
             
             ws="${args[1]}"
             alias="${args[2]}"
@@ -216,6 +292,23 @@ for (( attempt=1; attempt<=MAX_ATTEMPTS; attempt++ )); do
                 all_rules_done=false
                 class="${ALIAS_MAP[$alias]:-$alias}"
                 window_json=$(get_window_data "$class" "$ws")
+
+                if [[ -z "$window_json" ]]; then
+                    any_json=$(get_window_data_anyws "$class")
+                    if [[ -n "$any_json" ]]; then
+                        any_addr=$(echo "$any_json" | jq -r '.address')
+                        any_ws=$(echo "$any_json" | jq -r '.workspace.id')
+
+                        if [[ "$any_ws" != "$ws" && -z "${MOVED_ADDR[$any_addr]}" ]]; then
+                            log "ACTION" "WS $ws: Moving $alias from ws $any_ws"
+                            ensure_ungrouped "$any_addr"
+                            run_hypr dispatch movetoworkspacesilent "$ws,address:$any_addr"
+                            MOVED_ADDR["$any_addr"]=1
+                            continue
+                        fi
+                    fi
+                fi
+
                 if [[ -n "$window_json" ]]; then
                     addr=$(echo "$window_json" | jq -r '.address')
                     size=$(echo "$window_json" | jq -r '.size[0]')
