@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${SCRIPT_DIR}/layout.conf"
 AUTOSTART_FILE="$(realpath "${SCRIPT_DIR}/../autostart.conf")"
 LOG_FILE="${SCRIPT_DIR}/layout.log"
+PID_FILE="${HOME}/.cache/layout-engine.pid"
 
 # --- CLEAN LOGGING ---
 log() {
@@ -43,6 +44,49 @@ ensure_ungrouped() {
         run_hypr dispatch moveoutofgroup
         sleep 0.1
     fi
+}
+
+ensure_tiled() {
+    local addr="$1"
+    local is_floating
+
+    is_floating=$(echo "$CLIENTS_CACHE" | jq -r ".[] | select(.address == \"$addr\") | .floating" | head -n 1)
+    if [[ "$is_floating" == "true" ]]; then
+        log "ACTION" "Tiling $addr for grouping"
+        run_hypr dispatch focuswindow "address:$addr"
+        run_hypr dispatch togglefloating
+        sleep 0.1
+    fi
+}
+
+refresh_clients_cache() {
+    CLIENTS_CACHE=$(hyprctl clients -j)
+}
+
+try_group_command() {
+    local addr="$1"
+    shift
+
+    run_hypr dispatch "$@"
+    refresh_clients_cache
+
+    local grouped_len
+    grouped_len=$(get_grouped_len "$addr")
+    [[ "$grouped_len" -gt 0 ]]
+}
+
+move_into_group() {
+    local addr="$1"
+    local dir
+
+    for dir in l r u d; do
+        if try_group_command "$addr" movewindow into_or_create_group "$dir"; then return 0; fi
+        if try_group_command "$addr" movewindow into_group "$dir"; then return 0; fi
+        if try_group_command "$addr" movewindow intogroup "$dir"; then return 0; fi
+        if try_group_command "$addr" moveintogroup "$dir"; then return 0; fi
+    done
+
+    return 1
 }
 
 get_monitor_data() {
@@ -133,6 +177,10 @@ if [[ "$1" == "generate" || "$1" == "--generate" ]]; then
 fi
 # =============================
 
+# --- PID FILE ---
+mkdir -p "$(dirname "$PID_FILE")"
+echo "$$" > "$PID_FILE"
+
 # --- THE REACTIVE CORE ---
 process_rule() {
     local type="$1" ws="$2" alias="$3" addr="$4" args=("${@:5}")
@@ -209,6 +257,7 @@ process_rule() {
 
             if [[ -z "${WS_GROUP_LOCKED[$ws]}" ]]; then
                 log "ACTION" "WS $ws: Initializing Group (Anchor: $alias)"
+                ensure_tiled "$addr"
                 run_hypr dispatch focuswindow "address:$addr"
                 run_hypr dispatch togglegroup
                 WS_GROUP_LOCKED[$ws]=1
@@ -222,6 +271,7 @@ process_rule() {
                 local t_addr=$(echo "$t_json" | jq -r '.address // empty')
                 
                 if [[ -n "$t_addr" ]]; then
+                    ensure_tiled "$t_addr"
                     local is_grouped=$(echo "$t_json" | jq -r 'if .grouped != null then (.grouped | length) else 0 end')
                     
                     if [[ "$is_grouped" -eq 0 ]]; then
@@ -229,15 +279,17 @@ process_rule() {
                         run_hypr dispatch focuswindow "address:$t_addr"
                         sleep 0.1
                         run_hypr dispatch focuswindow "address:$t_addr"
-                        
-                        for d in l r u d; do run_hypr dispatch moveintogroup "$d"; done
-                        sleep 0.2
-                        
+
+                        local moved_ok=0
+                        if move_into_group "$t_addr"; then
+                            moved_ok=1
+                        fi
+
                         # Fetch fresh data just for this verification
                         local post_json=$(hyprctl clients -j | jq -c ".[] | select(.address == \"$t_addr\")")
                         local post_grouped=$(echo "$post_json" | jq -r 'if .grouped != null then (.grouped | length) else 0 end')
                         
-                        if [[ "$post_grouped" -eq 0 ]]; then
+                        if [[ "$post_grouped" -eq 0 || "$moved_ok" -eq 0 ]]; then
                             log "WARN" "WS $ws: $tail escaped the group. Retrying..."
                             missing=$((missing + 1))
                         else
