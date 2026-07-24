@@ -201,33 +201,34 @@ process_rule() {
         "RATIO")
             local move_dir="${args[0]}"
             local x_pct=$(echo "${args[2]}" | tr -d '%')
-            local cur_x=$(echo "$CLIENTS_CACHE" | jq -r ".[] | select(.address == \"$addr\") | .at[0]")
+            local ratio_value
 
-            if [[ "$move_dir" == "l" ]]; then
-                if [[ "$cur_x" -gt "$master_threshold" ]]; then
-                    log "DEBUG-MOVE" "WS $ws: [L-RULE] $alias is at x=$cur_x. Forcing Left."
-                    run_hypr dispatch focuswindow "address:$addr"
-                    run_hypr dispatch movewindow l
-                    return 
-                fi
-                
-                if [[ -z "${WS_GEOMETRY_LOCKED[$ws]}" ]]; then
-                    local tw=$(awk "BEGIN {print int($x_pct * $mon_w / 100)}")
-                    log "DEBUG-RESIZE" "WS $ws: Master verified. Resizing $alias to ${tw}px."
-                    run_hypr dispatch focuswindow "address:$addr"
-                    run_hypr dispatch resizewindowpixel "exact $tw 100%,address:$addr"
-                    WS_GEOMETRY_LOCKED[$ws]=1
-                fi
-                PROCESSED_RULES["$rule_id"]=1
-            else
-                if [[ "$cur_x" -lt "$master_threshold" ]]; then
-                    log "DEBUG-MOVE" "WS $ws: [R-RULE] $alias is at x=$cur_x (Master Spot). Forcing Right."
-                    run_hypr dispatch focuswindow "address:$addr"
-                    run_hypr dispatch movewindow r
-                    return 
-                fi
-                PROCESSED_RULES["$rule_id"]=1
+            ratio_value=$(awk "BEGIN {printf \"%.2f\", ($x_pct / 100.0)}")
+            if [[ -z "$ratio_value" || ! "$ratio_value" =~ ^[0-9.]+$ ]]; then
+                log "WARN" "WS $ws: Invalid ratio value '$x_pct' for $alias"
+                return
             fi
+
+            # Ensure a dwindle split exists first: moving the window in the requested
+            # direction will create the split container. We only do this once per WS.
+            if [[ -z "${WS_RATIO_SPLIT_CREATED[$ws]}" ]]; then
+                log "DEBUG-RATIO" "WS $ws: Creating dwindle split for $alias by moving $move_dir"
+                run_hypr dispatch focuswindow "address:$addr"
+                run_hypr dispatch movewindow "$move_dir"
+                WS_RATIO_SPLIT_CREATED["$ws"]=1
+                return
+            fi
+
+            # Resize the rule's own window after the split exists. In dwindle, resizing the
+            # target child is stable once the split container has been created.
+            local target_pct="$x_pct"
+            local tw_px
+            tw_px=$(awk "BEGIN {printf \"%d\", ($target_pct/100.0) * $mon_w}")
+            log "DEBUG-RATIO" "WS $ws: Resizing $alias at $addr to ${tw_px}px (${target_pct}%)"
+            run_hypr dispatch focuswindow "address:$addr"
+            run_hypr dispatch resizewindowpixel "exact ${tw_px} 100%,address:$addr"
+            sleep 0.2
+            PROCESSED_RULES["$rule_id"]=1
             ;;
 
         "GROUP")
@@ -319,8 +320,8 @@ MAX_ATTEMPTS=3
 for (( attempt=1; attempt<=MAX_ATTEMPTS; attempt++ )); do
     log "INFO" "--- RUNNING LAYOUT PASS $attempt ---"
     
-    unset PROCESSED_RULES WS_GEOMETRY_LOCKED WS_GROUP_LOCKED MOVED_ADDR
-    declare -A PROCESSED_RULES WS_GEOMETRY_LOCKED WS_GROUP_LOCKED MOVED_ADDR
+    unset PROCESSED_RULES WS_GEOMETRY_LOCKED WS_GROUP_LOCKED MOVED_ADDR WS_RATIO_SPLIT_CREATED
+    declare -A PROCESSED_RULES WS_GEOMETRY_LOCKED WS_GROUP_LOCKED MOVED_ADDR WS_RATIO_SPLIT_CREATED
 
     pass_start=$SECONDS
     while true; do
