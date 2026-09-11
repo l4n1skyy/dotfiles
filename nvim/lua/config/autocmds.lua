@@ -37,6 +37,10 @@ local function update_dashboard_theme()
   end
 
   local colors_file = vim.fn.expand("~/.local/state/omarchy/current/theme/colors.toml")
+  if vim.fn.filereadable(colors_file) ~= 1 then
+    return
+  end
+
   local accent
   for _, line in ipairs(vim.fn.readfile(colors_file)) do
     accent = line:match('^accent%s*=%s*"([^"]+)"')
