@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+get_sig() {
+  if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+    echo "$HYPRLAND_INSTANCE_SIGNATURE"
+    return
+  fi
+
+  local latest
+  latest=$(ls -td "/run/user/$UID/hypr/"* 2>/dev/null | head -n1 || true)
+  if [[ -n "$latest" ]]; then
+    basename "$latest"
+  fi
+}
+
+for _ in {1..40}; do
+  sig=$(get_sig)
+  if pgrep -x waybar >/dev/null && [[ -n "$sig" ]] && [[ -S "/run/user/$UID/hypr/$sig/.socket.sock" ]]; then
+    break
+  fi
+  sleep 0.25
+done
+
+exec alacritty --class pomoru-term -e /home/l4n1skyy/.local/src/pomoru/target/release/pomoru

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+notify_waybar() {
+    pkill -RTMIN+11 waybar 2>/dev/null || true
+}
+
+# Send signal to Waybar to update the Pomoru module before starting
+notify_waybar
+
+repo_dir="$HOME/.local/src/pomoru"
+
+# Function to send signal when script exits
+cleanup() {
+    # Send signal to Waybar to update the Pomoru module after stopping
+    notify_waybar
+}
+
+# Register the cleanup function to be called on exit/signals
+trap cleanup EXIT HUP INT TERM
+
+cargo run --release --quiet --manifest-path "$repo_dir/Cargo.toml"
