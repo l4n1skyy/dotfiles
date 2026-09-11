@@ -1,4 +1,4 @@
-general.import = [ "~/.config/omarchy/current/theme/alacritty.toml" ]
+general.import = [ "~/.local/state/omarchy/current/theme/alacritty.toml" ]
 
 [env]
 TERM = "xterm-256color"
@@ -7,15 +7,15 @@ TERM = "xterm-256color"
 osc52 = "CopyPaste"
 
 [font]
-# normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
-# bold = { family = "JetBrainsMono Nerd Font", style = "Bold" }
-# italic = { family = "JetBrainsMono Nerd Font", style = "Italic" }
+# normal = { family = "CozetteVector" }
+# bold = { family = "CozetteVector" }
+# italic = { family = "CozetteVector" }
 # size = 9
 
-normal = { family = "CozetteVector", style = "HiDpi" }
-bold = { family = "CozetteVector", style = "HiDpi" }
-italic = { family = "CozetteVector", style = "HiDpi" }
-size = 11
+normal = { family = "CozetteVector" }
+bold = { family = "CozetteVector" }
+italic = { family = "CozetteVector" }
+size = 12
 
 [font.offset]
 x = 0

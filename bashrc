@@ -3,9 +3,19 @@
 
 # All the default Omarchy aliases and functions
 # (don't mess with these directly, just overwrite them here!)
-source ~/.local/share/omarchy/default/bash/rc
+# /etc/omarchy.conf is written by omarchy-dev-link. When absent, force the
+# package default instead of preserving a stale inherited dev-link value before
+# we decide which rc file to source.
+if [[ -f /etc/omarchy.conf ]]; then
+  source /etc/omarchy.conf
+  export OMARCHY_PATH="${OMARCHY_PATH:-/usr/share/omarchy}"
+else
+  export OMARCHY_PATH=/usr/share/omarchy
+fi
+source "$OMARCHY_PATH/default/bash/rc"
 
 export PATH=$PATH:/home/l4n1skyy/.spicetify
+export PATH="$HOME/.local/bin/ai:$HOME/.local/bin/desktop:$HOME/.local/bin/system:$HOME/.local/bin/boot:$HOME/.local/bin/hypr:$PATH"
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
@@ -14,6 +24,7 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 export PATH="$PATH:$HOME/go/bin"
 export JAVA_HOME=/usr/lib/jvm/default
 export PATH=$JAVA_HOME/bin:$PATH
+export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
 
 alias bottles='flatpak run com.usebottles.bottles'
 unalias ff 2>/dev/null
@@ -23,9 +34,9 @@ alias p='python3'
 
 ff() {
   case "$1" in
-    -p) ~/.local/bin/fastfetch-pokemon ;;
-    -a) ~/.local/bin/fastfetch-anime ;;
-    *)  ~/.local/bin/fastfetch-pokemon ;;
+    -p) ~/.local/bin/desktop/fastfetch-pokemon ;;
+    -a) ~/.local/bin/desktop/fastfetch-anime ;;
+    *)  ~/.local/bin/desktop/fastfetch-pokemon ;;
     #*)  command fastfetch "$@" ;;
   esac
 }

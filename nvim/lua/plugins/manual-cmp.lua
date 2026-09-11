@@ -10,15 +10,4 @@ return {
       },
     },
   },
-
-  -- Config for nvim-cmp (LazyVim's older default)
-  {
-    "hrsh7th/nvim-cmp",
-    optional = true,
-    opts = function(_, opts)
-      opts.completion = {
-        autocomplete = false, -- Disables the automatic popup
-      }
-    end,
-  },
 }
