@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Outlook
+Comment=Outlook
+Exec=omarchy-launch-webapp https://outlook.office365.com/mail/
+Terminal=false
+Type=Application
+Icon=/home/l4n1skyy/.local/share/applications/icons/Outlook.png
+StartupNotify=true

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if command -v nvidia-smi >/dev/null && value=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -n 1); then
+  value=${value//[[:space:]]/}
+  printf '{"text":"󰾲 %s%%","tooltip":"GPU usage: %s%%"}\n' "$value" "$value"
+else
+  printf '{"text":"󰾲 --","tooltip":"NVIDIA GPU unavailable"}\n'
+fi

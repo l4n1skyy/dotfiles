@@ -1,0 +1,6 @@
+{
+    "label" : "layout-text",
+    "action" : "sh -c 'pid=$(cat \"$HOME/.cache/layout-engine.pid\" 2>/dev/null); [ -n \"$pid\" ] && kill -TERM \"$pid\"'",
+    "text" : "hol up a min fixing things up for ya",
+    "keybind" : "q"
+}

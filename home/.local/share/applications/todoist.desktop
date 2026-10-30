@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Todoist
+Comment=Task Management
+# This command opens the site in 'App Mode' with a private data folder
+Exec=chromium --app=https://app.todoist.com/app/today --user-data-dir="/home/l4n1skyy/.config/todoist-app"
+Icon=/home/l4n1skyy/.local/share/icons/todoist_new.webp
+Terminal=false
+# This identifies the window for Hyprland rules
+StartupWMClass=app.todoist.com
+Categories=Office;Utility;

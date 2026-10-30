@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [[ -f $HOME/.cache/disable_autostart ]]; then
+  printf '{"text":"○","class":"disabled","tooltip":"Startup apps disabled"}\n'
+else
+  printf '{"text":"◉","class":"enabled","tooltip":"Startup apps enabled"}\n'
+fi

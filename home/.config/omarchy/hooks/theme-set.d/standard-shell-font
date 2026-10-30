@@ -1,0 +1,8 @@
+#!/bin/bash
+
+shell_theme="$HOME/.local/state/omarchy/current/theme/shell.toml"
+
+if [[ -f $shell_theme ]]; then
+  sed -i '/^\[font\]/,/^\[/{s/^base-size = .*/base-size = 14/;}' "$shell_theme"
+  omarchy-restart-shell
+fi

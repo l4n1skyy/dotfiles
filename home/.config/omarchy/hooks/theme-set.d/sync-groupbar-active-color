@@ -1,0 +1,31 @@
+#!/bin/bash
+
+active_border=$(hyprctl getoption general:col.active_border -j | jq -r '.gradient')
+
+if [[ -n "$active_border" && "$active_border" != "null" ]]; then
+    read -ra gradient_parts <<< "$active_border"
+    colors=""
+    angle="${gradient_parts[-1]%deg}"
+
+    for ((index = 0; index < ${#gradient_parts[@]} - 1; index++)); do
+        [[ -n "$colors" ]] && colors+=", "
+        color="${gradient_parts[index]}"
+        colors+="\"rgba(${color:2}88)\""
+    done
+
+    cat > "$HOME/.config/hypr/groupbar.lua" <<EOF
+local active_border_color = { colors = { $colors }, angle = $angle }
+
+hl.config({
+	group = {
+		groupbar = {
+			col = {
+				active = active_border_color,
+			},
+		},
+	},
+})
+EOF
+
+    hyprctl reload >/dev/null
+fi

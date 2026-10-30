@@ -1,0 +1,8 @@
+#!/bin/bash
+
+read -r total used <<<"$(free -m | awk '/^Mem:/ {print $2, $3}')"
+percentage=0
+if (( total > 0 )); then
+  percentage=$((used * 100 / total))
+fi
+printf '{"text":"󰘚 %s%%","tooltip":"Memory usage: %s%% (%s MiB / %s MiB)"}\n' "$percentage" "$percentage" "$used" "$total"

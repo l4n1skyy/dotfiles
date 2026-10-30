@@ -1,0 +1,5 @@
+#!/bin/bash
+
+usage=$(LC_ALL=C top -bn1 | awk -F'[, ]+' '/^%Cpu/{for (i = 1; i <= NF; i++) if ($i == "id") {print 100 - $(i - 1); exit}}')
+usage=${usage:-0}
+printf '{"text":"󰍛 %s%%","tooltip":"CPU usage: %s%%"}\n' "${usage%.*}" "${usage%.*}"

@@ -1,0 +1,22 @@
+# Terminalist Configuration File
+# Generated on 2026-03-30
+
+[ui]
+default_project = "today"
+mouse_enabled = true
+sidebar_width = 15
+sidebar_visible = true
+
+[sync]
+auto_sync_interval_minutes = 5
+
+[display]
+date_format = "%Y-%m-%d"
+time_format = "%H:%M"
+show_descriptions = true
+show_durations = true
+show_labels = true
+show_project_colors = true
+
+[logging]
+enabled = false

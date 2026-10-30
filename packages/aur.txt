@@ -1,0 +1,15 @@
+beeper-v4-bin
+catppuccin-gtk-theme-mocha
+cbonsai
+cozette-ttf
+micromamba-bin
+ngrok
+osu-lazer-bin
+pixora-icons-git
+pokeget
+spicetify-cli
+vesktop-bin
+wlogout
+xorgxrdp
+xpadneo-dkms-git
+xrdp

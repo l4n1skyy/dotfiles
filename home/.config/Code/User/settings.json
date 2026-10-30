@@ -1,0 +1,51 @@
+{
+  "editor.fontLigatures": false,
+  "git.openRepositoryInParentFolders": "never",
+  "workbench.startupEditor": "none",
+  "editor.minimap.enabled": false,
+  "git.autofetch": true,
+  "github.copilot.enable": {
+    "*": false,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
+  },
+  "editor.codeActionsOnSave": {
+  },
+  "security.workspace.trust.untrustedFiles": "open",
+  "C_Cpp.default.compilerPath": "c:\\Programs\\MSYS2\\mingw64.exe",
+  "workbench.layoutControl.enabled": false,
+  "svelte.enable-ts-plugin": true,
+  "github.copilot.editor.enableAutoCompletions": true,
+  "liveServer.settings.donotShowInfoMsg": true,
+  "liveServer.settings.donotVerifyTags": true,
+  "workbench.editorAssociations": {
+    "*.copilotmd": "vscode.markdown.preview.editor",
+    "*.db": "default"
+  },
+  "[typescript]": {
+
+  },
+  "[typescriptreact]": {
+
+  },
+  "workbench.editor.empty.hint": "hidden",
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "haskell.checkForUpdates": false,
+  "files.watcherExclude": {
+    "**/.bloop": true,
+    "**/.metals": true
+  },
+  "chat.tools.terminal.autoApprove": {
+    "sbt": true,
+    "/^set -e\ncd '/home/l4n1skyy/Shared/03 AREAS/42kl-piscine-0426'\nbash -n scripts/prep-code scripts/prep-main scripts/prep-files scripts/prep-header scripts/prep-norminette$/": {
+      "approve": true,
+      "matchCommandLine": true
+    }
+  },
+  "chat.agent.maxRequests": 50,
+  "chat.viewSessions.orientation": "stacked",
+  "settingsSync.ignoredExtensions": [],
+  "workbench.colorTheme": "Noctokai",
+  "git.confirmSync": false
+}

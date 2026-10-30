@@ -1,0 +1,8 @@
+{
+  "theme": "custom:omarchy",
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "xhigh"
+    }
+  }
+}
