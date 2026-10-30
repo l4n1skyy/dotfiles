@@ -12,6 +12,10 @@ end
 
 local function open_with_system(args)
   local path = vim.api.nvim_buf_get_name(args.buf)
+  if path:match("^minifiles://") then
+    return
+  end
+
   local extension = vim.fn.fnamemodify(path, ":e"):lower()
   if not vim.tbl_contains({ "pdf", "png", "jpg", "jpeg", "gif", "svg", "webp", "bmp" }, extension) then
     return

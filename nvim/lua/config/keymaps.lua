@@ -11,6 +11,11 @@ vim.keymap.set("t", "<C-l>", [[<C-\><C-n><C-w>l]])
 
 local function open_mini_files()
   local path = vim.api.nvim_buf_get_name(0)
+  local extension = vim.fn.fnamemodify(path, ":e"):lower()
+  if vim.tbl_contains({ "pdf", "png", "jpg", "jpeg", "gif", "svg", "webp", "bmp" }, extension) then
+    path = vim.fn.getcwd()
+  end
+
   if vim.bo.buftype == "terminal" then
     path = vim.fn.getcwd()
     local terminal_job_id = vim.b.terminal_job_id

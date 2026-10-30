@@ -6,6 +6,10 @@ hl.config({
 		layout = "master",
 	},
 
+	scrolling = {
+		column_width = 0.50,
+	},
+
 	decoration = {
 		rounding = 3,
 	},
@@ -21,8 +25,16 @@ hl.config({
 
 	master = {
 		mfact = 0.50,
-		orientation = "left",
+		orientation = "right",
 		new_status = "master",
+	},
+})
+
+hl.workspace_rule({
+	workspace = "1",
+	layout = "master",
+	layout_opts = {
+		orientation = "right",
 	},
 })
 
