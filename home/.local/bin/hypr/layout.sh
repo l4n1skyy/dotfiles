@@ -283,8 +283,6 @@ trace("autostart.lua loaded")
 EOF
         echo 'hl.on("hyprland.start", function()'
         echo '  trace("hyprland.start fired")'
-        echo '  hl.exec_cmd("systemctl --user import-environment $(env | cut -d'\''='\'' -f 1)")'
-        echo '  hl.exec_cmd("dbus-update-activation-environment --systemd --all")'
         echo '  trace("launch requested: kanshi")'
         echo '  hl.exec_cmd(o.launch("kanshi"))'
         for alias in "${APP_ORDER[@]}"; do

@@ -58,19 +58,11 @@ reorder_windows_before_snapshots() {
 		for (i = 1; i < snapshots_line; i++) print line[i]
 		for (i = snapshots_end; i <= NR; i++) print line[i]
 
+		# Keep the limine-snapper-sync snapshot entries exactly as it wrote them;
+		# rewriting them breaks its bookkeeping and drops linux-omarchy snapshots.
 		print "/+Snapshots"
-		in_kernel = 0
 		for (i = snapshots_line + 1; i < snapshots_end; i++) {
-			if (line[i] ~ /^[[:space:]]+\/\/\/linux([[:space:]]|$)/ || line[i] ~ /^[[:space:]]+\/\/\/\/linux([[:space:]]|$)/ || line[i] ~ /^[[:space:]]+\/\/linux-backup([[:space:]]|$)/) {
-				print "  //linux-backup"
-				in_kernel = 1
-			} else if (line[i] ~ /^[[:space:]]+\//) {
-				in_kernel = 0
-			} else if (in_kernel && line[i] !~ /^[[:space:]]*$/) {
-				entry = line[i]
-				sub(/^[[:space:]]+/, "", entry)
-				print "  " entry
-			}
+			if (line[i] !~ /^[[:space:]]*$/) print line[i]
 		}
 	}
 	' "$temporary_config" > "$reordered_config" || {

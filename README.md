@@ -10,7 +10,7 @@ My Omarchy (Arch + Hyprland) setup.
 |---|---|
 | Omarchy | 4.0.6-1 |
 | Hyprland | 0.56.2-4 |
-| Last updated | 2026-10-30 13:24 |
+| Last updated | 2026-10-30 15:40 |
 
 ## What's in here
 
@@ -50,8 +50,9 @@ My Omarchy (Arch + Hyprland) setup.
 | `~/.config/Code/User/settings.json` | VS Code settings | 1 |
 | `~/.config/Code/User/snippets` | VS Code snippets | 4 |
 | `~/.claude/settings.json` | Claude Code settings | 1 |
-| `~/.local/bin` | Personal scripts: layout engine, toggles, AI wrappers, this sync script | 29 |
+| `~/.local/bin` | Personal scripts: layout engine, toggles, AI wrappers, this sync script | 30 |
 | `~/.local/share/applications/icons` | Web app icons | 7 |
+| `/etc/boot/hooks/post.d/50-snapshot-latest` | Limine hook: one "snapshot-latest" boot entry | 1 |
 | `~/.local/share/applications/*.desktop` | Web apps | 15 |
 
 Listed in `dotfiles.conf` but skipped because they match Omarchy's defaults: `.config/starship.toml`, `.config/autostart`, `.config/lazygit`, `.config/herdr`, `.config/chromium-flags.conf`.
@@ -69,6 +70,7 @@ Installed on top of Omarchy's own package list (count per file):
 ## Layout
 
 - `home/` mirrors `~` (so `home/.config/hypr` is `~/.config/hypr`)
+- `root/` mirrors `/` for system files
 - `dotfiles.conf` decides what gets copied
 
 ```
@@ -207,6 +209,7 @@ Installed on top of Omarchy's own package list (count per file):
 │   │   │   │   ├── playwright
 │   │   │   │   └── playwright-cli
 │   │   │   ├── boot
+│   │   │   │   ├── update-limine -> update-limine.sh
 │   │   │   │   └── update-limine.sh
 │   │   │   ├── desktop
 │   │   │   │   ├── fastfetch-anime
@@ -250,6 +253,11 @@ Installed on top of Omarchy's own package list (count per file):
 │   ├── aur.txt
 │   ├── flatpak.txt
 │   └── pacman.txt
+├── root
+│   └── etc
+│       └── boot
+│           └── hooks
+│               └── post.d
 └── dotfiles.conf
 ```
 
