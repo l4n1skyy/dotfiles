@@ -52,13 +52,23 @@ done
 for tool in rsync perl git; do command -v "$tool" >/dev/null || die "$tool is not installed"; done
 
 # --- CONFIG -------------------------------------------------------------------
-declare -a INCLUDES=() INCLUDE_DESC=() INCLUDE_IF=() INCLUDE_IF_DESC=() EXCLUDES=() REDACT=()
-declare -A OPT=([remote]="" [branch]="master" [skip_stock]="yes" [links]="safe" [max_size]="5M" [packages]="yes" [tree_depth]="5")
+declare -a INCLUDES=() INCLUDE_DESC=() INCLUDE_SEC=() INCLUDE_IF=() INCLUDE_IF_DESC=() INCLUDE_IF_SEC=() EXCLUDES=() REDACT=()
+declare -a SECTIONS=() USE_SEC=() USE_PART=() USE_WHAT=() USE_NEEDS=()
+declare -A OPT=([remote]="" [branch]="master" [skip_stock]="yes" [links]="safe" [max_size]="5M" [packages]="yes") SEEN_SECTION=()
+SECTION_RE='^# --- (.*[^ -])[ -]*$'
 
-lineno=0
+trim() { local s="$1"; s="${s#"${s%%[![:space:]]*}"}"; printf '%s' "${s%"${s##*[![:space:]]}"}"; }
+
+lineno=0 section=""
 while IFS= read -r line || [[ -n "$line" ]]; do
     lineno=$((lineno + 1))
     line="${line%$'\r'}"
+    # `# --- Name ---` headers become the README's sections
+    if [[ "$line" =~ $SECTION_RE ]]; then
+        section="${BASH_REMATCH[1]}"
+        [[ -n "${SEEN_SECTION[$section]-}" ]] || { SECTIONS+=("$section"); SEEN_SECTION[$section]=1; }
+        continue
+    fi
     [[ "$line" =~ ^[[:space:]]*(#|$) ]] && continue
     desc=""
     if [[ "$line" == *" #"* ]]; then
@@ -67,8 +77,11 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     fi
     read -r key rest <<<"$line"
     case "$key" in
-        include)    INCLUDES+=("$rest"); INCLUDE_DESC+=("$desc") ;;
-        include-if) INCLUDE_IF+=("$rest"); INCLUDE_IF_DESC+=("$desc") ;;
+        include)    INCLUDES+=("$rest"); INCLUDE_DESC+=("$desc"); INCLUDE_SEC+=("$section") ;;
+        include-if) INCLUDE_IF+=("$rest"); INCLUDE_IF_DESC+=("$desc"); INCLUDE_IF_SEC+=("$section") ;;
+        use)        IFS='|' read -r part what needs <<<"$rest"
+                    [[ -n "$(trim "$what")" ]] || { warn "dotfiles.conf:$lineno: use needs '<part> | <what>'"; continue; }
+                    USE_SEC+=("$section"); USE_PART+=("$(trim "$part")"); USE_WHAT+=("$(trim "$what")"); USE_NEEDS+=("$(trim "$needs")") ;;
         exclude)    EXCLUDES+=("$rest") ;;
         redact)     REDACT+=("$rest") ;;
         set)        read -r k v <<<"$rest"; OPT[$k]="$v" ;;
@@ -112,7 +125,7 @@ expand() { # spec -> matching absolute paths, one per line
 }
 
 mkdir -p "$STAGE/home"
-declare -a ROW_PATHS=() ROW_DESCS=() MISSING=()
+declare -a ROW_PATHS=() ROW_DESCS=() ROW_SECS=() MISSING=()
 for i in "${!INCLUDES[@]}"; do
     found=0
     while IFS= read -r src; do
@@ -121,7 +134,7 @@ for i in "${!INCLUDES[@]}"; do
         found=1
     done < <(expand "${INCLUDES[$i]}")
     if (( found )); then
-        ROW_PATHS+=("${INCLUDES[$i]}"); ROW_DESCS+=("${INCLUDE_DESC[$i]}")
+        ROW_PATHS+=("${INCLUDES[$i]}"); ROW_DESCS+=("${INCLUDE_DESC[$i]}"); ROW_SECS+=("${INCLUDE_SEC[$i]}")
     else
         MISSING+=("${INCLUDES[$i]}")
     fi
@@ -135,7 +148,7 @@ for i in "${!INCLUDE_IF[@]}"; do
         copy_into_stage "$src"
         found=1
     done < <(expand "$glob")
-    (( found )) && { ROW_PATHS+=("$glob"); ROW_DESCS+=("${INCLUDE_IF_DESC[$i]}"); }
+    (( found )) && { ROW_PATHS+=("$glob"); ROW_DESCS+=("${INCLUDE_IF_DESC[$i]}"); ROW_SECS+=("${INCLUDE_IF_SEC[$i]}"); }
 done
 rm -f "$EXCLUDE_FILE"
 
@@ -240,8 +253,45 @@ if [[ -f "$README" ]] && grep -qF -- "$CUSTOM_END" "$README"; then
 fi
 [[ -n "$custom_block" ]] || custom_block="My Arch + Hyprland (fuck-omarchy) setup."
 
-fo_version="$(git -C "$FO_PATH" log -1 --format=%h 2>/dev/null || true)"
-hypr_version="$(pacman -Q hyprland 2>/dev/null | awk '{print $2}' || true)"
+declare -A PKG_VER=()
+if command -v pacman >/dev/null; then
+    while read -r name ver; do PKG_VER[$name]="$ver"; done < <(pacman -Q)
+fi
+FLATPAKS=" $(flatpak list --app --columns=application 2>/dev/null | paste -sd' ' || true) "
+
+installed() { # a pacman package, Flatpak app or command
+    [[ -n "${PKG_VER[$1]-}" || "$FLATPAKS" == *" $1 "* ]] || command -v "$1" >/dev/null
+}
+
+# Expand the {placeholders} in a `use` value. If one comes up empty, prints it and fails.
+PLACEHOLDER_RE='\{([a-z-]+)(:([^}]+))?\}'
+fill() {
+    local s="$1" whole key arg val
+    while [[ "$s" =~ $PLACEHOLDER_RE ]]; do
+        whole="${BASH_REMATCH[0]}" key="${BASH_REMATCH[1]}" arg="${BASH_REMATCH[3]}" val=""
+        case "$key" in
+            ver)   [[ -n "$arg" ]] && val="${PKG_VER[$arg]-}"; val="${val#*:}"; val="${val%-*}" ;;
+            theme) val="$("$FO_PATH/bin/fo-theme-current" 2>/dev/null || true)" ;;
+            font)  val="$(fc-match -f '%{family[0]}' monospace 2>/dev/null || true)" ;;
+            gtk-theme|icon-theme)
+                   val="$(gsettings get org.gnome.desktop.interface "$key" 2>/dev/null | tr -d "'" || true)" ;;
+            webapps)
+                   val="$(grep -h '^Name=' "$DOTFILES_DIR"/home/.local/share/applications/*.desktop 2>/dev/null \
+                          | cut -d= -f2- | sort -f | paste -sd, | sed 's/,/, /g' || true)" ;;
+        esac
+        [[ -n "$val" ]] || { printf '%s' "$whole"; return 1; }
+        s="${s/"$whole"/"$val"}"
+    done
+    printf '%s' "$s"
+}
+
+repo_link() { # where an include spec lives in the repo; a glob links to its folder
+    local spec="$1" p
+    [[ "$spec" == /* ]] || spec="$HOME/$spec"
+    p="$(repo_path "$spec")"
+    case "$p" in *[*?[]*) p="${p%/*}" ;; esac
+    printf '%s' "$p"
+}
 
 count_files() { # files in the repo that came from one include spec
     local spec="$1" n=0 src
@@ -254,54 +304,69 @@ count_files() { # files in the repo that came from one include spec
     printf '%s' "$n"
 }
 
-stock_only=()
+stock_only=() skipped_uses=()
 {
     printf '# dotfiles\n\n%s\n%s\n%s\n\n' "$CUSTOM_START" "$custom_block" "$CUSTOM_END"
     printf '<!-- Everything below is generated by `dotfiles`. Edit dotfiles.conf instead. -->\n\n'
+    printf '_Last updated %s_\n\n' "$(date '+%Y-%m-%d %H:%M')"
 
-    printf '| | |\n|---|---|\n'
-    [[ -n "$fo_version" ]] && printf '| fuck-omarchy | %s |\n' "$fo_version"
-    [[ -n "$hypr_version" ]] && printf '| Hyprland | %s |\n' "$hypr_version"
-    printf '| Last updated | %s |\n\n' "$(date '+%Y-%m-%d %H:%M')"
+    # One section per `# --- Name ---` header: what I use, then the configs
+    for sec in "${SECTIONS[@]}" ""; do
+        uses=() configs=()
+        for i in "${!USE_PART[@]}"; do
+            [[ "${USE_SEC[$i]}" == "$sec" ]] || continue
+            missing=""
+            for need in ${USE_NEEDS[$i]}; do installed "$need" || missing+=" $need"; done
+            if [[ -n "$missing" ]]; then
+                skipped_uses+=("${USE_PART[$i]} (not installed:$missing)")
+            elif what="$(fill "${USE_WHAT[$i]}")"; then
+                uses+=("| **${USE_PART[$i]}** | $what |")
+            else
+                skipped_uses+=("${USE_PART[$i]} ($what is empty)")
+            fi
+        done
+        for i in "${!ROW_PATHS[@]}"; do
+            [[ "${ROW_SECS[$i]}" == "$sec" ]] || continue
+            n="$(count_files "${ROW_PATHS[$i]}")"
+            if (( n == 0 )); then stock_only+=("${ROW_PATHS[$i]}"); continue; fi
+            shown="${ROW_PATHS[$i]#"$HOME"/}"
+            [[ "$shown" == /* ]] || shown="~/$shown"
+            configs+=("- [\`$shown\`]($(repo_link "${ROW_PATHS[$i]}"))${ROW_DESCS[$i]:+: ${ROW_DESCS[$i]}}")
+        done
+        (( ${#uses[@]} + ${#configs[@]} )) || continue
 
-    printf '## What'\''s in here\n\n| Path | What | Files |\n|---|---|---|\n'
-    for i in "${!ROW_PATHS[@]}"; do
-        n="$(count_files "${ROW_PATHS[$i]}")"
-        if (( n == 0 )); then stock_only+=("${ROW_PATHS[$i]}"); continue; fi
-        shown="${ROW_PATHS[$i]#"$HOME"/}"
-        [[ "$shown" == /* ]] || shown="~/$shown"
-        printf '| `%s` | %s | %s |\n' "$shown" "${ROW_DESCS[$i]:-}" "$n"
+        printf '## %s\n\n' "${sec:-Other}"
+        if (( ${#uses[@]} )); then
+            printf '| | |\n|---|---|\n'
+            printf '%s\n' "${uses[@]}"
+            printf '\n'
+        fi
+        if (( ${#configs[@]} )); then
+            if (( ${#uses[@]} )); then printf 'Configs:\n\n'; fi
+            printf '%s\n' "${configs[@]}"
+            printf '\n'
+        fi
     done
-    printf '\n'
-    if (( ${#stock_only[@]} )); then
-        printf 'Listed in `dotfiles.conf` but skipped because they match fuck-omarchy'\''s defaults: %s.\n\n' \
-            "$(printf '`%s`, ' "${stock_only[@]}" | sed 's/, $//')"
-    fi
-    if (( ${#redacted_files[@]} )); then
-        printf 'Secrets were replaced with `<redacted>` in: %s.\n\n' \
-            "$(printf '`%s`, ' "${redacted_files[@]}" | sed 's/, $//')"
-    fi
 
     if [[ -d "$DOTFILES_DIR/packages" ]]; then
-        printf '## Packages\n\nExplicitly installed packages (count per file):\n\n'
-        for f in "$DOTFILES_DIR"/packages/*.txt; do
-            printf -- '- `packages/%s`: %s\n' "${f##*/}" "$(wc -l < "$f")"
+        printf '## Packages\n\nEverything installed on purpose, one package per line:\n\n'
+        for name in pacman.txt aur.txt flatpak.txt; do
+            f="$DOTFILES_DIR/packages/$name"
+            [[ -f "$f" ]] || continue
+            case "$name" in
+                pacman.txt)  from=" from the repos (pacman)" ;;
+                aur.txt)     from=" from the AUR (yay)" ;;
+                flatpak.txt) from=" from Flatpak" ;;
+            esac
+            printf -- '- [`packages/%s`](packages/%s): %s%s\n' "$name" "$name" "$(wc -l < "$f")" "$from"
         done
         printf '\n'
     fi
 
-    printf '## Layout\n\n'
-    printf -- '- `home/` mirrors `~` (so `home/.config/hypr` is `~/.config/hypr`)\n'
-    [[ -d "$DOTFILES_DIR/root" ]] && printf -- '- `root/` mirrors `/` for system files\n'
-    printf -- '- `dotfiles.conf` decides what gets copied\n\n'
-    if command -v tree >/dev/null; then
-        printf '```\n'
-        (cd "$DOTFILES_DIR" && tree -a --dirsfirst --noreport --filelimit 30 -L "${OPT[tree_depth]}" -I '.git|README.md|README.md.tmp' .)
-        printf '```\n\n'
-    fi
-
     cat <<'EOF'
 ## Restore on a new machine
+
+`home/` mirrors `~` and `root/` mirrors `/`, so `home/.config/hypr` goes back to `~/.config/hypr`.
 
 ```bash
 git clone https://github.com/l4n1skyy/dotfiles.git ~/dotfiles
@@ -310,8 +375,17 @@ sudo pacman -S --needed - < ~/dotfiles/packages/pacman.txt
 yay -S --needed - < ~/dotfiles/packages/aur.txt
 ```
 
-Anything shown as `<redacted>` (API keys etc.) needs filling in by hand.
+EOF
+    if (( ${#redacted_files[@]} )); then
+        printf 'Secrets were replaced with `<redacted>` in %s; fill those in by hand.\n\n' \
+            "$(printf '`%s`, ' "${redacted_files[@]}" | sed 's/, $//')"
+    fi
+    if (( ${#stock_only[@]} )); then
+        printf 'Not copied because they match fuck-omarchy'\''s defaults: %s.\n\n' \
+            "$(printf '`%s`, ' "${stock_only[@]}" | sed 's/, $//')"
+    fi
 
+    cat <<'EOF'
 ## Updating
 
 ```bash
@@ -327,7 +401,7 @@ EOF
 } > "$README.tmp"
 sed -i "s|https://github.com/l4n1skyy/dotfiles.git|${OPT[remote]:-https://github.com/l4n1skyy/dotfiles.git}|" "$README.tmp"
 # Only bump "Last updated" when something else changed, so idle syncs don't create commits.
-if [[ -f "$README" ]] && cmp -s <(grep -v '^| Last updated |' "$README") <(grep -v '^| Last updated |' "$README.tmp"); then
+if [[ -f "$README" ]] && cmp -s <(grep -v '^_Last updated ' "$README") <(grep -v '^_Last updated ' "$README.tmp"); then
     rm -f "$README.tmp"
 else
     mv "$README.tmp" "$README"
@@ -338,6 +412,7 @@ ok "Synced into $DOTFILES_DIR"
 (( stock_skipped )) && info "$stock_skipped file(s) skipped because they match fuck-omarchy's defaults"
 (( ${#redacted_files[@]} )) && info "Secrets redacted in: ${redacted_files[*]}"
 (( ${#MISSING[@]} )) && warn "Not found (skipped): ${MISSING[*]}"
+(( ${#skipped_uses[@]} )) && warn "Left out of README.md: $(printf '%s, ' "${skipped_uses[@]}" | sed 's/, $//')"
 
 if ! git -C "$DOTFILES_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     (( PUSH )) && die "$DOTFILES_DIR is not a git repo, can't push"
