@@ -20,7 +20,7 @@
           "format": "dddd ~ h:mm AP ~ d MMM",
           "formatAlt": "d MMMM 'W'ww yyyy",
           "id": "fo.clock",
-          "verticalFormat": "HH\n\u2014\nmm"
+          "verticalFormat": "HH\n—\nmm"
         },
         {
           "exec": "~/.config/fuck-omarchy/bar/scripts/autostart",
