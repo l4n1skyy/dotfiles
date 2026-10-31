@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# limine post-hook: keep the custom boot menu layout after every limine-entry-tool /
+# limine-snapper-sync update (runs before 50-snapshot-latest and config enrollment):
+#
+#   /+OS        CachyOS (kernel-id=linux-cachyos-bore, the default), Arch Linux
+#               (kernel-id=linux), any other kernels, then Windows
+#   /+Snapshots always last (50-snapshot-latest flattens it to "snapshot-latest")
+#
+# Kernel entries are matched by their "comment: kernel-id=" line, so the tools can name
+# them however they like. Kernel sections the tools create elsewhere (e.g. "/+Omarchy")
+# are merged into /+OS. Usage: 40-menu-layout [limine.conf]  (default: $ESP_PATH/limine.conf)
+
+set -euo pipefail
+
+conf="${1:-${ESP_PATH:-/boot}/limine.conf}"
+[[ -f "$conf" ]] || exit 0
+mid="$(cat /etc/machine-id 2>/dev/null || true)"
+
+tmp="$(mktemp "$(dirname "$conf")/.limine.conf.XXXXXX")"
+trap 'rm -f "$tmp"' EXIT
+
+awk -v mid="$mid" '
+function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
+function secname(s) { sub(/^\/\+?/, "", s); return trim(s) }
+function display(kid, name) {
+    if (kid == "linux-cachyos-bore") return "CachyOS"
+    if (kid == "linux") return "Arch Linux"
+    return name
+}
+{ L[NR] = $0 }
+END {
+    # Top-level sections start with a single "/"; everything before the first is the header
+    ns = 0
+    for (i = 1; i <= NR; i++) if (L[i] ~ /^\/[^\/]/) { ns++; sstart[ns] = i }
+    for (s = 1; s <= ns; s++) send[s] = (s < ns ? sstart[s + 1] - 1 : NR)
+    hdr_end = (ns ? sstart[1] - 1 : NR)
+
+    # The OS section is the one carrying this machine-id (fallback: named "OS")
+    os = 0
+    for (s = 1; s <= ns && !os; s++)
+        for (i = sstart[s] + 1; i <= send[s] && L[i] !~ /^[[:space:]]*\/\//; i++)
+            if (mid != "" && L[i] ~ ("^[[:space:]]*comment:[[:space:]]*machine-id=" mid)) os = s
+    for (s = 1; s <= ns && !os; s++) if (secname(L[sstart[s]]) == "OS") os = s
+    if (!os) { for (i = 1; i <= NR; i++) print L[i]; exit }
+
+    # Collect OS block header lines and sub-entries (from /+OS plus any merged sections)
+    ne = 0; nh = 0
+    for (s = 1; s <= ns; s++) {
+        nm = secname(L[sstart[s]])
+        if (nm == "Snapshots") { snap = s; continue }
+        is_kernel_sec = 0
+        for (i = sstart[s]; i <= send[s]; i++) if (L[i] ~ /comment:[[:space:]]*kernel-id=/) is_kernel_sec = 1
+        if (s != os && !is_kernel_sec && nm !~ /^[Ww]indows/) { keep[s] = 1; continue }
+        if (s != os && nm ~ /^[Ww]indows/ && !is_kernel_sec) {
+            # A top-level Windows entry: turn it into an OS sub-entry
+            ne++; ename[ne] = nm; ekid[ne] = ""; elines[ne] = ""
+            for (i = sstart[s] + 1; i <= send[s]; i++) if (trim(L[i]) != "") elines[ne] = elines[ne] "  " trim(L[i]) "\n"
+            continue
+        }
+        cur = 0
+        for (i = sstart[s] + 1; i <= send[s]; i++) {
+            if (trim(L[i]) == "") continue
+            if (L[i] ~ /^[[:space:]]*\/\/[^\/]/) {
+                ne++; cur = ne; ename[ne] = trim(substr(trim(L[i]), 3)); sub(/^\+/, "", ename[ne])
+                ekid[ne] = ""; elines[ne] = ""
+                continue
+            }
+            if (!cur) { if (s == os) hl[++nh] = L[i]; continue }
+            if (L[i] ~ /comment:[[:space:]]*kernel-id=/) { k = L[i]; sub(/.*kernel-id=/, "", k); ekid[cur] = trim(k) }
+            elines[cur] = elines[cur] L[i] "\n"
+        }
+    }
+
+    # One entry per kernel-id: prefer a fresh tool write (named after the kernel), else the first
+    for (e = 1; e <= ne; e++) {
+        if (ekid[e] == "") continue
+        if (!(ekid[e] in best) || (ename[e] == ekid[e] && ename[best[ekid[e]]] != ekid[e])) best[ekid[e]] = e
+    }
+
+    # Header (default entry = first item in /+OS)
+    for (i = 1; i <= hdr_end; i++) print (L[i] ~ /^default_entry:/ ? "default_entry: 2" : L[i])
+
+    print L[sstart[os]]
+    for (h = 1; h <= nh; h++) print hl[h]
+    order[1] = "linux-cachyos-bore"; order[2] = "linux"
+    for (o = 1; o <= 2; o++) if (order[o] in best) { e = best[order[o]]; done[e] = 1; printf "  //%s\n%s", display(ekid[e], ename[e]), elines[e] }
+    for (e = 1; e <= ne; e++) if (ekid[e] != "" && best[ekid[e]] == e && !done[e]) { done[e] = 1; printf "  //%s\n%s", display(ekid[e], ename[e]), elines[e] }
+    for (e = 1; e <= ne; e++) if (ekid[e] == "" && ename[e] !~ /^[Ww]indows/) printf "  //%s\n%s", ename[e], elines[e]
+    for (e = 1; e <= ne; e++) if (ekid[e] == "" && ename[e] ~ /^[Ww]indows/) printf "  //%s\n%s", ename[e], elines[e]
+
+    for (s = 1; s <= ns; s++) if (keep[s]) for (i = sstart[s]; i <= send[s]; i++) if (trim(L[i]) != "") print L[i]
+    if (snap) for (i = sstart[snap]; i <= send[snap]; i++) print L[i]
+}
+' "$conf" > "$tmp"
+
+# Sanity: same kernels, same Windows loader, Snapshots section untouched
+snaps() { awk '/^\/\+?Snapshots[[:space:]]*$/ {s = 1; print; next} s && /^\/[^\/]/ {s = 0} s' "$1"; }
+os_kids() { awk '/^\/\+?Snapshots[[:space:]]*$/ {s = 1; next} s && /^\/[^\/]/ {s = 0} !s' "$1" | grep -o 'kernel-id=[^[:space:]]*' | sort -u; }
+if [[ ! -s "$tmp" ]] || ! cmp -s <(os_kids "$conf") <(os_kids "$tmp") || ! cmp -s <(snaps "$conf") <(snaps "$tmp") \
+    || [[ $(grep -c 'bootmgfw.efi' "$conf") != $(grep -c 'bootmgfw.efi' "$tmp") ]]; then
+    echo "menu-layout: result failed sanity checks, leaving $conf alone" >&2
+    exit 1
+fi
+if ! cmp -s "$tmp" "$conf"; then
+    mv -f "$tmp" "$conf"
+    sync -f "$conf" 2>/dev/null || sync
+    echo "menu-layout: arranged boot menu in $conf"
+fi

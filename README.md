@@ -8,9 +8,9 @@ My Omarchy (Arch + Hyprland) setup.
 
 | | |
 |---|---|
-| Omarchy | 4.0.6-1 |
+| fuck-omarchy | 141accb |
 | Hyprland | 0.56.2-4 |
-| Last updated | 2026-10-30 15:40 |
+| Last updated | 2026-10-31 14:46 |
 
 ## What's in here
 
@@ -20,8 +20,7 @@ My Omarchy (Arch + Hyprland) setup.
 | `~/.bash_profile` | Login shell | 1 |
 | `~/.config/git/config` | Git identity and aliases | 1 |
 | `~/.config/mise/config.toml` | mise tool versions | 1 |
-| `~/.config/hypr` | Hyprland: bindings, look, input, autostart | 9 |
-| `~/.config/omarchy` | Omarchy shell.json, plugins, hooks, themes, wallpapers | 58 |
+| `~/.config/hypr` | Hyprland: bindings, look, input, autostart | 8 |
 | `~/.config/kanshi` | Monitor profiles | 1 |
 | `~/.config/sddm` | Login screen theme | 9 |
 | `~/.config/wlogout` | Logout menu | 3 |
@@ -32,7 +31,6 @@ My Omarchy (Arch + Hyprland) setup.
 | `~/.config/gtk-4.0/settings.ini` | GTK 4 theme | 1 |
 | `~/.config/nwg-look` | GTK settings tool | 1 |
 | `~/.config/xsettingsd` | X settings daemon | 1 |
-| `~/.config/alacritty` | Alacritty | 1 |
 | `~/.config/ghostty` | Ghostty | 1 |
 | `~/.config/kitty` | Kitty | 1 |
 | `~/.config/foot` | Foot | 1 |
@@ -42,30 +40,35 @@ My Omarchy (Arch + Hyprland) setup.
 | `~/.config/fastfetch` | fastfetch | 1 |
 | `~/.config/terminalist` | terminalist | 1 |
 | `~/.config/tensaku` | tensaku | 1 |
-| `~/.config/cliamp/config.toml` | cliamp | 1 |
 | `~/.config/spicetify` | Spotify theming | 2 |
 | `~/.config/pomoru/config.toml` | Pomodoro timer | 1 |
-| `~/.config/aether` | Aether wallpaper source (API key redacted) | 1 |
 | `~/.config/brave-flags.conf` | Brave flags | 1 |
+| `~/.config/chromium-flags.conf` | Chromium flags | 1 |
 | `~/.config/Code/User/settings.json` | VS Code settings | 1 |
 | `~/.config/Code/User/snippets` | VS Code snippets | 4 |
 | `~/.claude/settings.json` | Claude Code settings | 1 |
 | `~/.local/bin` | Personal scripts: layout engine, toggles, AI wrappers, this sync script | 30 |
-| `~/.local/share/applications/icons` | Web app icons | 7 |
+| `~/.local/share/applications/icons` | Web app icons | 6 |
+| `~/.config/fuck-omarchy` | fuck-omarchy: shell.json, hooks, themes, wallpapers (code lives in ~/.local/share/fuck-omarchy) | 32 |
+| `~/.config/uwsm/env` | Session env: loads fuck-omarchy's FO_PATH + PATH | 1 |
+| `/etc/boot/hooks/post.d/40-menu-layout` | Limine hook: CachyOS / Arch Linux / Windows menu | 1 |
 | `/etc/boot/hooks/post.d/50-snapshot-latest` | Limine hook: one "snapshot-latest" boot entry | 1 |
-| `~/.local/share/applications/*.desktop` | Web apps | 15 |
+| `/etc/default/limine` | Limine settings: boot order, snapshot entries | 1 |
+| `/etc/mkinitcpio.conf.d/zz-hybrid-gpu.conf` | Keep nouveau + its firmware out of the kernel images | 1 |
+| `/etc/pacman.d/mirrorlist.arch` | Spare copy of the ranked Arch mirrorlist | 1 |
+| `~/.local/share/applications/*.desktop` | Web apps | 11 |
 
-Listed in `dotfiles.conf` but skipped because they match Omarchy's defaults: `.config/starship.toml`, `.config/autostart`, `.config/lazygit`, `.config/herdr`, `.config/chromium-flags.conf`.
+Listed in `dotfiles.conf` but skipped because they match fuck-omarchy's defaults: `.config/starship.toml`, `.config/autostart`.
 
 Secrets were replaced with `<redacted>` in: `home/.bashrc`.
 
 ## Packages
 
-Installed on top of Omarchy's own package list (count per file):
+Explicitly installed packages (count per file):
 
-- `packages/aur.txt`: 15
+- `packages/aur.txt`: 29
 - `packages/flatpak.txt`: 1
-- `packages/pacman.txt`: 75
+- `packages/pacman.txt`: 206
 
 ## Layout
 
@@ -79,14 +82,8 @@ Installed on top of Omarchy's own package list (count per file):
 │   ├── .claude
 │   │   └── settings.json
 │   ├── .config
-│   │   ├── aether
-│   │   │   └── wallhaven.json
-│   │   ├── alacritty
-│   │   │   └── alacritty.toml
 │   │   ├── btop
 │   │   │   └── btop.conf
-│   │   ├── cliamp
-│   │   │   └── config.toml
 │   │   ├── Code
 │   │   │   └── User
 │   │   │       ├── snippets
@@ -101,6 +98,26 @@ Installed on top of Omarchy's own package list (count per file):
 │   │   │   └── fonts.conf
 │   │   ├── foot
 │   │   │   └── foot.ini
+│   │   ├── fuck-omarchy
+│   │   │   ├── backgrounds
+│   │   │   │   ├── everforest
+│   │   │   │   └── rose-pine
+│   │   │   ├── bar
+│   │   │   │   ├── modules
+│   │   │   │   └── scripts
+│   │   │   ├── branding
+│   │   │   │   ├── about.txt
+│   │   │   │   └── screensaver.txt
+│   │   │   ├── defaults
+│   │   │   │   └── agent
+│   │   │   ├── extensions
+│   │   │   │   └── menu.sh
+│   │   │   ├── hooks
+│   │   │   │   └── theme-set.d
+│   │   │   ├── themes
+│   │   │   │   ├── custom
+│   │   │   │   └── everforest
+│   │   │   └── shell.json
 │   │   ├── ghostty
 │   │   │   └── config
 │   │   ├── git
@@ -117,8 +134,7 @@ Installed on top of Omarchy's own package list (count per file):
 │   │   │   ├── hyprland.lua
 │   │   │   ├── hyprlock.conf
 │   │   │   ├── input.lua
-│   │   │   ├── looknfeel.lua
-│   │   │   └── omarchy-logo.png
+│   │   │   └── looknfeel.lua
 │   │   ├── kanshi
 │   │   │   └── config
 │   │   ├── kitty
@@ -140,39 +156,11 @@ Installed on top of Omarchy's own package list (count per file):
 │   │   │   └── stylua.toml
 │   │   ├── nwg-look
 │   │   │   └── config
-│   │   ├── omarchy
-│   │   │   ├── backgrounds
-│   │   │   │   ├── everforest
-│   │   │   │   └── rose-pine
-│   │   │   ├── bar
-│   │   │   │   ├── modules
-│   │   │   │   └── scripts
-│   │   │   ├── branding
-│   │   │   │   ├── about.txt
-│   │   │   │   └── screensaver.txt
-│   │   │   ├── defaults
-│   │   │   │   └── agent
-│   │   │   ├── extensions
-│   │   │   │   └── menu.sh
-│   │   │   ├── hooks
-│   │   │   │   ├── post-update.d
-│   │   │   │   └── theme-set.d
-│   │   │   ├── plugins
-│   │   │   │   ├── l4n1skyy.audio
-│   │   │   │   ├── l4n1skyy.clock
-│   │   │   │   ├── l4n1skyy.idle
-│   │   │   │   ├── l4n1skyy.indicators
-│   │   │   │   ├── l4n1skyy.lock
-│   │   │   │   └── l4n1skyy.notifications
-│   │   │   ├── themes
-│   │   │   │   ├── custom
-│   │   │   │   └── everforest
-│   │   │   └── shell.json
 │   │   ├── pomoru
 │   │   │   └── config.toml
 │   │   ├── sddm
 │   │   │   ├── themes
-│   │   │   │   └── omarchy-cozette
+│   │   │   │   └── cozette
 │   │   │   └── 10-theme.conf
 │   │   ├── spicetify
 │   │   │   ├── Themes
@@ -184,6 +172,8 @@ Installed on top of Omarchy's own package list (count per file):
 │   │   │   └── config.toml
 │   │   ├── tmux
 │   │   │   └── tmux.conf
+│   │   ├── uwsm
+│   │   │   └── env
 │   │   ├── wlogout
 │   │   │   ├── layout
 │   │   │   ├── spinner.svg
@@ -191,6 +181,7 @@ Installed on top of Omarchy's own package list (count per file):
 │   │   ├── xsettingsd
 │   │   │   └── xsettingsd.conf
 │   │   ├── brave-flags.conf
+│   │   ├── chromium-flags.conf
 │   │   └── mimeapps.list
 │   ├── .local
 │   │   ├── bin
@@ -234,18 +225,14 @@ Installed on top of Omarchy's own package list (count per file):
 │   │           ├── icons
 │   │           ├── Alfred Camera.desktop
 │   │           ├── Calendar.desktop
-│   │           ├── Discord.desktop
 │   │           ├── Gmail.desktop
 │   │           ├── Google Contacts.desktop
 │   │           ├── Google Maps.desktop
-│   │           ├── Google Messages.desktop
 │   │           ├── Google Photos.desktop
-│   │           ├── Instagram.desktop
 │   │           ├── Outlook.desktop
 │   │           ├── Pomofocus.desktop
 │   │           ├── Teams.desktop
 │   │           ├── todoist.desktop
-│   │           ├── WhatsApp.desktop
 │   │           └── YouTube.desktop
 │   ├── .bash_profile
 │   └── .bashrc
@@ -255,9 +242,15 @@ Installed on top of Omarchy's own package list (count per file):
 │   └── pacman.txt
 ├── root
 │   └── etc
-│       └── boot
-│           └── hooks
-│               └── post.d
+│       ├── boot
+│       │   └── hooks
+│       │       └── post.d
+│       ├── default
+│       │   └── limine
+│       ├── mkinitcpio.conf.d
+│       │   └── zz-hybrid-gpu.conf
+│       └── pacman.d
+│           └── mirrorlist.arch
 └── dotfiles.conf
 ```
 

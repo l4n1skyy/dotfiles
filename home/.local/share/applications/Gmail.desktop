@@ -2,7 +2,7 @@
 Version=1.0
 Name=Gmail
 Comment=Gmail
-Exec=omarchy-launch-webapp https://mail.google.com/
+Exec=fo-launch-webapp https://mail.google.com/
 Terminal=false
 Type=Application
 Icon=/home/l4n1skyy/.local/share/applications/icons/Gmail.png

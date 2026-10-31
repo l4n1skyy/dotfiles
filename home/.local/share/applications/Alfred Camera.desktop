@@ -2,7 +2,7 @@
 Version=1.0
 Name=Alfred Camera
 Comment=Alfred Camera
-Exec=omarchy-launch-webapp https://alfred.camera/webapp/camera
+Exec=fo-launch-webapp https://alfred.camera/webapp/camera
 Terminal=false
 Type=Application
 Icon=/home/l4n1skyy/.local/share/applications/icons/Alfred Camera.png

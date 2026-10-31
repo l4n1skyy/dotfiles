@@ -1,0 +1,116 @@
+{
+  "bar": {
+    "centerAnchor": "fo.clock",
+    "layout": {
+      "center": [
+        {
+          "id": "l4n1skyy.indicators",
+          "items": [
+            "ScreenRecording",
+            "Reminder",
+            "NightLight",
+            "Dnd",
+            "StayAwake"
+          ]
+        },
+        {
+          "id": "fo.keyboard-layout"
+        },
+        {
+          "format": "dddd ~ h:mm AP ~ d MMM",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "id": "fo.clock",
+          "verticalFormat": "HH\n\u2014\nmm"
+        },
+        {
+          "exec": "~/.config/fuck-omarchy/bar/scripts/autostart",
+          "fontSize": 16,
+          "horizontalMargin": 8.75,
+          "id": "system.autostart",
+          "interval": 1,
+          "onClick": "~/.local/bin/system/toggle-autostart.sh",
+          "tooltip": "Startup apps",
+          "type": "command"
+        }
+      ],
+      "left": [
+        {
+          "id": "fo.menu"
+        },
+        {
+          "id": "fo.workspaces"
+        }
+      ],
+      "right": [
+        {
+          "exec": "~/.config/fuck-omarchy/bar/scripts/cpu",
+          "horizontalMargin": 5,
+          "id": "system.cpu",
+          "interval": 1,
+          "onClick": "fo-launch-or-focus-tui btop",
+          "tooltip": "CPU usage",
+          "type": "command"
+        },
+        {
+          "exec": "~/.config/fuck-omarchy/bar/scripts/gpu",
+          "horizontalMargin": 5,
+          "id": "system.gpu",
+          "interval": 1,
+          "onClick": "fo-launch-or-focus-tui btop",
+          "tooltip": "GPU usage",
+          "type": "command"
+        },
+        {
+          "exec": "~/.config/fuck-omarchy/bar/scripts/memory",
+          "horizontalMargin": 5,
+          "id": "system.memory",
+          "interval": 1,
+          "tooltip": "Memory usage",
+          "type": "command"
+        },
+        {
+          "id": "fo.tray"
+        },
+        {
+          "id": "fo.bluetooth"
+        },
+        {
+          "id": "fo.network"
+        },
+        {
+          "id": "fo.monitor"
+        },
+        {
+          "id": "l4n1skyy.audio"
+        },
+        {
+          "id": "fo.power"
+        }
+      ]
+    },
+    "position": "top",
+    "transparent": true
+  },
+  "cloneSourceRestores": [
+    "l4n1skyy.notifications",
+    "l4n1skyy.lock",
+    "l4n1skyy.idle"
+  ],
+  "disabledPlugins": [],
+  "idle": {
+    "lock": 300,
+    "screensaver": 150
+  },
+  "plugins": [
+    {
+      "id": "l4n1skyy.notifications"
+    },
+    {
+      "id": "l4n1skyy.lock"
+    },
+    {
+      "id": "l4n1skyy.idle"
+    }
+  ],
+  "version": 1
+}

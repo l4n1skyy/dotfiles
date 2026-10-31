@@ -2,7 +2,7 @@
 Version=1.0
 Name=Teams
 Comment=Teams
-Exec=omarchy-launch-webapp https://teams.microsoft.com/v2/
+Exec=fo-launch-webapp https://teams.microsoft.com/v2/
 Terminal=false
 Type=Application
 Icon=/home/l4n1skyy/.local/share/applications/icons/Teams.png

@@ -1,0 +1,25 @@
+TARGET_OS_NAME="Arch Linux"
+
+ESP_PATH="/boot"
+
+KERNEL_CMDLINE[default]+="cryptdevice=PARTUUID=7490455c-4a0f-491d-aa42-c0289959642d:root root=/dev/mapper/root zswap.enabled=0 rootflags=subvol=@ rw rootfstype=btrfs"
+KERNEL_CMDLINE[default]+=" quiet splash loglevel=0 systemd.show_status=false rd.udev.log_level=0 vt.global_cursor_default=0"
+
+ENABLE_UKI=yes
+CUSTOM_UKI_NAME="arch"
+
+ENABLE_LIMINE_FALLBACK=yes
+
+# Find and add other bootloaders
+FIND_BOOTLOADERS=yes
+
+
+MAX_SNAPSHOT_ENTRIES=1
+
+SNAPSHOT_FORMAT_CHOICE=5
+
+BOOT_ORDER="linux-cachyos-bore, linux, *, *fallback, Snapshots"
+# Snapshot boot entries carry only the Arch kernel (the boot partition fits one copy;
+# CachyOS is left out)
+EXCLUDE_SNAPSHOT_ENTRIES="Windows*, windows*, CachyOS*, linux-cachyos-bore*"
+EXCLUDE_SNAPSHOT_TYPES="post"

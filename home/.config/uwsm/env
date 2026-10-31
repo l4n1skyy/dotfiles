@@ -1,0 +1,2 @@
+# fuck-omarchy session environment: FO_PATH, PATH (fork commands first), TERMINAL, EDITOR
+. "$HOME/.local/share/fuck-omarchy/default/uwsm/env.d/10-fo"

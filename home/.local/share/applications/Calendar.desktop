@@ -2,7 +2,7 @@
 Version=1.0
 Name=Calendar
 Comment=Calendar
-Exec=omarchy-launch-webapp https://calendar.google.com
+Exec=fo-launch-webapp https://calendar.google.com
 Terminal=false
 Type=Application
 Icon=/home/l4n1skyy/.local/share/applications/icons/Calendar.png

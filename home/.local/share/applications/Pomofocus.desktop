@@ -2,7 +2,7 @@
 Version=1.0
 Name=Pomofocus
 Comment=Pomofocus
-Exec=omarchy-launch-webapp https://pomofocus.io/
+Exec=fo-launch-webapp https://pomofocus.io/
 Terminal=false
 Type=Application
 Icon=/home/l4n1skyy/.local/share/applications/icons/Pomofocus.png

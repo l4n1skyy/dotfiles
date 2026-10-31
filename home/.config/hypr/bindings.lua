@@ -16,30 +16,30 @@ for _, keys in ipairs({
 	hl.unbind(keys)
 end
 
-o.bind("SUPER + RETURN", "Terminal", "uwsm-app -- xdg-terminal-exec --dir=\"$(omarchy-cmd-terminal-cwd)\"")
+o.bind("SUPER + RETURN", "Terminal", "uwsm-app -- xdg-terminal-exec --dir=\"$(fo-cmd-terminal-cwd)\"")
 o.bind(
 	"SUPER + ALT + RETURN",
 	"Tmux",
-	"uwsm-app -- xdg-terminal-exec --dir=\"$(omarchy-cmd-terminal-cwd)\" bash -c \"tmux attach || tmux new -s Work\""
+	"uwsm-app -- xdg-terminal-exec --dir=\"$(fo-cmd-terminal-cwd)\" bash -c \"tmux attach || tmux new -s Work\""
 )
-o.bind("SUPER + SHIFT + RETURN", "Browser", "omarchy-launch-browser")
-o.bind("SUPER + SHIFT + ALT + B", "Browser (private)", "omarchy-launch-browser --private")
+o.bind("SUPER + SHIFT + RETURN", "Browser", "fo-launch-browser")
+o.bind("SUPER + SHIFT + ALT + B", "Browser (private)", "fo-launch-browser --private")
 o.bind("SUPER + SHIFT + F", "File manager", "uwsm-app -- nautilus --new-window")
 o.bind(
 	"SUPER + ALT + SHIFT + F",
 	"File manager (cwd)",
-	"uwsm-app -- nautilus --new-window \"$(omarchy-cmd-terminal-cwd)\""
+	"uwsm-app -- nautilus --new-window \"$(fo-cmd-terminal-cwd)\""
 )
-o.bind("SUPER + SHIFT + N", "Editor", "omarchy-launch-editor")
+o.bind("SUPER + SHIFT + N", "Editor", "fo-launch-editor")
 o.bind(
 	"SUPER + SHIFT + E",
 	"Beeper",
-	"omarchy-launch-or-focus ^beeper$ \"uwsm-app -- beeper\""
+	"fo-launch-or-focus ^beeper$ \"uwsm-app -- beeper\""
 )
 o.bind(
 	"SUPER + SHIFT + O",
 	"Obsidian",
-	"omarchy-launch-or-focus ^obsidian$ \"uwsm-app -- obsidian\""
+	"fo-launch-or-focus ^obsidian$ \"uwsm-app -- obsidian\""
 )
 o.bind("SUPER + ALT + A", "Toggle Autostart", "~/.local/bin/system/toggle-autostart.sh")
 o.bind("SUPER + L", "Lock System", "hyprlock")
@@ -50,4 +50,4 @@ o.bind(
 	"Update Limine",
 	"uwsm-app -- xdg-terminal-exec -- bash -lc '~/.local/bin/boot/update-limine.sh'"
 )
-o.bind("SUPER + PERIOD", nil, "omarchy-shell shell toggle omarchy.emojis")
+o.bind("SUPER + PERIOD", nil, "fo-shell shell toggle fo.emojis")

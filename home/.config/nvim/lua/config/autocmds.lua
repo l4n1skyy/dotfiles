@@ -36,7 +36,7 @@ local function update_dashboard_theme()
     vim.api.nvim_set_hl(0, group, { link = "Identifier" })
   end
 
-  local colors_file = vim.fn.expand("~/.local/state/omarchy/current/theme/colors.toml")
+  local colors_file = vim.fn.expand("~/.local/state/fuck-omarchy/current/theme/colors.toml")
   if vim.fn.filereadable(colors_file) ~= 1 then
     return
   end
