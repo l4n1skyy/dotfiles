@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Re-apply the custom Limine boot menu:
-#   OS:        CachyOS (CachyOS BORE kernel, default), Arch Linux (Arch kernel), Windows
+#   OS:        FrAnkEnArch (CachyOS BORE kernel, default), Windows
 #   Snapshots: snapshot-latest
 # The same two root hooks run automatically after every kernel or snapshot update
 # (/etc/boot/hooks/post.d/); this is the manual trigger (SUPER+ALT+SHIFT+L / update-limine).

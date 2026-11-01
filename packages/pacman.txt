@@ -84,11 +84,9 @@ libva-nvidia-driver
 libvips
 libyaml
 limine
-linux
 linux-cachyos-bore
 linux-cachyos-bore-headers
 linux-firmware
-linux-headers
 llvm
 lua51
 luarocks

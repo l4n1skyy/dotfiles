@@ -1,4 +1,4 @@
-TARGET_OS_NAME="Arch Linux"
+TARGET_OS_NAME="OS"
 
 ESP_PATH="/boot"
 
@@ -18,8 +18,6 @@ MAX_SNAPSHOT_ENTRIES=1
 
 SNAPSHOT_FORMAT_CHOICE=5
 
-BOOT_ORDER="linux-cachyos-bore, linux, *, *fallback, Snapshots"
-# Snapshot boot entries carry only the Arch kernel (the boot partition fits one copy;
-# CachyOS is left out)
-EXCLUDE_SNAPSHOT_ENTRIES="Windows*, windows*, CachyOS*, linux-cachyos-bore*"
+BOOT_ORDER="linux-cachyos-bore, *, *fallback, Snapshots"
+EXCLUDE_SNAPSHOT_ENTRIES="Windows*, windows*"
 EXCLUDE_SNAPSHOT_TYPES="post"

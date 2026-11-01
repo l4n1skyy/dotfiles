@@ -2,8 +2,8 @@
 # limine post-hook: keep the custom boot menu layout after every limine-entry-tool /
 # limine-snapper-sync update (runs before 50-snapshot-latest and config enrollment):
 #
-#   /+OS        CachyOS (kernel-id=linux-cachyos-bore, the default), Arch Linux
-#               (kernel-id=linux), any other kernels, then Windows
+#   /+OS        FrAnkEnArch (kernel-id=linux-cachyos-bore, the default), any other
+#               kernels, then Windows
 #   /+Snapshots always last (50-snapshot-latest flattens it to "snapshot-latest")
 #
 # Kernel entries are matched by their "comment: kernel-id=" line, so the tools can name
@@ -23,8 +23,7 @@ awk -v mid="$mid" '
 function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
 function secname(s) { sub(/^\/\+?/, "", s); return trim(s) }
 function display(kid, name) {
-    if (kid == "linux-cachyos-bore") return "CachyOS"
-    if (kid == "linux") return "Arch Linux"
+    if (kid == "linux-cachyos-bore") return "FrAnkEnArch"
     return name
 }
 { L[NR] = $0 }
@@ -80,10 +79,9 @@ END {
     # Header (default entry = first item in /+OS)
     for (i = 1; i <= hdr_end; i++) print (L[i] ~ /^default_entry:/ ? "default_entry: 2" : L[i])
 
-    print L[sstart[os]]
+    print "/+OS"
     for (h = 1; h <= nh; h++) print hl[h]
-    order[1] = "linux-cachyos-bore"; order[2] = "linux"
-    for (o = 1; o <= 2; o++) if (order[o] in best) { e = best[order[o]]; done[e] = 1; printf "  //%s\n%s", display(ekid[e], ename[e]), elines[e] }
+    if ("linux-cachyos-bore" in best) { e = best["linux-cachyos-bore"]; done[e] = 1; printf "  //%s\n%s", display(ekid[e], ename[e]), elines[e] }
     for (e = 1; e <= ne; e++) if (ekid[e] != "" && best[ekid[e]] == e && !done[e]) { done[e] = 1; printf "  //%s\n%s", display(ekid[e], ename[e]), elines[e] }
     for (e = 1; e <= ne; e++) if (ekid[e] == "" && ename[e] !~ /^[Ww]indows/) printf "  //%s\n%s", ename[e], elines[e]
     for (e = 1; e <= ne; e++) if (ekid[e] == "" && ename[e] ~ /^[Ww]indows/) printf "  //%s\n%s", ename[e], elines[e]
