@@ -50,4 +50,5 @@ o.bind(
 	"Update Limine",
 	"uwsm-app -- xdg-terminal-exec -- bash -lc '~/.local/bin/boot/update-limine.sh'"
 )
+o.bind("SUPER + CTRL + U", "Update everything", "fo-launch-floating-terminal-with-presentation fo-update-all")
 o.bind("SUPER + PERIOD", nil, "fo-shell shell toggle fo.emojis")

@@ -17,7 +17,7 @@ hl.config({
 	group = {
 		groupbar = {
 			font_family = "CozetteVector",
-			font_size = 0,
+			render_titles = false, -- thin 5px bar, no titles (font_size must be >= 2)
 			rounding = 10,
 			height = 5,
 		},

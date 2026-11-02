@@ -29,6 +29,7 @@ unalias ff 2>/dev/null
 alias nv='nvim'
 alias ccc='cc -Wall -Wextra -Werror'
 alias p='python3'
+alias up='fo-update-all'
 
 ff() {
   case "$1" in

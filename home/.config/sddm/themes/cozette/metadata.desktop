@@ -1,6 +1,6 @@
 [SddmGreeterTheme]
 Name=Cozette
-Description=Minimal terminal-style login theme matching the Limine bootloader aesthetic
+Description=Login screen matching the Plymouth boot splash (logo, lock, entry box, bullets)
 Author=l4n1skyy
 Type=sddm-theme
 Version=1.0
