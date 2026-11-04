@@ -25,20 +25,11 @@ export PATH=$JAVA_HOME/bin:$PATH
 export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
 
 alias bottles='flatpak run com.usebottles.bottles'
-unalias ff 2>/dev/null
 alias nv='nvim'
 alias ccc='cc -Wall -Wextra -Werror'
 alias p='python3'
 alias up='fo-update-all'
 
-ff() {
-  case "$1" in
-    -p) ~/.local/bin/desktop/fastfetch-pokemon ;;
-    -a) ~/.local/bin/desktop/fastfetch-anime ;;
-    *)  ~/.local/bin/desktop/fastfetch-pokemon ;;
-    #*)  command fastfetch "$@" ;;
-  esac
-}
 
 function cdd {
   local SEARCH_PATHS="$HOME /mnt/shared"

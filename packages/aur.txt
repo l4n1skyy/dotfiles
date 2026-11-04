@@ -13,7 +13,6 @@ mise-bin
 ngrok
 osu-lazer-bin
 pixora-icons-git
-pokeget
 spicetify-cli
 spotify
 tensaku
