@@ -330,11 +330,13 @@ process_rule() {
             local ratio_value
 
             # Wait until both ratio windows are present; adding the second window resets the split.
-            local workspace_window_count
-            workspace_window_count=$(echo "$CLIENTS_CACHE" | jq "[.[] | select(.workspace.id == $ws)] | length")
-            if [[ "$workspace_window_count" -lt 2 ]]; then
-                return
-            fi
+            # Every RATIO alias of this workspace must be here by class (a bare window
+            # count let a stray window stand in for the companion and flip the sides).
+            local ratio_alias ratio_class
+            while read -r ratio_alias; do
+                ratio_class="${ALIAS_MAP[$ratio_alias]:-$ratio_alias}"
+                [[ -z "$(get_window_data "$ratio_class" "$ws")" ]] && return
+            done < <(awk -v ws="$ws" '$1=="RATIO" && $2==ws {print $3}' "${CONFIG_FILE}")
 
             ratio_value=$(awk "BEGIN {printf \"%.2f\", ($x_pct / 100.0)}")
             if [[ -z "$ratio_value" || ! "$ratio_value" =~ ^[0-9.]+$ ]]; then
@@ -534,6 +536,22 @@ while true; do
     [[ "$all_rules_done" == "true" ]] || [[ $((SECONDS - pass_start)) -gt 60 ]] && break
     sleep 1.5
 done
+
+# Final check: the split can settle after the first measurement, so re-verify every
+# RATIO window sits on its requested side and swap if not (left/right got swapped).
+sleep 1
+CLIENTS_CACHE=$(hyprctl clients -j); MONITORS_CACHE=$(hyprctl monitors -j)
+while read -r _ vws valias vdir _; do
+    vjson=$(get_window_data "${ALIAS_MAP[$valias]:-$valias}" "$vws")
+    [[ -z "$vjson" ]] && continue
+    vaddr=$(echo "$vjson" | jq -r '.address')
+    vmon=$(get_monitor_data_by_addr "$vaddr")
+    read -r vside _ < <(measure_ratio_window "$vaddr" "$vdir" "$(echo "$vmon" | jq -r '.x')" "$(get_monitor_layout_width "$vmon")" 0.5)
+    if (( ! vside )); then
+        log "ACTION" "WS $vws: $valias ended on the wrong side; swapping"
+        layoutmsg_on_workspace "$vws" "swapwithmaster master" "$vaddr" >/dev/null
+    fi
+done < <(grep -E '^RATIO ' "${CONFIG_FILE}")
 
 [[ -n "$START_WORKSPACE" ]] && run_hypr dispatch workspace "$START_WORKSPACE"
 

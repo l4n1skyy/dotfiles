@@ -1,0 +1,8 @@
+#!/bin/bash
+# Vesktop's system24 theme @imports its CSS and fonts from the web; started before
+# the network is up it loads unthemed and never retries. Wait (max 40s) for the host.
+for _ in $(seq 1 40); do
+    getent hosts refact0r.github.io >/dev/null 2>&1 && curl -sf -m 3 -o /dev/null -I https://refact0r.github.io/system24/build/system24.css && break
+    sleep 1
+done
+exec vesktop "$@"

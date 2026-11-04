@@ -42,7 +42,7 @@ o.bind(
 	"fo-launch-or-focus ^obsidian$ \"uwsm-app -- obsidian\""
 )
 o.bind("SUPER + ALT + A", "Toggle Autostart", "~/.local/bin/system/toggle-autostart.sh")
-o.bind("SUPER + L", "Lock System", "hyprlock")
+o.bind("SUPER + L", "Lock System", "fo-system-lock")
 o.bind("SUPER + F10", nil, "~/.local/bin/system/toggle-audio.sh")
 o.bind("SUPER + ALT + I", "Toggle Idle Lock", "~/.local/bin/system/toggle-idle.sh")
 o.bind(

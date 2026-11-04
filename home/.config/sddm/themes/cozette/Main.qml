@@ -39,6 +39,21 @@ Rectangle {
     onClicked: password.forceActiveFocus()
   }
 
+  // Dimmed lily flowers either side, same as the Plymouth splash.
+  Image {
+    source: "flower-left.png"
+    x: 0
+    y: Math.floor(root.height / 2 - height / 2)
+    smooth: false
+  }
+
+  Image {
+    source: "flower-right.png"
+    x: root.width - width
+    y: Math.floor(root.height / 2 - height / 2)
+    smooth: false
+  }
+
   Image {
     id: logo
     // The splash's own logo, so a new logo shows up here too.
@@ -71,7 +86,7 @@ Rectangle {
       source: "bullet.png"
       width: 7
       height: 7
-      x: entry.x + 20 + index * 12
+      x: Math.floor(entry.x + (entry.width - (Math.min(password.text.length, 21) * 12 - 5)) / 2 + index * 12)
       y: Math.floor(entry.y + entry.height / 2 - 3.5)
     }
   }
