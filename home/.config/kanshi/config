@@ -1,13 +1,10 @@
-# Profile 1: Laptop Mode (When nothing is plugged in)
+# Laptop only
 profile {
-    output eDP-2 enable mode 2880x1920@120 position 0,0 scale 2
+    output eDP-1 enable mode 1920x1200@180 position 0,0 scale 1.5
 }
 
-# Profile 2: Docked Mode (When HDMI is detected)
+# Docked: HDMI monitor connected -> laptop screen off, external only
 profile {
-    # This is the 'magic' line that shuts off the laptop screen
-    output eDP-2 disable
-    
-    # This activates your external monitor
-    output HDMI-A-1 enable mode preferred position 0,0 scale 1
+    output eDP-1 disable
+    output HDMI-A-1 enable mode 1920x1080@60 position 0,0 scale 1.25
 }
