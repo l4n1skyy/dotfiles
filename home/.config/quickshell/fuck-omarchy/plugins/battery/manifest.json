@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "fuck-omarchy.battery",
+  "name": "Battery",
+  "version": "1.0.0",
+  "author": "fuck-omarchy",
+  "description": "Low battery warning service",
+  "kinds": [
+    "service"
+  ],
+  "entryPoints": {
+    "service": "Service.qml"
+  },
+  "fuck_omarchy": {
+    "provides": [
+      "battery"
+    ]
+  }
+}

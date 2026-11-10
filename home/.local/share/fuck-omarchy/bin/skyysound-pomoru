@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# fuck-omarchy:summary=Play the soft pomoru chime: focus-done or break-done (used by the skyypomoru bar module)
+# fuck-omarchy:args=<focus-done|break-done>
+# fuck-omarchy:group=sound
+
+# Clips live in $FUCK_OMARCHY_ASSETS/audio/pomoru (default ~/Assets/audio/pomoru).
+# Light on purpose: no volume boost, music keeps playing. Bar instances on
+# several monitors all call this, so a second call within 3 seconds is ignored.
+
+kind="${1:-}"
+[[ $kind == focus-done || $kind == break-done ]] || { echo "Usage: skyysound-pomoru <focus-done|break-done>" >&2; exit 1; }
+
+dir="${FUCK_OMARCHY_ASSETS:-$HOME/Assets}/audio/pomoru"
+clip=$(find "$dir" -maxdepth 1 -type f -name "$kind.*" 2>/dev/null | head -n 1)
+[[ -n $clip ]] || exit 0
+
+stamp="${XDG_RUNTIME_DIR:-/tmp}/fuck-omarchy-sound-pomoru"
+now=$(date +%s)
+last=$(cat "$stamp" 2>/dev/null || echo 0)
+(( now - last < 3 )) && exit 0
+echo "$now" >"$stamp"
+
+exec pw-play --volume 0.7 "$clip"

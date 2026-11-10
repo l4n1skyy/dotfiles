@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# fuck-omarchy:summary=Display Neovim (LazyVim + your own) keybindings using an interactive search menu.
+# fuck-omarchy:args=[--print|-p] [--refresh]
+
+# Keymaps are read from a headless Neovim after plugins have loaded, so the
+# list always matches the real config (LazyVim defaults, extras, your own).
+# The result is cached until the nvim config changes.
+
+print_only=false
+refresh=false
+for arg in "$@"; do
+  case "$arg" in
+    --print|-p) print_only=true ;;
+    --refresh) refresh=true ;;
+  esac
+done
+
+nvim_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/fuck-omarchy"
+mkdir -p "$cache_dir"
+
+stamp=$(find "$nvim_dir" -type f \( -name '*.lua' -o -name 'lazy-lock.json' -o -name 'lazyvim.json' \) -printf '%p %T@\n' 2>/dev/null | sort | sha256sum | cut -c1-16)
+cache_file="$cache_dir/nvim-keybindings-$stamp.txt"
+
+generate() {
+  local lua_file raw
+  lua_file=$(mktemp --suffix=.lua)
+  raw=$(mktemp)
+
+  cat >"$lua_file" <<LUA
+vim.defer_fn(function()
+  local out = {}
+  local leader = vim.g.mapleader or " "
+  local names = { n = "NORMAL", v = "VISUAL", x = "VISUAL", i = "INSERT", t = "TERMINAL" }
+  for mode, label in pairs(names) do
+    for _, m in ipairs(vim.api.nvim_get_keymap(mode)) do
+      local d = m.desc or ""
+      if d ~= "" and not d:match("^:help ") and not d:match("^vim%.") then
+        out[#out + 1] = label .. "\t" .. m.lhs:gsub("^" .. vim.pesc(leader), "<leader>") .. "\t" .. d
+      end
+    end
+  end
+  table.sort(out)
+  vim.fn.writefile(out, "$raw")
+  vim.cmd("qa!")
+end, 3000)
+LUA
+
+  timeout 60 nvim --headless -c "luafile $lua_file" >/dev/null 2>&1
+  rm -f "$lua_file"
+
+  [[ -s $raw ]] || { rm -f "$raw"; return 1; }
+
+  # Dedupe (visual modes duplicate), fold <leader> to SPACE, pad, and put
+  # the leader/custom maps first.
+  awk -F '\t' '
+    {
+      key = $2
+      if (key == "<leader> ") key = "<leader>SPACE"
+      sub(/^<leader>/, "SPACE + ", key)
+      gsub(/<space>/, "SPACE", key)
+      gsub(/<C-/, "CTRL + <", key)
+      line = sprintf("%-10s %-26s → %s", $1, key, $3)
+      if (!(line in seen)) { seen[line] = 1; prio = (key ~ /^SPACE/) ? 0 : 1; print prio "\t" line }
+    }' "$raw" | sort -s -k1,1n | cut -f2- >"$cache_file"
+  rm -f "$raw"
+}
+
+if $refresh || [[ ! -s $cache_file ]]; then
+  find "$cache_dir" -maxdepth 1 -name 'nvim-keybindings-*.txt' -delete 2>/dev/null
+  generate || { echo "Could not read Neovim keymaps" >&2; exit 1; }
+fi
+
+if [[ $print_only == "true" ]]; then
+  cat "$cache_file"
+  exit 0
+fi
+
+fuck-omarchy-menu-select 'Neovim keybindings' -- --width 800 --height 500 <"$cache_file" >/dev/null || true

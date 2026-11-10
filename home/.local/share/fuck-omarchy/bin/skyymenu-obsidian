@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# fuck-omarchy:summary=Display Obsidian keybindings (your custom hotkeys + the useful defaults) using an interactive search menu.
+# fuck-omarchy:args=[--print|-p]
+
+# Custom hotkeys are read live from the open vault's .obsidian/hotkeys.json;
+# the defaults are a curated list of Obsidian's core shortcuts.
+
+print_only=false
+[[ $1 == "--print" || $1 == "-p" ]] && print_only=true
+
+obsidian_json="${XDG_CONFIG_HOME:-$HOME/.config}/obsidian/obsidian.json"
+
+vault_hotkeys() {
+  local vault hotkeys
+  [[ -f $obsidian_json ]] || return 0
+
+  vault=$(jq -r '[.vaults[] | select(.open == true)][0].path // ([.vaults[]][0].path // empty)' "$obsidian_json")
+  hotkeys="$vault/.obsidian/hotkeys.json"
+  [[ -f $hotkeys ]] || return 0
+
+  jq -r '
+    to_entries[] | select(.value | length > 0) | .key as $cmd | .value[] |
+    ((.modifiers | map(if . == "Mod" then "CTRL" else ascii_upcase end) | join(" + ")) as $m |
+      (if $m == "" then "" else $m + " + " end) + (.key | ascii_upcase)) as $combo |
+    [$combo, ($cmd | gsub("[:-]"; " ") | gsub("  +"; " ")), "custom"] | @tsv
+  ' "$hotkeys"
+}
+
+default_hotkeys() {
+  cat <<'DEFAULTS'
+CTRL + O	Quick switcher (open note)
+CTRL + P	Command palette
+CTRL + N	New note
+CTRL + SHIFT + F	Search in all notes
+CTRL + F	Find in current note
+CTRL + H	Replace in current note
+CTRL + E	Toggle edit / reading view
+CTRL + ENTER	Follow link under cursor
+CTRL + ALT + LEFT	Navigate back
+CTRL + ALT + RIGHT	Navigate forward
+CTRL + T	New tab
+CTRL + W	Close tab
+CTRL + TAB	Next tab
+CTRL + SHIFT + TAB	Previous tab
+CTRL + \	Split pane right
+CTRL + SHIFT + \	Split pane down
+CTRL + ,	Open settings
+CTRL + K	Insert link
+CTRL + B	Bold
+CTRL + I	Italic
+CTRL + SHIFT + S	Strikethrough
+CTRL + SHIFT + H	Highlight
+CTRL + SHIFT + K	Inline code
+CTRL + L	Toggle checklist item
+CTRL + ]	Indent
+CTRL + [	Unindent
+CTRL + G	Open graph view
+CTRL + D	Delete current file
+ALT + ENTER	Open link in new pane
+F2	Rename file
+DEFAULTS
+}
+
+output_keybindings() {
+  {
+    vault_hotkeys | while IFS=$'\t' read -r combo action tag; do
+      printf '%-30s → %s (custom)\n' "$combo" "$action"
+    done
+    default_hotkeys | while IFS=$'\t' read -r combo action; do
+      printf '%-30s → %s\n' "$combo" "$action"
+    done
+    printf '%-30s → %s\n' "SUPER + SHIFT + O" "Launch / focus Obsidian (Hyprland)"
+  } | awk '!seen[$0]++'
+}
+
+if [[ $print_only == "true" ]]; then
+  output_keybindings
+else
+  output_keybindings | fuck-omarchy-menu-select 'Obsidian keybindings' -- --width 800 --height 500 >/dev/null || true
+fi

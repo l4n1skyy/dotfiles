@@ -1,0 +1,495 @@
+#!/bin/bash
+
+# fuck-omarchy:summary=Update everything (system + AUR, config files, Spicetify, Flatpak, pipx, uv, mise, npm), then clean up (unused packages, caches, trash, old config/pacnew backups and snapshots, old logs)
+# fuck-omarchy:group=update
+# fuck-omarchy:args=[--check] [--envs]
+# fuck-omarchy:requires-sudo=true
+
+# --check  only list what is outdated or would be cleaned up; nothing is changed
+# --envs   also update every package in every micromamba environment. Off by
+#          default: project environments often pin versions on purpose.
+#
+# Plain pip is left out on purpose: Arch's Python is externally managed, so
+# python-* packages come from pacman, and pip-installed apps live in pipx or uv.
+#
+# Ends with a summary of what changed in each step (also saved to
+# ~/.local/state/fuck-omarchy/updates/), then offers pacdiff for config files
+# that couldn't be merged automatically.
+
+check=0
+envs=0
+
+for arg in "$@"; do
+  case $arg in
+  -c | --check) check=1 ;;
+  -e | --envs) envs=1 ;;
+  -h | --help)
+    echo "Usage: fuck-omarchy-update-all [--check] [--envs]"
+    exit 0
+    ;;
+  *)
+    echo "fuck-omarchy-update-all: unknown option '$arg'" >&2
+    exit 1
+    ;;
+  esac
+done
+
+failed=()
+steps=()
+declare -A labels
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+has() {
+  command -v "$1" >/dev/null
+}
+
+# note <text>: add a line to the running step's summary
+note() {
+  echo "$*" >>"$tmp/$current.notes"
+}
+
+# step <id> <label> <update command> <check command> [<list command>]
+# The list command prints one "name<TAB>version[<TAB>build id]" line per
+# installed package; it runs before and after the update to build the summary.
+step() {
+  current=$1
+  echo -e "\n\e[32m$2\e[0m"
+  if (( check )); then
+    eval "$4" || failed+=("$2")
+    return
+  fi
+
+  steps+=("$1")
+  labels[$1]=$2
+  [[ -n $5 ]] && eval "$5" >"$tmp/$1.before" 2>/dev/null
+  eval "$3" || failed+=("$2")
+  [[ -n $5 ]] && eval "$5" >"$tmp/$1.after" 2>/dev/null
+}
+
+# --- System -------------------------------------------------------------------
+
+check_system() {
+  checkupdates
+  (( $? != 1 )) || return 1 # 2 only means nothing to update
+  if has yay; then
+    yay -Qua # 1 only means nothing to update
+  fi
+  return 0
+}
+
+list_system() { pacman -Q | tr ' ' '\t'; }
+
+# --- Config files ---------------------------------------------------------------
+
+list_pacnew() { find /etc -name '*.pacnew' 2>/dev/null | sort; }
+
+# For each .pacnew this update created, re-apply your edits to the new file: a
+# 3-way merge with the file from the package version installed before the
+# update. Clean merges replace the config (the old one is kept in
+# /var/backups/pacnew/); anything else is left for pacdiff at the end.
+merge_pacnew() {
+  local new cur pkg ver base
+  local backup=/var/backups/pacnew/$(date +%F-%H%M)
+  local -a created
+
+  mapfile -t created < <(comm -13 "$tmp/pacnew.before" <(list_pacnew))
+  for new in "${created[@]}"; do
+    cur=${new%.pacnew}
+    if pkg=$(pacman -Qqo "$cur" 2>/dev/null) &&
+      ver=$(awk -F'\t' -v pkg="$pkg" '$1 == pkg { print $2 }' "$tmp/system.before") && [[ -n $ver ]] &&
+      base=$(compgen -G "/var/cache/pacman/pkg/$pkg-$ver-*.pkg.tar.*" | grep -v '\.sig$' | head -1) && [[ -n $base ]] &&
+      bsdtar -xOf "$base" "${cur#/}" >"$tmp/base" 2>/dev/null </dev/null &&
+      cp "$cur" "$tmp/merged" 2>/dev/null &&
+      git merge-file -q "$tmp/merged" "$tmp/base" "$new" 2>/dev/null &&
+      sudo mkdir -p "$backup" && sudo cp -a --parents "$cur" "$backup/" &&
+      sudo tee "$cur" <"$tmp/merged" >/dev/null && sudo rm "$new"; then
+      echo "Merged $cur"
+      note "merged $cur (your changes kept)"
+    else
+      echo "Can't merge $cur automatically"
+    fi
+  done
+}
+
+# --- Spicetify ------------------------------------------------------------------
+
+# stock: Spotify was installed or updated, so its original app files are back
+# outdated: spicetify itself was updated since the last apply
+spicetify_state() {
+  local apps with
+  apps=$(spicetify config spotify_path)/Apps
+  with=$(awk -F' *= *' '$1 == "with" { print $2 }' "$(spicetify -c)")
+  if [[ -e $apps/xpui.spa ]]; then
+    echo stock
+  elif [[ $with != "$(spicetify -v)" ]]; then
+    echo outdated
+  else
+    echo applied
+  fi
+}
+
+check_spicetify() {
+  local state
+  state=$(spicetify_state)
+  [[ $state == applied ]] && echo "Applied" || echo "Needs re-applying ($state)"
+}
+
+spicetify_apply() {
+  local apps
+  apps=$(spicetify config spotify_path)/Apps
+
+  case $(spicetify_state) in
+  stock)
+    if [[ ! -w $apps ]]; then
+      echo "Spicetify can't write to $apps. Fix: sudo chmod a+wr /opt/spotify && sudo chmod a+wr -R /opt/spotify/Apps" >&2
+      return 1
+    fi
+    spicetify -q -n backup apply || { echo "Failed; run 'spicetify backup apply' to see why" >&2; return 1; }
+    note "re-applied to the updated Spotify"
+    ;;
+  outdated)
+    spicetify -q -n restore backup apply || { echo "Failed; run 'spicetify restore backup apply' to see why" >&2; return 1; }
+    note "re-applied with spicetify $(spicetify -v)"
+    ;;
+  *)
+    echo "Already applied"
+    return 0
+    ;;
+  esac
+
+  echo "Applied"
+  pgrep -x spotify >/dev/null && note "restart Spotify to load it"
+  return 0
+}
+
+# --- Other package managers -------------------------------------------------------
+
+check_pipx() {
+  local app version
+  pipx list --short | while read -r app version; do
+    pipx runpip "$app" list --outdated 2>/dev/null |
+      awk -v app="${app,,}" 'tolower($1) == app { print $1, $2, "->", $3 }'
+  done
+}
+
+update_mamba_envs() {
+  local env flag=$1
+  for env in $(micromamba env list --json | jq -r '.envs[]'); do
+    echo "$env"
+    micromamba update -p "$env" --all -y $flag || return 1
+  done
+}
+
+# Runtimes often change without a new version number, so the commit is the
+# build id. The arch is dropped from the ref to keep names short.
+list_flatpak() { flatpak list --columns=ref,version,active | sed -E 's|^([^/]+)/[^/]+/|\1/|'; }
+
+list_pipx() { pipx list --short | tr ' ' '\t'; }
+
+list_uv() { uv tool list | awk '!/^-/ { sub(/^v/, "", $2); print $1 "\t" $2 }'; }
+
+list_mise() {
+  mise ls --current --json |
+    jq -r 'to_entries[] | .key as $tool | .value[] | select(.active) | "\($tool)\t\(.version)"'
+}
+
+list_npm() {
+  npm ls -g --depth=0 --json | jq -r '.dependencies // {} | to_entries[] | "\(.key)\t\(.value.version)"'
+}
+
+list_mamba_envs() {
+  local env
+  for env in $(micromamba env list --json | jq -r '.envs[]'); do
+    micromamba list -p "$env" --json | jq -r --arg env "${env##*/}" '.[] | "\($env)/\(.name)\t\(.version)"'
+  done
+}
+
+# --- Cleanup --------------------------------------------------------------------
+
+yay_cache=${XDG_CACHE_HOME:-$HOME/.cache}/yay
+mise_installs=${MISE_DATA_DIR:-$HOME/.local/share/mise}/installs
+mamba_pkgs=${MAMBA_ROOT_PREFIX:-$HOME/.local/share/mamba}/pkgs
+
+# tidy <label> <dir> <command...>: run a cleanup command and record how much
+# space it freed in <dir>
+tidy() {
+  local label=$1 dir=$2 before after
+  shift 2
+  [[ -d $dir ]] || return 0
+  before=$(du -sb "$dir" 2>/dev/null | cut -f1)
+  "$@" || return 1
+  after=$(du -sb "$dir" 2>/dev/null | cut -f1)
+  if (( before > after )); then
+    freed+=("$label $(numfmt --to=iec $(( before - after )))")
+    (( freed_bytes += before - after ))
+  fi
+  return 0
+}
+
+# Keep the installed and one previous version of each package, nothing of
+# uninstalled ones
+clean_pacman_cache() { sudo paccache -qrk2 && sudo paccache -qruk0; }
+
+clean_yay_cache() {
+  local dir
+  for dir in "$yay_cache"/*/; do
+    dir=${dir%/}
+    if ! pacman -Qq "${dir##*/}" &>/dev/null; then
+      rm -rf "$dir" # the package is gone
+    elif [[ -d $dir/.git ]]; then
+      git -C "$dir" clean -ffdxq # keep the PKGBUILD repo, drop sources and built packages
+    fi
+  done
+}
+
+# Keep only the newest of each group of config backups (name.bak, name.bak.123,
+# name.bak.AbC...). Only the config and script dirs are touched.
+backup_dirs=("${XDG_CONFIG_HOME:-$HOME/.config}" "$HOME/.local/bin")
+
+list_old_config_backups() {
+  local f base
+  declare -A newest
+  local -a all
+  mapfile -t all < <(find "${backup_dirs[@]}" -xdev -type f -regextype posix-extended \
+    -regex '.*\.(bak|old|orig)(\.[A-Za-z0-9]+)?' -not -path '*/LOG.old' -not -path '*/.git/*' \
+    -printf '%T@ %p\n' 2>/dev/null | sort -rn | cut -d' ' -f2-)
+  for f in "${all[@]}"; do
+    base=$(sed -E 's/\.(bak|old|orig)(\.[A-Za-z0-9]+)?$//' <<<"$f")
+    if [[ -z ${newest[$base]} ]]; then
+      newest[$base]=1
+    else
+      echo "$f"
+    fi
+  done
+}
+
+clean_config_backups() {
+  local f
+  while IFS= read -r f; do rm -f -- "$f"; done < <(list_old_config_backups)
+}
+
+# Keep the newest /var/backups/pacnew/<date> directory
+clean_pacnew_backups() {
+  local -a old
+  mapfile -t old < <(sudo find /var/backups/pacnew -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort -r | tail -n +2)
+  (( ${#old[@]} )) && sudo rm -rf -- "${old[@]}"
+  return 0
+}
+
+# Keep only the latest snapper snapshot pair (snap-pac makes one per pacman
+# transaction, so this is the rollback point of the update just done)
+clean_snapshots() {
+  has snapper || return 0
+  sudo snapper -c root set-config NUMBER_LIMIT=2 NUMBER_LIMIT_IMPORTANT=2 &&
+    sudo snapper -c root cleanup number
+}
+
+# Empty the trash (chmod first: trashed read-only folders can't be removed otherwise)
+clean_trash() {
+  local trash=${XDG_DATA_HOME:-$HOME/.local/share}/Trash
+  [[ -d $trash ]] || return 0
+  chmod -R u+w "$trash/files" 2>/dev/null
+  rm -rf "$trash/files/"* "$trash/info/"* "$trash/directorysizes"
+}
+
+# Wipe the user cache; apps rebuild what they need. Kept: the clipboard
+# history, the autostart flag, the fork's own cache, and yay's PKGBUILD repos
+# (handled by clean_yay_cache above).
+clean_user_cache() {
+  local cache=${XDG_CACHE_HOME:-$HOME/.cache}
+  find "$cache" -mindepth 1 -maxdepth 1 ! -name cliphist ! -name disable_autostart \
+    ! -name fuck-omarchy ! -name yay -exec rm -rf {} + 2>/dev/null
+  return 0
+}
+
+clean_coredumps() { sudo find /var/lib/systemd/coredump -type f -delete 2>/dev/null; return 0; }
+
+clean_journal() { sudo journalctl -q --vacuum-time=2weeks 2>/dev/null; return 0; }
+
+cleanup() {
+  local -a orphans
+  freed=()
+  freed_bytes=0
+
+  # Packages nothing needs any more: make dependencies yay kept, -debug
+  # packages, dependencies of removed apps
+  mapfile -t orphans < <(pacman -Qdtq)
+  if (( ${#orphans[@]} )); then
+    sudo pacman -Rns "${orphans[@]}" || return 1
+  fi
+
+  if has paccache; then tidy "pacman cache" /var/cache/pacman/pkg clean_pacman_cache || return 1; fi
+  if has yay; then tidy "AUR build files" "$yay_cache" clean_yay_cache || return 1; fi
+  if has mise; then tidy "old mise tool versions" "$mise_installs" mise prune --yes || return 1; fi
+  if has uv; then tidy "uv cache" "$(uv cache dir)" uv cache prune -q || return 1; fi
+  if has micromamba; then tidy "micromamba packages" "$mamba_pkgs" micromamba clean --all --yes -q || return 1; fi
+
+  tidy "trash" "${XDG_DATA_HOME:-$HOME/.local/share}/Trash" clean_trash || return 1
+  tidy "user cache" "${XDG_CACHE_HOME:-$HOME/.cache}" clean_user_cache || return 1
+  tidy "old config backups" "${backup_dirs[0]}" clean_config_backups || return 1
+  # Root-owned dirs the user can't measure, so no size is reported for these
+  clean_pacnew_backups || return 1
+  clean_snapshots || return 1
+  clean_coredumps
+  clean_journal
+
+  (( freed_bytes )) && note "freed $(numfmt --to=iec "$freed_bytes"): $(IFS=,; echo "${freed[*]}" | sed 's/,/, /g')"
+  return 0
+}
+
+check_cleanup() {
+  local orphans
+  orphans=$(pacman -Qdtq)
+  [[ -n $orphans ]] && echo "Unneeded packages:" $orphans
+  if has paccache; then paccache -dk2; paccache -duk0; fi
+  if has mise; then mise prune --dry-run; fi
+  du -sh "${XDG_DATA_HOME:-$HOME/.local/share}/Trash" "${XDG_CACHE_HOME:-$HOME/.cache}" 2>/dev/null | sed 's/^/Would empty: /'
+  list_old_config_backups | sed 's/^/Old config backup: /'
+  sudo find /var/backups/pacnew -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort -r | tail -n +2 | sed 's/^/Old pacnew backup: /'
+  has snapper && sudo snapper -c root list 2>/dev/null | tail -n +3 | sed 's/^/Snapshot: /'
+  return 0
+}
+
+# --- Summary --------------------------------------------------------------------
+
+# changes <before> <after>: one "order<TAB>name<TAB>what changed" line per
+# package (order 1 = updated, 2 = new, 3 = removed)
+changes() {
+  awk -F'\t' -v OFS='\t' '
+    NR == FNR { ver[$1] = $2; id[$1] = $3 != "" ? $3 : $2; next }
+    {
+      seen[$1] = 1
+      nid = $3 != "" ? $3 : $2
+      if (!($1 in id))
+        print 2, $1, "new " ($2 != "" ? $2 : nid)
+      else if (id[$1] != nid)
+        print 1, $1, (ver[$1] != $2 && ver[$1] != "" && $2 != "" ? ver[$1] " -> " $2 : id[$1] " -> " nid)
+    }
+    END { for (n in id) if (!(n in seen)) print 3, n, "removed " (ver[n] != "" ? ver[n] : id[n]) }
+  ' "$1" "$2" | sort -t$'\t' -k1,1n -k2,2
+}
+
+didnt_finish() {
+  local f
+  for f in "${failed[@]}"; do
+    [[ $f == "$1" ]] && return 0
+  done
+  return 1
+}
+
+print_summary() {
+  local id label summary width
+
+  width=$(( $(tput cols 2>/dev/null || echo 80) - 2 ))
+
+  echo -e "\n\e[1mSummary\e[0m"
+  for id in "${steps[@]}"; do
+    label=${labels[$id]}
+    : >"$tmp/$id.changes"
+    [[ -f $tmp/$id.before ]] && changes "$tmp/$id.before" "$tmp/$id.after" >"$tmp/$id.changes"
+    touch "$tmp/$id.notes"
+
+    if [[ -s $tmp/$id.changes ]]; then
+      summary=$(awk -F'\t' '
+        { n[$1]++ }
+        END {
+          if (n[1]) out = n[1] " updated"
+          if (n[2]) out = out (out ? ", " : "") n[2] " new"
+          if (n[3]) out = out (out ? ", " : "") n[3] " removed"
+          print out
+        }' "$tmp/$id.changes")
+    elif [[ -s $tmp/$id.notes ]]; then
+      summary=$(head -1 "$tmp/$id.notes")
+      sed -i 1d "$tmp/$id.notes"
+    else
+      summary="no changes"
+    fi
+
+    if didnt_finish "$label"; then
+      echo -e "\e[32m$label\e[0m: $summary \e[31m(didn't finish)\e[0m"
+    else
+      echo -e "\e[32m$label\e[0m: $summary"
+    fi
+
+    # Long lists are laid out in as many columns as the terminal fits
+    [[ -s $tmp/$id.changes ]] &&
+      cut -f2- "$tmp/$id.changes" | column -t -s $'\t' | column -c "$width" | expand | sed 's/^/  /'
+    sed 's/^/  /' "$tmp/$id.notes"
+  done
+
+  if (( ${#pending[@]} )); then
+    echo -e "\e[33mConfig files to merge by hand\e[0m:"
+    printf '  %s\n' "${pending[@]}"
+  fi
+}
+
+# --- Run --------------------------------------------------------------------------
+
+(( check )) || list_pacnew >"$tmp/pacnew.before"
+
+step system "System + AUR packages" "fuck-omarchy-update" "check_system" "list_system"
+
+step config "Config files" "merge_pacnew" "list_pacnew"
+
+has spicetify && has spotify && step spicetify "Spicetify" "spicetify_apply" "check_spicetify"
+
+has flatpak && step flatpak "Flatpak" \
+  "flatpak update -y && flatpak uninstall --unused -y" \
+  "flatpak remote-ls --updates" \
+  "list_flatpak"
+
+has pipx && step pipx "pipx apps" "pipx upgrade-all" "check_pipx" "list_pipx"
+
+has uv && step uv "uv tools" "uv tool upgrade --all" "uv tool list --outdated" "list_uv"
+
+# Same release-age override as the `mup` alias and the AI tool launchers
+has mise && step mise "mise tools" \
+  "MISE_MINIMUM_RELEASE_AGE=0 mise upgrade" \
+  "MISE_MINIMUM_RELEASE_AGE=0 mise outdated" \
+  "list_mise"
+
+has npm && step npm "npm global packages" "npm update -g" "npm outdated -g || true" "list_npm"
+
+(( envs )) && has micromamba && step mamba "micromamba environments" \
+  "update_mamba_envs" \
+  "update_mamba_envs --dry-run" \
+  "list_mamba_envs"
+
+step cleanup "Cleanup" "cleanup" "check_cleanup" "list_system"
+
+if (( ! check )); then
+  mapfile -t pending < <(list_pacnew)
+
+  log_dir=${XDG_STATE_HOME:-$HOME/.local/state}/fuck-omarchy/updates
+  mkdir -p "$log_dir"
+  print_summary | tee >(sed 's/\x1b\[[0-9;]*m//g' >"$log_dir/$(date +%F-%H%M).txt")
+
+  if (( ${#pending[@]} )) && has pacdiff; then
+    echo
+    if gum confirm "Merge ${#pending[@]} config file update(s) now with pacdiff?"; then
+      has nvim && export DIFFPROG=${DIFFPROG:-nvim -d}
+      pacdiff --sudo --backup
+    fi
+  fi
+
+  if ! pacman -Qqo "/usr/lib/modules/$(uname -r)/vmlinuz" &>/dev/null; then
+    reboot="The kernel was updated"
+  elif pid=$(pgrep -xo Hyprland) && [[ $(readlink "/proc/$pid/exe") == *"(deleted)" ]]; then
+    reboot="Hyprland was updated"
+  fi
+fi
+
+echo
+if (( ${#failed[@]} )); then
+  echo -e "\e[31mDidn't finish:\e[0m"
+  printf '  %s\n' "${failed[@]}"
+else
+  echo -e "\e[32mAll done.\e[0m"
+fi
+
+if [[ -n $reboot ]]; then
+  gum confirm "$reboot. Reboot now?" && fuck-omarchy-system-reboot
+fi
+
+(( ${#failed[@]} == 0 ))

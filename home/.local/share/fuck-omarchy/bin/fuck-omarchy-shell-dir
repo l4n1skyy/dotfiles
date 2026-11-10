@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# fuck-omarchy:summary=Print the directory of the active shell profile (the Quickshell config that is running)
+# fuck-omarchy:hidden=true
+
+# A shell profile is a complete Quickshell config: a directory with a shell.qml.
+# Profiles live in ~/.config/quickshell/<name>/ (override the root with
+# FUCK_OMARCHY_SHELL_PROFILES). The active one is named in
+# ~/.config/fuck-omarchy/shell-profile, or by FUCK_OMARCHY_SHELL_PROFILE; the
+# default is "fuck-omarchy". Switch with fuck-omarchy-shell-profile.
+
+root="${FUCK_OMARCHY_SHELL_PROFILES:-$HOME/.config/quickshell}"
+state="${XDG_CONFIG_HOME:-$HOME/.config}/fuck-omarchy/shell-profile"
+
+name="${FUCK_OMARCHY_SHELL_PROFILE:-}"
+[[ -z $name && -r $state ]] && name=$(<"$state")
+name="${name//[[:space:]]/}"
+: "${name:=fuck-omarchy}"
+
+dir="$root/$name"
+[[ -f $dir/shell.qml ]] || { echo "shell profile '$name' not found: $dir/shell.qml" >&2; exit 1; }
+printf '%s\n' "$dir"

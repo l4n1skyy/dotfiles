@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "skyynotifications",
+  "name": "My Notifications",
+  "version": "1.0.0",
+  "author": "fuck-omarchy",
+  "description": "Notification daemon, popups, DND, and history",
+  "kinds": [
+    "service"
+  ],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "Service.qml"
+  },
+  "fuck_omarchy": {
+    "clonedFrom": "fuck-omarchy.notifications",
+    "provides": [
+      "notifications"
+    ]
+  }
+}

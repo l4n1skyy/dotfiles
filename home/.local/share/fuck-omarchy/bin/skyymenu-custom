@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# fuck-omarchy:summary=Display my custom commands and workflow (updating, cleaning, dotfiles, databases, aliases) using an interactive search menu.
+# fuck-omarchy:args=[--print|-p]
+
+# Curated list of the commands that differ from the stock workflow. Aliases
+# defined in ~/.bashrc are added automatically, so new ones show up here.
+
+print_only=false
+[[ $1 == "--print" || $1 == "-p" ]] && print_only=true
+
+curated() {
+  cat <<'LIST'
+NAMING	skyy<name>  (skyylock, skyylimine, skyysound-password...)	A skyy prefix means my own custom module, not part of Omarchy or the fork; the fuck-omarchy-* names are the fork
+UPDATE	up  /  SUPER CTRL + U	Update everything: system + AUR (merging .pacnew), Spicetify, Flatpak, pipx, uv, mise, npm, then clean up
+UPDATE	up --check	Only list what is outdated or would be cleaned; changes nothing
+UPDATE	up --envs	Also update every micromamba environment (off by default, envs pin versions)
+UPDATE	fuck-omarchy-update	Just pacman -Syu + AUR (yay -Sua)
+UPDATE	mup	mise up, ignoring the release-age delay
+UPDATE	Menu > Update > Everything	Same as `up`, from the menu
+CLEANUP	(part of `up`)	Removes orphans, old package/AUR/mise/uv/micromamba caches, empties Trash and ~/.cache, deletes coredumps, old journal logs
+CLEANUP	(part of `up`)	Keeps only the newest config backup (*.bak.*), newest /var/backups/pacnew dir, latest snapper snapshot pair
+CLEANUP	~/.local/state/fuck-omarchy/updates/	Summary of every update run (what changed, space freed)
+CLEANUP	pacdiff --sudo --backup	Merge leftover .pacnew files (offered at the end of `up`)
+SYSTEM	skyylimine  /  SUPER ALT SHIFT + L	Re-apply the custom Limine boot menu (FrAnkEnArch, Windows, snapshot-latest)
+SYSTEM	fuck-omarchy-restart-shell	Restart the Quickshell shell (refuses while locked)
+SYSTEM	SUPER ALT + A	Toggle autostart apps
+SYSTEM	SUPER ALT + I	Toggle idle lock
+SYSTEM	SUPER + F10	Toggle audio output (speakers / headphone jack)
+SHELL	fuck-omarchy-shell-profile list | current	Shell profiles: whole Quickshell configs in ~/.config/quickshell/<name>/ (fuck-omarchy is the default)
+SHELL	fuck-omarchy-shell-profile use <name>  /  back	Swap the whole shell to another profile and swap back (settings in ~/.config/fuck-omarchy are kept)
+SHELL	fuck-omarchy-shell-profile new <name> [--minimal | --from <p>]	Make a new profile: a tiny bar, or a copy of an existing one
+SHELL	fuck-omarchy-plugin-clone <id>	Copy one component (bar, menu, notifications...) to edit it; callers keep working through capabilities
+SHELL	fuck-omarchy-shell-audit [--strict]	Check the shell is modular: no cross-plugin imports, calls declared in fuck_omarchy.uses, kit usage
+SHELL	~/.config/quickshell/fuck-omarchy/MODULARITY.md	The rules: plugins are folders, they talk by capability (provides/uses), shared look is the optional kit
+DOTFILES	dotfiles	Copy configs listed in ~/dotfiles/dotfiles.conf, scrub secrets, regenerate README
+DOTFILES	dotfiles --push [-m MSG]	Also commit and push to GitHub
+DOTFILES	dotfiles --dry-run  /  --edit	Preview changes / edit dotfiles.conf
+DATA	skyydb	Open my SQLite databases (vocab, workouts, finance, quotes, knowledge) in Datasette
+DATA	skyydb restart | stop | sync | import FILE	Manage Datasette, sync vocab, import CSVs
+FILES	cdd  (terminal)	Fuzzy-jump to a directory in ~ or /mnt/shared
+FILES	SPACE + cd / cD  (nvim)	Same jump from Neovim, global / local
+FILES	skyypomoru  /  SUPER ALT + P	Open pomoru on workspace 7 (the bar shows its timer next to the clock)
+LIST
+}
+
+aliases() {
+  [[ -f $HOME/.bashrc ]] || return 0
+  sed -n -E "s/^alias ([A-Za-z0-9_.-]+)='?([^']*)'?\$/\1\t\2/p" "$HOME/.bashrc" |
+    while IFS=$'\t' read -r name cmd; do
+      printf 'ALIAS\t%s\t%s\n' "$name" "$cmd"
+    done
+}
+
+output() {
+  { curated; aliases; } | awk -F '\t' '
+    !seen[$2]++ { printf "%-9s %-42s → %s\n", $1, $2, $3 }'
+}
+
+if [[ $print_only == "true" ]]; then
+  output
+else
+  output | fuck-omarchy-menu-select 'My commands' -- --width 1000 --height 500 >/dev/null || true
+fi

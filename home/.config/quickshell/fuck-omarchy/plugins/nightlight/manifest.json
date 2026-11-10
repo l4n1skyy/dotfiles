@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "fuck-omarchy.nightlight",
+  "name": "Night Light",
+  "version": "1.0.0",
+  "author": "fuck-omarchy",
+  "description": "Owns the hyprsunset night light temperature for the bar indicator and CLI.",
+  "kinds": [
+    "service"
+  ],
+  "entryPoints": {
+    "service": "Service.qml"
+  },
+  "fuck_omarchy": {
+    "provides": [
+      "nightlight"
+    ]
+  }
+}

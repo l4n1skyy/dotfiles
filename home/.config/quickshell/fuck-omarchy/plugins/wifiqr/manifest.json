@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "fuck-omarchy.wifiqr",
+  "name": "Wi-Fi QR",
+  "version": "1.0.0",
+  "author": "fuck-omarchy",
+  "description": "Share the connected Wi-Fi network as a scannable QR code",
+  "kinds": [
+    "panel"
+  ],
+  "entryPoints": {
+    "panel": "Panel.qml"
+  },
+  "fuck_omarchy": {
+    "provides": [
+      "wifiqr"
+    ]
+  }
+}

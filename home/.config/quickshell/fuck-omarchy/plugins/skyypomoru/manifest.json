@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "skyypomoru",
+  "name": "My Pomoru",
+  "version": "1.0.0",
+  "author": "skyy",
+  "description": "Display-only pomoru timer. Fades out while the pointer is over it so it never gets in the way of its neighbours",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "My Pomoru",
+    "description": "Pomodoro mode and time left (display only, hides on hover)",
+    "category": "Time",
+    "allowMultiple": false
+  }
+}

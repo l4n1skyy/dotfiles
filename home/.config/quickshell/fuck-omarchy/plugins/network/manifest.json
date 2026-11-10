@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "fuck-omarchy.network",
+  "name": "Network",
+  "version": "1.0.0",
+  "author": "fuck-omarchy",
+  "description": "Wi-Fi list and connection state",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Network",
+    "description": "Wi-Fi list and connection state",
+    "category": "Network",
+    "allowMultiple": false
+  },
+  "fuck_omarchy": {
+    "uses": [
+      "wifiqr",
+      "speedtest"
+    ]
+  }
+}

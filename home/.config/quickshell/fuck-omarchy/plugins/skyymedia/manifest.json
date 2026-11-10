@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "skyymedia",
+  "name": "My Media Controls",
+  "version": "1.0.0",
+  "author": "skyy",
+  "description": "Previous / play-pause / next buttons for whatever is playing (Zen, YouTube, YouTube Music, Spotify... anything that speaks MPRIS)",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "My Media Controls",
+    "description": "Previous, play/pause and next buttons with the track title",
+    "category": "Media",
+    "allowMultiple": false
+  },
+  "fuck_omarchy": {
+    "uses": [
+      "media"
+    ]
+  }
+}

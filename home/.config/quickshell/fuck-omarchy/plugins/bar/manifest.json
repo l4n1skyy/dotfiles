@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "fuck-omarchy.bar",
+  "name": "Bar",
+  "version": "1.0.0",
+  "author": "fuck-omarchy",
+  "description": "Status bar with widgets",
+  "kinds": [
+    "bar"
+  ],
+  "entryPoints": {
+    "bar": "Bar.qml"
+  }
+}

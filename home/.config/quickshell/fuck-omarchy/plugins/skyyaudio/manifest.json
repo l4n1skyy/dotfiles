@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "skyyaudio",
+  "name": "My Audio",
+  "version": "1.0.0",
+  "author": "fuck-omarchy",
+  "description": "Volume slider, output picker, per-app mixer",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "My Audio",
+    "description": "Volume slider, output picker, per-app mixer",
+    "category": "Audio",
+    "allowMultiple": false
+  },
+  "fuck_omarchy": {
+    "clonedFrom": "fuck-omarchy.audio",
+    "uses": [
+      "osd",
+      "media"
+    ]
+  }
+}

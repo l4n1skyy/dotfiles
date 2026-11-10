@@ -1,0 +1,175 @@
+#!/bin/bash
+
+# fuck-omarchy:summary=List, create and swap shell profiles (whole Quickshell configs) and swap back
+# fuck-omarchy:args=<list|current|path|use <name>|back|new <name> [--from <profile>|--minimal]|remove <name>>
+# fuck-omarchy:examples=fuck-omarchy shell-profile list | fuck-omarchy shell-profile new try --minimal | fuck-omarchy shell-profile use try | fuck-omarchy shell-profile back
+
+# A profile is a directory with a shell.qml in ~/.config/quickshell/<name>/.
+# "fuck-omarchy" is the shell this desktop was built around (bar, menu,
+# notifications, lock screen, polkit dialog...). Any other Quickshell config
+# dropped in that folder is a profile too, e.g. one cloned from someone's dotfiles.
+#
+# Your settings (bar layout, themes, hooks) stay in ~/.config/fuck-omarchy, so
+# swapping to another profile and back loses nothing.
+#
+# Caution: the lock screen and the password dialog are part of the shell. A
+# profile without them leaves you with hyprlock only and no polkit dialog;
+# `use` warns when the target profile has neither.
+
+set -uo pipefail
+
+root="${FUCK_OMARCHY_SHELL_PROFILES:-$HOME/.config/quickshell}"
+state_dir="${XDG_CONFIG_HOME:-$HOME/.config}/fuck-omarchy"
+active_file="$state_dir/shell-profile"
+previous_file="$state_dir/shell-profile.previous"
+
+die() { echo "fuck-omarchy-shell-profile: $*" >&2; exit 1; }
+
+active() {
+  local n="${FUCK_OMARCHY_SHELL_PROFILE:-}"
+  [[ -z $n && -r $active_file ]] && n=$(<"$active_file")
+  n="${n//[[:space:]]/}"
+  printf '%s\n' "${n:-fuck-omarchy}"
+}
+
+profiles() {
+  local d
+  for d in "$root"/*/; do
+    [[ -f ${d}shell.qml ]] && basename "$d"
+  done
+}
+
+valid_name() { [[ $1 =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || die "bad profile name '$1' (letters, digits, . _ -)"; }
+
+usage() { sed -n 's/^# fuck-omarchy:args=/Usage: fuck-omarchy-shell-profile /p' "$0"; exit "${1:-0}"; }
+
+write_minimal() {
+  local dir="$1"
+  mkdir -p "$dir"
+  cat >"$dir/shell.qml" <<'QML'
+//@ pragma UseQApplication
+import QtQuick
+import Quickshell
+import Quickshell.Hyprland
+
+// Minimal fuck-omarchy shell profile: a top bar with workspaces and a clock,
+// nothing else. A starting point, or a safe place to test swapping profiles.
+ShellRoot {
+  Variants {
+    model: Quickshell.screens
+
+    PanelWindow {
+      required property var modelData
+      screen: modelData
+      anchors { top: true; left: true; right: true }
+      implicitHeight: 32
+      color: "#1e1e2e"
+
+      Row {
+        anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: 12 }
+        spacing: 8
+        Repeater {
+          model: Hyprland.workspaces
+          Text {
+            required property var modelData
+            text: modelData.name
+            color: modelData.focused ? "#cba6f7" : "#6c7086"
+            font.pixelSize: 14
+          }
+        }
+      }
+
+      Text {
+        id: clock
+        anchors.centerIn: parent
+        color: "#cdd6f4"
+        font.pixelSize: 14
+        text: Qt.formatDateTime(new Date(), "ddd d MMM  h:mm AP")
+        Timer { interval: 1000; running: true; repeat: true; onTriggered: clock.text = Qt.formatDateTime(new Date(), "ddd d MMM  h:mm AP") }
+      }
+    }
+  }
+}
+QML
+  cat >"$dir/README.md" <<'MD'
+# Minimal shell profile
+
+Workspaces + clock. Created by `fuck-omarchy-shell-profile new <name> --minimal`.
+It has no lock screen, notifications or password dialog, so swap back with
+`fuck-omarchy-shell-profile back` when you are done.
+MD
+}
+
+cmd="${1:-list}"
+shift || true
+
+case "$cmd" in
+  list|ls)
+    cur=$(active)
+    while read -r n; do
+      printf '%s %s\n' "$([[ $n == "$cur" ]] && echo '*' || echo ' ')" "$n"
+    done < <(profiles)
+    ;;
+  current) active ;;
+  path) FUCK_OMARCHY_SHELL_PROFILE="${1:-$(active)}" fuck-omarchy-shell-dir ;;
+  new)
+    name="${1:-}"; [[ -n $name ]] || usage 1; shift
+    valid_name "$name"
+    [[ -e $root/$name ]] && die "profile '$name' already exists"
+    case "${1:-}" in
+      --minimal) write_minimal "$root/$name" ;;
+      --from)
+        src="${2:-}"; [[ -f $root/$src/shell.qml ]] || die "no profile named '$src'"
+        cp -a "$root/$src" "$root/$name"
+        rm -rf "$root/$name/.git"
+        git -C "$root/$name" init -q 2>/dev/null && git -C "$root/$name" add -A && git -C "$root/$name" commit -qm "Copy of $src" 2>/dev/null
+        ;;
+      "") write_minimal "$root/$name" ;;
+      *) usage 1 ;;
+    esac
+    echo "Created $root/$name"
+    ;;
+  use)
+    name="${1:-}"; [[ -n $name ]] || usage 1
+    [[ -f $root/$name/shell.qml ]] || die "no profile named '$name' in $root"
+    cur=$(active)
+    if [[ $name == "$cur" ]]; then
+      echo "Already on '$name'; restarting it."
+    else
+      fuck-omarchy-hyprland-session-locked && die "refusing to swap shell profiles while the session is locked"
+      grep -rqE "WlSessionLock|SessionLock" "$root/$name" --include=*.qml 2>/dev/null || echo "Warning: '$name' has no lock screen; Super+L falls back to hyprlock only." >&2
+      grep -rqE "PolkitAgent" "$root/$name" --include=*.qml 2>/dev/null || echo "Warning: '$name' has no polkit agent; password dialogs (pkexec) will not appear until you swap back." >&2
+    fi
+    # Stop the running profile, point at the new one, start it.
+    while timeout 30 quickshell kill -p "$root/$cur" --any-display >/dev/null 2>&1; do :; done
+    mkdir -p "$state_dir"
+    [[ $name != "$cur" ]] && printf '%s\n' "$cur" >"$previous_file"
+    printf '%s\n' "$name" >"$active_file"
+    if grep -qs 'target: "shell"' "$root/$name/shell.qml"; then
+      fuck-omarchy-restart-shell
+    else
+      # Not a fuck-omarchy shell: it does not answer our IPC ping, so just
+      # start it from Hyprland and wait for the instance to appear.
+      hyprctl dispatch 'hl.dsp.exec_cmd("fuck-omarchy-launch-shell")' >/dev/null
+      for _ in $(seq 1 50); do
+        quickshell list -a -j 2>/dev/null | jq -e --arg dir "$root/$name/" 'any(.[]; .config_path | startswith($dir))' >/dev/null 2>&1 && { echo "Running profile '$name'."; exit 0; }
+        sleep 0.1
+      done
+      die "profile '$name' did not start; run 'fuck-omarchy-shell-profile back'"
+    fi
+    ;;
+  back)
+    [[ -r $previous_file ]] || die "no previous profile recorded"
+    exec "$0" use "$(<"$previous_file")"
+    ;;
+  remove|rm)
+    name="${1:-}"; [[ -n $name ]] || usage 1
+    [[ $name == "$(active)" ]] && die "'$name' is the active profile; swap away first"
+    [[ $name == fuck-omarchy ]] && die "refusing to remove the fuck-omarchy profile (delete the folder by hand if you really mean it)"
+    [[ -f $root/$name/shell.qml ]] || die "no profile named '$name'"
+    rm -rf -- "${root:?}/$name"
+    echo "Removed $name"
+    ;;
+  -h|--help|help) usage 0 ;;
+  *) usage 1 ;;
+esac
