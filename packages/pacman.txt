@@ -1,6 +1,7 @@
 7zip
 alsa-tools
 alsa-utils
+audacity
 avahi
 base
 base-devel

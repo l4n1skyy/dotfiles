@@ -1,10 +1,27 @@
 {
   "bar": {
-    "centerAnchor": "fo.clock",
+    "centerAnchor": "fuck-omarchy.clock",
     "layout": {
+      "left": [
+        {
+          "id": "fuck-omarchy.workspaces"
+        },
+        {
+          "id": "skyymedia"
+        }
+      ],
       "center": [
         {
-          "id": "l4n1skyy.indicators",
+          "id": "fuck-omarchy.keyboard-layout"
+        },
+        {
+          "format": "dddd ~ h:mm AP ~ d MMM",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "id": "fuck-omarchy.clock",
+          "verticalFormat": "HH\n—\nmm"
+        },
+        {
+          "id": "skyyindicators",
           "items": [
             "ScreenRecording",
             "Reminder",
@@ -14,13 +31,21 @@
           ]
         },
         {
-          "id": "fo.keyboard-layout"
+          "id": "skyypomoru"
+        }
+      ],
+      "right": [
+        {
+          "id": "skyystats",
+          "type": "command",
+          "exec": "~/.config/fuck-omarchy/bar/scripts/skyystats",
+          "interval": 1,
+          "horizontalMargin": 5,
+          "onClick": "fuck-omarchy-launch-or-focus-tui btop",
+          "tooltip": "CPU / GPU / memory"
         },
         {
-          "format": "dddd ~ h:mm AP ~ d MMM",
-          "formatAlt": "d MMMM 'W'ww yyyy",
-          "id": "fo.clock",
-          "verticalFormat": "HH\n—\nmm"
+          "id": "fuck-omarchy.tray"
         },
         {
           "exec": "~/.config/fuck-omarchy/bar/scripts/autostart",
@@ -28,63 +53,24 @@
           "horizontalMargin": 8.75,
           "id": "system.autostart",
           "interval": 1,
-          "onClick": "~/.local/bin/system/toggle-autostart.sh",
+          "onClick": "skyytoggle-autostart",
           "tooltip": "Startup apps",
           "type": "command"
-        }
-      ],
-      "left": [
-        {
-          "id": "fo.menu"
         },
         {
-          "id": "fo.workspaces"
-        }
-      ],
-      "right": [
-        {
-          "exec": "~/.config/fuck-omarchy/bar/scripts/cpu",
-          "horizontalMargin": 5,
-          "id": "system.cpu",
-          "interval": 1,
-          "onClick": "fo-launch-or-focus-tui btop",
-          "tooltip": "CPU usage",
-          "type": "command"
+          "id": "fuck-omarchy.bluetooth"
         },
         {
-          "exec": "~/.config/fuck-omarchy/bar/scripts/gpu",
-          "horizontalMargin": 5,
-          "id": "system.gpu",
-          "interval": 1,
-          "onClick": "fo-launch-or-focus-tui btop",
-          "tooltip": "GPU usage",
-          "type": "command"
+          "id": "fuck-omarchy.network"
         },
         {
-          "exec": "~/.config/fuck-omarchy/bar/scripts/memory",
-          "horizontalMargin": 5,
-          "id": "system.memory",
-          "interval": 1,
-          "tooltip": "Memory usage",
-          "type": "command"
+          "id": "fuck-omarchy.monitor"
         },
         {
-          "id": "fo.tray"
+          "id": "skyyaudio"
         },
         {
-          "id": "fo.bluetooth"
-        },
-        {
-          "id": "fo.network"
-        },
-        {
-          "id": "fo.monitor"
-        },
-        {
-          "id": "l4n1skyy.audio"
-        },
-        {
-          "id": "fo.power"
+          "id": "fuck-omarchy.power"
         }
       ]
     },
@@ -92,24 +78,23 @@
     "transparent": true
   },
   "cloneSourceRestores": [
-    "l4n1skyy.notifications",
-    "l4n1skyy.lock",
-    "l4n1skyy.idle"
+    "skyynotifications",
+    "skyylock",
+    "skyyidle"
   ],
-  "disabledPlugins": [],
   "idle": {
     "lock": 300,
     "screensaver": 150
   },
   "plugins": [
     {
-      "id": "l4n1skyy.notifications"
+      "id": "skyynotifications"
     },
     {
-      "id": "l4n1skyy.lock"
+      "id": "skyylock"
     },
     {
-      "id": "l4n1skyy.idle"
+      "id": "skyyidle"
     }
   ],
   "version": 1

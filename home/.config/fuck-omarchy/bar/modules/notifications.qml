@@ -6,7 +6,7 @@ BarIconButton {
 
   property string moduleName: "system.notifications"
   property var settings: ({})
-  readonly property var notificationService: bar?.shell?.firstPartyServiceFor("fo.notifications")
+  readonly property var notificationService: bar?.shell?.firstPartyServiceFor("fuck-omarchy.notifications")
   readonly property bool doNotDisturb: notificationService ? notificationService.doNotDisturb : false
 
   text: doNotDisturb ? "󰂛" : ""

@@ -1,10 +1,10 @@
 # If not running interactively, don't do anything (leave this at the top of this file)
 [[ $- != *i* ]] && return
 
-# fuck-omarchy environment (FO_PATH + PATH) and default aliases/functions
+# fuck-omarchy environment (FUCK_OMARCHY_PATH + PATH) and default aliases/functions
 # (don't mess with these directly, just overwrite them here!)
 source "$HOME/.local/share/fuck-omarchy/default/bash/env-bootstrap"
-source "$FO_PATH/default/bash/rc"
+source "$FUCK_OMARCHY_PATH/default/bash/rc"
 
 export TODOIST_API_TOKEN=<redacted>
 export DEEPSEEK_API_KEY="<redacted>"
@@ -28,7 +28,7 @@ alias bottles='flatpak run com.usebottles.bottles'
 alias nv='nvim'
 alias ccc='cc -Wall -Wextra -Werror'
 alias p='python3'
-alias up='fo-update-all'
+alias up='fuck-omarchy-update-all'
 
 
 function cdd {

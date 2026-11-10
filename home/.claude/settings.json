@@ -4,20 +4,5 @@
     "claude-opus-5-5": {
       "effortLevel": "xhigh"
     }
-  },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/password-sound 2>/dev/null || true",
-            "async": true,
-            "timeout": 30
-          }
-        ]
-      }
-    ]
   }
 }

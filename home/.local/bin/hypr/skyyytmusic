@@ -1,0 +1,29 @@
+#!/bin/bash
+# skyyytmusic: open YouTube Music in its own Zen window (profile zen-youtube-music,
+# class "ytmusic") without piling up tabs.
+#
+# Zen restores the previous session on start and then also opens the URL, so every
+# login added one more YouTube Music tab. This forgets the saved tabs first, so the
+# window always starts with the single fresh tab. Logins and cookies are untouched.
+# If that Zen instance is already running it is left alone.
+#
+# skyyytmusic focus   jump to the YouTube Music window (switching to its
+#                     workspace), or open it if it isn't running. Used by the
+#                     media title in the bar.
+
+profile="$HOME/.config/zen-youtube-music"
+url="https://music.youtube.com"
+
+# Running? The profile lock is a symlink "host:+PID".
+pid=$(readlink "$profile/lock" 2>/dev/null | sed -n 's/.*+//p')
+if [[ -n $pid ]] && kill -0 "$pid" 2>/dev/null; then
+  [[ ${1:-} == focus ]] && hyprctl dispatch 'hl.dsp.focus({ window = "class:ytmusic" })' >/dev/null
+  exit 0
+fi
+
+# Forget the saved tabs
+rm -f "$profile"/sessionstore.jsonlz4 \
+      "$profile"/zen-sessions.jsonlz4 \
+      "$profile"/sessionstore-backups/*
+
+exec zen-browser --new-instance --profile "$profile" --name ytmusic "$url"

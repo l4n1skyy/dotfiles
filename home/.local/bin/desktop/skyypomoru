@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# skyypomoru: open pomoru (the Pomodoro timer in ~/.local/src/pomoru) in its own
+# terminal on workspace 7, or jump to it if it is already open.
+# The bar module skyypomoru reads the status pomoru writes to ~/.config/pomoru.
+set -euo pipefail
+
+repo="$HOME/.local/src/pomoru"
+bin="$repo/target/release/pomoru"
+class="skyypomoru"
+
+# Already open? Go there.
+if hyprctl clients -j | jq -e --arg c "$class" 'any(.[]; .class == $c)' >/dev/null; then
+  hyprctl dispatch "hl.dsp.focus({ window = \"class:$class\" })" >/dev/null
+  exit 0
+fi
+
+# Build it once if the binary is missing
+[[ -x $bin ]] || cargo build --release --quiet --manifest-path "$repo/Cargo.toml"
+
+# New windows open on the current workspace, so go to 7 first
+hyprctl dispatch 'hl.dsp.focus({ workspace = "7" })' >/dev/null
+exec foot --app-id "$class" -e "$bin"

@@ -1,0 +1,11 @@
+#!/bin/bash
+# skyystats: CPU, GPU and memory in one bar module. Runs the three single-stat
+# scripts next to it and joins them, so each can still be used on its own.
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+texts=(); tips=()
+for s in cpu gpu memory; do
+  out=$("$dir/$s" 2>/dev/null)
+  texts+=("$(jq -r '.text' <<<"$out")")
+  tips+=("$(jq -r '.tooltip' <<<"$out")")
+done
+jq -cn --arg text "${texts[0]}  ${texts[1]}  ${texts[2]}" --arg tooltip "$(printf '%s\n' "${tips[@]}")" '{text:$text, tooltip:$tooltip}'

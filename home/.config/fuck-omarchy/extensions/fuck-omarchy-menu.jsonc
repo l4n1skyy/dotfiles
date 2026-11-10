@@ -11,14 +11,14 @@
   //   action      Shell command to run. If omitted, the row is a submenu.
   //   target      Existing submenu id to open. Use for links/aliases.
   //   provider    Runtime provider function/command returning JSON rows.
-  //   aliases     alternate `fo menu summon <name>` routes; also searchable.
+  //   aliases     alternate `fuck-omarchy menu summon <name>` routes; also searchable.
   //   description Optional subtitle and extra search text.
   //   when        Shell condition; hide row when it fails.
   //   checked     Shell condition; append ✓ when it succeeds.
   //
   // Examples:
   // "personal": {"icon":"","label":"Personal"},
-  // "personal.notes": {"icon":"󰎞","label":"Notes","action":"fo-launch-editor ~/notes"},
+  // "personal.notes": {"icon":"󰎞","label":"Notes","action":"fuck-omarchy-launch-editor ~/notes"},
   // "personal.files": {"icon":"","label":"Files","action":"uwsm-app -- nautilus ~/Documents"},
   //
   // Only use provider when a provider_name function or command named "name"
@@ -26,5 +26,5 @@
   //
   // Example: replace the default About action by reusing the same id. Existing
   // fields are kept unless overridden.
-  "about": {"icon":"","label":"About","action":"fo-launch-or-focus-tui fetch"},
+  "about": {"icon":"","label":"About","action":"fuck-omarchy-launch-or-focus-tui fetch"},
 }

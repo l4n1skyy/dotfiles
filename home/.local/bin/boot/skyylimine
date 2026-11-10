@@ -3,12 +3,12 @@
 #   OS:        FrAnkEnArch (CachyOS BORE kernel, default), Windows
 #   Snapshots: snapshot-latest
 # The same two root hooks run automatically after every kernel or snapshot update
-# (/etc/boot/hooks/post.d/); this is the manual trigger (SUPER+ALT+SHIFT+L / update-limine).
+# (/etc/boot/hooks/post.d/); this is the manual trigger (SUPER+ALT+SHIFT+L / skyylimine).
 
 set -euo pipefail
 
 config=/boot/limine.conf
-hooks=(/etc/boot/hooks/post.d/40-menu-layout /etc/boot/hooks/post.d/50-snapshot-latest)
+hooks=(/etc/boot/hooks/post.d/40-skyylimine-menu-layout /etc/boot/hooks/post.d/50-skyylimine-snapshot-latest)
 
 notify() { notify-send "$@" 2>/dev/null || true; }
 
