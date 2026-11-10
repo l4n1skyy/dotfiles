@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# dotfiles: copy the configs listed in ~/dotfiles/dotfiles.conf into ~/dotfiles,
+# dotfiles: copy the configs listed in ~/Shared/03_AREAS/_DOTFILES/dotfiles.conf into that folder,
 # scrub secrets, regenerate README.md, and (with --push) commit and push to GitHub.
 
 set -euo pipefail
 
-DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/Shared/03_AREAS/_DOTFILES}"
 CONF="$DOTFILES_DIR/dotfiles.conf"
 FUCK_OMARCHY_PATH="${FUCK_OMARCHY_PATH:-$HOME/.local/share/fuck-omarchy}"
 AREAS=(home root packages)
@@ -369,10 +369,10 @@ stock_only=() skipped_uses=()
 `home/` mirrors `~` and `root/` mirrors `/`, so `home/.config/hypr` goes back to `~/.config/hypr`.
 
 ```bash
-git clone https://github.com/l4n1skyy/dotfiles.git ~/dotfiles
-rsync -av ~/dotfiles/home/ ~/                      # put the configs back
-sudo pacman -S --needed - < ~/dotfiles/packages/pacman.txt
-yay -S --needed - < ~/dotfiles/packages/aur.txt
+git clone https://github.com/l4n1skyy/dotfiles.git ~/Shared/03_AREAS/_DOTFILES
+rsync -av ~/Shared/03_AREAS/_DOTFILES/home/ ~/                      # put the configs back
+sudo pacman -S --needed - < ~/Shared/03_AREAS/_DOTFILES/packages/pacman.txt
+yay -S --needed - < ~/Shared/03_AREAS/_DOTFILES/packages/aur.txt
 ```
 
 EOF

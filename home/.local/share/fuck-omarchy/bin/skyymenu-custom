@@ -33,7 +33,7 @@ SHELL	fuck-omarchy-shell-profile new <name> [--minimal | --from <p>]	Make a new 
 SHELL	fuck-omarchy-plugin-clone <id>	Copy one component (bar, menu, notifications...) to edit it; callers keep working through capabilities
 SHELL	fuck-omarchy-shell-audit [--strict]	Check the shell is modular: no cross-plugin imports, calls declared in fuck_omarchy.uses, kit usage
 SHELL	~/.config/quickshell/fuck-omarchy/MODULARITY.md	The rules: plugins are folders, they talk by capability (provides/uses), shared look is the optional kit
-DOTFILES	dotfiles	Copy configs listed in ~/dotfiles/dotfiles.conf, scrub secrets, regenerate README
+DOTFILES	dotfiles	Copy configs listed in ~/Shared/03_AREAS/_DOTFILES/dotfiles.conf, scrub secrets, regenerate README
 DOTFILES	dotfiles --push [-m MSG]	Also commit and push to GitHub
 DOTFILES	dotfiles --dry-run  /  --edit	Preview changes / edit dotfiles.conf
 DATA	skyydb	Open my SQLite databases (vocab, workouts, finance, quotes, knowledge) in Datasette

@@ -424,6 +424,17 @@ print_summary() {
   fi
 }
 
+# --- Dotfiles -------------------------------------------------------------------
+
+# Sync configs into the dotfiles repo and push (after the other steps so the
+# package lists are current). A failed push must not fail the update.
+push_dotfiles() {
+  local out rc=0
+  out=$(dotfiles --push -m "Update after system update $(date +%F)" 2>&1) || rc=$?
+  printf '%s\n' "$out" | tail -n 5 | while IFS= read -r l; do note "$l"; done
+  return $rc
+}
+
 # --- Run --------------------------------------------------------------------------
 
 (( check )) || list_pacnew >"$tmp/pacnew.before"
@@ -457,6 +468,8 @@ has npm && step npm "npm global packages" "npm update -g" "npm outdated -g || tr
   "list_mamba_envs"
 
 step cleanup "Cleanup" "cleanup" "check_cleanup" "list_system"
+
+has dotfiles && step dotfiles "Dotfiles" "push_dotfiles" "dotfiles --dry-run"
 
 if (( ! check )); then
   mapfile -t pending < <(list_pacnew)
