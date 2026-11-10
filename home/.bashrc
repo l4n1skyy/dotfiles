@@ -60,3 +60,11 @@ else
 fi
 unset __mamba_setup
 # <<< mamba initialize <<<
+
+# Play the password-prompt clip when sudo is about to ask for a password
+sudo() {
+  if [[ -t 0 ]] && ! command sudo -n true 2>/dev/null; then
+    (skyysound-password >/dev/null 2>&1 &)
+  fi
+  command sudo "$@"
+}
