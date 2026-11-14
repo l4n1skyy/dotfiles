@@ -79,6 +79,16 @@ Rectangle {
     y: Math.floor(entry.y + entry.height / 2 - height / 2)
   }
 
+  Text {
+    visible: root.loginFailed
+    text: "YOU SHALL NOT PASS >:("
+    color: "#f38ba8"
+    font.family: "CozetteVector"
+    font.pixelSize: 26
+    x: Math.floor(root.width / 2 - width / 2)
+    y: entry.y + entry.height + 40
+  }
+
   Repeater {
     model: Math.min(password.text.length, 21)
 

@@ -5,7 +5,9 @@
 # Zen restores the previous session on start and then also opens the URL, so every
 # login added one more YouTube Music tab. This forgets the saved tabs first, so the
 # window always starts with the single fresh tab. Logins and cookies are untouched.
-# If that Zen instance is already running it is left alone.
+# If that Zen instance is already running it is left alone, and a YouTube Music tab
+# is only opened in it when none is open yet (read from the session file Zen keeps
+# up to date, so a tab in the background counts too).
 #
 # skyyytmusic focus   jump to the YouTube Music window (switching to its
 #                     workspace), or open it if it isn't running. Used by the
@@ -17,6 +19,40 @@ url="https://music.youtube.com"
 # Running? The profile lock is a symlink "host:+PID".
 pid=$(readlink "$profile/lock" 2>/dev/null | sed -n 's/.*+//p')
 if [[ -n $pid ]] && kill -0 "$pid" 2>/dev/null; then
+  # Is a YouTube Music tab open? Unknown (no session file yet, unreadable) counts as yes: never add a second one.
+  has_tab=$(python3 - "$profile/sessionstore-backups/recovery.jsonlz4" <<'PY'
+import json, sys
+def unlz4(b):  # Mozilla's session files: "mozLz40\0", 4-byte size, one LZ4 block
+    src, out, i = b[12:], bytearray(), 0
+    while i < len(src):
+        t = src[i]; i += 1
+        n = t >> 4
+        if n == 15:
+            while True:
+                x = src[i]; i += 1; n += x
+                if x != 255: break
+        out += src[i:i + n]; i += n
+        if i >= len(src): break
+        off = src[i] | src[i + 1] << 8; i += 2
+        m = t & 15
+        if m == 15:
+            while True:
+                x = src[i]; i += 1; m += x
+                if x != 255: break
+        m += 4
+        for _ in range(m): out.append(out[-off])
+    return bytes(out)
+try:
+    data = json.loads(unlz4(open(sys.argv[1], "rb").read()))
+    urls = [e.get("url", "") for w in data["windows"] for t in w["tabs"] for e in t["entries"][-1:]]
+    print("yes" if any("music.youtube.com" in u for u in urls) else "no")
+except Exception:
+    print("yes")
+PY
+)
+  if [[ $has_tab == no ]]; then
+    zen-browser --profile "$profile" --name ytmusic "$url" >/dev/null 2>&1 &
+  fi
   [[ ${1:-} == focus ]] && hyprctl dispatch 'hl.dsp.focus({ window = "class:ytmusic" })' >/dev/null
   exit 0
 fi
@@ -26,4 +62,10 @@ rm -f "$profile"/sessionstore.jsonlz4 \
       "$profile"/zen-sessions.jsonlz4 \
       "$profile"/sessionstore-backups/*
 
-exec zen-browser --new-instance --profile "$profile" --name ytmusic "$url"
+# Marionette (local only) lets skyyytlike click the page's own like button, so
+# liking from the bar updates the page without a reload.
+echo 'user_pref("marionette.port", 28281);' > "$profile/user.js.mn"
+grep -qs 'marionette.port' "$profile/user.js" || cat "$profile/user.js.mn" >> "$profile/user.js"
+rm -f "$profile/user.js.mn"
+
+exec zen-browser --new-instance --marionette --profile "$profile" --name ytmusic "$url"

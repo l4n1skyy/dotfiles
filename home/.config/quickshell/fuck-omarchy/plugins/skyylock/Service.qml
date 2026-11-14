@@ -203,7 +203,7 @@ Item {
     enteredPassword = ""
     pendingPassword = ""
     failedAttempts += 1
-    failureMessage = "YOU SHALL NOT PASS D:<"
+    failureMessage = "YOU SHALL NOT PASS >:("
     failureMessageTimer.restart()
     runWake()
   }

@@ -159,8 +159,8 @@ Item {
 
       Text {
         textFormat: Text.PlainText
-        text: root.authenticatingPassword ? "checking…" : root.hintText
-        color: "#cba6f7"
+        text: root.errorState ? root.failureMessage : root.hintText
+        color: root.errorState ? "#f38ba8" : "#cba6f7"
         font.family: "CozetteVector"
         font.pixelSize: 26
         horizontalAlignment: Text.AlignHCenter

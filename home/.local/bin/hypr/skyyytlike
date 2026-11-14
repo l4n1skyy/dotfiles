@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+"""skyyytlike: like / unlike a YouTube Music track using the login of the
+zen-youtube-music profile (no extra packages, no browser automation).
+
+  skyyytlike status VIDEO_ID   prints LIKE or INDIFFERENT (or DISLIKE)
+  skyyytlike toggle VIDEO_ID   like if not liked, otherwise remove the like;
+                               prints the new state
+"""
+import hashlib, json, os, shutil, socket, sqlite3, sys, tempfile, time, urllib.request
+
+PROFILE = os.path.expanduser("~/.config/zen-youtube-music")
+BASE = "https://music.youtube.com/youtubei/v1/"
+ORIGIN = "https://music.youtube.com"
+
+# --- Preferred path: drive the real YouTube Music page over Marionette --------
+# skyyytmusic starts the window with Marionette on this port, so the page's own
+# like button is read and clicked: its heart updates instantly, no reload.
+MN_PORT = 28281
+PAGE_JS = """
+const r = document.querySelector('ytmusic-player-bar ytmusic-like-button-renderer');
+if (r) {
+  if (arguments[0]) (r.querySelector('#button-shape-like button') || r.querySelector('#like')).click();
+  return r.getAttribute('like-status') || 'INDIFFERENT';
+}
+const v = document.querySelector('segmented-like-dislike-button-view-model like-button-view-model button');
+if (!v) return null;
+if (arguments[0]) v.click();
+return v.getAttribute('aria-pressed') === 'true' ? 'LIKE' : 'INDIFFERENT';
+"""
+
+def _mn_read(sock):
+    buf = b""
+    while b":" not in buf:
+        buf += sock.recv(1)
+    n = int(buf.split(b":")[0])
+    data = buf.split(b":", 1)[1]
+    while len(data) < n:
+        data += sock.recv(n - len(data))
+    return json.loads(data)
+
+def _mn_send(sock, i, name, params):
+    msg = json.dumps([0, i, name, params])
+    sock.sendall(f"{len(msg.encode())}:{msg}".encode())
+    while True:
+        r = _mn_read(sock)
+        if isinstance(r, list) and r[0] == 1 and r[1] == i:
+            if r[2]:
+                raise RuntimeError(r[2])
+            return r[3]
+
+def page(click):
+    """Returns the page's like status (after clicking if asked), None if the
+    page has no like button, raises if Marionette isn't reachable."""
+    sock = socket.create_connection(("127.0.0.1", MN_PORT), 3)
+    sock.settimeout(8)
+    try:
+        _mn_read(sock)  # greeting
+        _mn_send(sock, 1, "WebDriver:NewSession", {"capabilities": {}})
+        try:
+            r = _mn_send(sock, 2, "WebDriver:ExecuteScript", {"script": PAGE_JS, "args": [click]})
+        finally:
+            try: _mn_send(sock, 3, "WebDriver:DeleteSession", {})
+            except Exception: pass
+        return r.get("value") if isinstance(r, dict) else r
+    finally:
+        sock.close()
+
+def cookies():
+    tmp = tempfile.mkdtemp()
+    try:
+        for ext in ("", "-wal", "-shm"):
+            src = f"{PROFILE}/cookies.sqlite{ext}"
+            if os.path.exists(src):
+                shutil.copy(src, f"{tmp}/c.sqlite{ext}")
+        db = sqlite3.connect(f"{tmp}/c.sqlite")
+        rows = db.execute("select name, value from moz_cookies where host like '%youtube.com'").fetchall()
+        return dict(rows)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+def call(endpoint, body):
+    ck = cookies()
+    sid = ck.get("SAPISID") or ck.get("__Secure-3PAPISID")
+    if not sid:
+        sys.exit("not logged in to YouTube Music")
+    ts = str(int(time.time()))
+    sig = hashlib.sha1(f"{ts} {sid} {ORIGIN}".encode()).hexdigest()
+    body = dict(body, context={"client": {"clientName": "WEB_REMIX", "clientVersion": "1." + time.strftime("%Y%m%d") + ".01.00", "hl": "en"}})
+    req = urllib.request.Request(BASE + endpoint + "?prettyPrint=false", json.dumps(body).encode(), {
+        "Content-Type": "application/json",
+        "Authorization": f"SAPISIDHASH {ts}_{sig}",
+        "Cookie": "; ".join(f"{k}={v}" for k, v in ck.items()),
+        "Origin": ORIGIN, "X-Origin": ORIGIN, "Referer": ORIGIN + "/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0",
+        "X-Goog-AuthUser": "0",
+    })
+    return json.load(urllib.request.urlopen(req, timeout=10))
+
+def find(obj, key):
+    if isinstance(obj, dict):
+        if key in obj: return obj[key]
+        for v in obj.values():
+            r = find(v, key)
+            if r is not None: return r
+    elif isinstance(obj, list):
+        for v in obj:
+            r = find(v, key)
+            if r is not None: return r
+
+def status(vid):
+    import base64, urllib.parse
+    data = call("next", {"videoId": vid, "isAudioOnly": True})
+    found = []
+    for m in data.get("frameworkUpdates", {}).get("entityBatchUpdate", {}).get("mutations", []):
+        e = m.get("payload", {}).get("likeStatusEntity")
+        if e and e.get("likeStatus"):
+            found.append(e)
+    for e in found:  # entity key is base64 of a protobuf containing the video id
+        try:
+            raw = base64.urlsafe_b64decode(urllib.parse.unquote(e["key"]) + "==")
+        except Exception:
+            continue
+        if vid.encode() in raw:
+            return e["likeStatus"].replace("LIKE_STATUS_", "")
+    st = find(data.get("playerOverlays", {}), "likeStatus")
+    return (st or "INDIFFERENT").replace("LIKE_STATUS_", "")
+
+def main():
+    if len(sys.argv) != 3 or sys.argv[1] not in ("status", "toggle"):
+        sys.exit(__doc__)
+    cmd, vid = sys.argv[1:]
+    try:
+        st = page(cmd == "toggle")
+        if st:
+            if cmd == "toggle":
+                time.sleep(0.4)
+                st = page(False) or st
+            print(st.replace("LIKE_STATUS_", "")); return
+    except Exception:
+        pass  # window not started with Marionette: fall back to the API
+    cur = status(vid)
+    if cmd == "status":
+        print(cur); return
+    new = "INDIFFERENT" if cur == "LIKE" else "LIKE"
+    call("like/" + ("removelike" if cur == "LIKE" else "like"), {"target": {"videoId": vid}})
+    print(new)
+
+main()

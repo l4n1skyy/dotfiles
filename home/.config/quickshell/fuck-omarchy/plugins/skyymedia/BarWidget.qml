@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import qs.Ui
 import qs.Commons
 
@@ -50,7 +51,15 @@ BarWidget {
     return edge
   }
 
+  // While this module is being dragged, its title keeps a fixed width so the
+  // ghost and the drop marker do not jump around; it re-measures on drop.
+  readonly property bool beingDragged: bar !== null && bar !== undefined
+    && bar.barDragSource !== null && bar.barDragSource !== undefined
+    && bar.barDragSource.activeItem === root
+  readonly property real dragWidth: Style.space(160)
+
   function measure() {
+    if (beingDragged) return
     var edge = centerEdge()
     if (!isFinite(edge)) return
     var start = titleClip.mapToItem(null, 0, 0).x
@@ -61,8 +70,53 @@ BarWidget {
     interval: 500
     repeat: true
     triggeredOnStart: true
-    running: root.visible && root.showTitle
+    running: root.visible && root.showTitle && !root.beingDragged
     onTriggered: root.measure()
+  }
+  // YouTube Music like button: only for tracks playing on music.youtube.com.
+  // The video id comes from the MPRIS url; skyyytlike talks to YouTube Music
+  // with the login of the zen-youtube-music profile.
+  readonly property string trackUrl: player && player.metadata ? (player.metadata["xesam:url"] || "") : ""
+  readonly property string videoId: {
+    var m = /^https:\/\/music\.youtube\.com\/watch\?(?:.*&)?v=([\w-]{11})/.exec(trackUrl)
+    return m ? m[1] : ""
+  }
+  property bool liked: false
+  property bool likeBusy: false
+  readonly property string likeBin: Quickshell.env("HOME") + "/.local/bin/hypr/skyyytlike"
+  onVideoIdChanged: { liked = false; if (videoId !== "") likeProc.run("status") }
+
+  // Re-check every few seconds so likes made in the browser show up too.
+  Timer {
+    interval: 3000
+    repeat: true
+    running: root.visible && root.videoId !== "" && !root.likeBusy
+    onTriggered: likeProc.run("status")
+  }
+
+  Process {
+    id: likeProc
+    property string mode: "status"
+    property string forId: ""
+    property bool pendingToggle: false
+    stdout: StdioCollector {
+      onStreamFinished: {
+        if (likeProc.forId === root.videoId) root.liked = text.trim() === "LIKE"
+        if (likeProc.pendingToggle) {
+          likeProc.pendingToggle = false
+          likeProc.run("toggle")
+        } else {
+          root.likeBusy = false
+        }
+      }
+    }
+    function run(m) {
+      if (running) { if (m === "toggle") pendingToggle = true; return }
+      mode = m
+      forId = root.videoId
+      command = [root.likeBin, m, root.videoId]
+      running = true
+    }
   }
   readonly property bool playing: player !== null && player.isPlaying === true
   readonly property bool hideWhenIdle: setting("hideWhenIdle", true)
@@ -125,10 +179,17 @@ BarWidget {
       onPressed: root.act("next")
     }
 
+    Btn {
+      visible: root.videoId !== ""
+      glyph: root.liked ? "♥" : "♡"
+      enabledBtn: !root.likeBusy
+      onPressed: { root.likeBusy = true; root.liked = !root.liked; likeProc.run("toggle") }
+    }
+
     Item {
       id: titleClip
       visible: root.showTitle && root.title !== ""
-      width: Math.min(root.maxTitleWidth > 0 ? root.maxTitleWidth : Infinity, root.freeWidth, titleText.implicitWidth)
+      width: Math.min(root.maxTitleWidth > 0 ? root.maxTitleWidth : Infinity, root.beingDragged ? root.dragWidth : root.freeWidth, titleText.implicitWidth)
       height: root.barSize
       clip: true
 
@@ -148,7 +209,13 @@ BarWidget {
         font.family: root.bar ? root.bar.fontFamily : ""
         font.pixelSize: Style.font.body
         property bool needsScroll: implicitWidth > titleClip.width
-        NumberAnimation on x {
+        // The marquee animates scrollX; x is bound so it snaps back to 0
+        // whenever the text fits or the track changes (an Animation on x
+        // leaves x stranded wherever it stopped).
+        property real scrollX: 0
+        x: needsScroll ? scrollX : 0
+        NumberAnimation on scrollX {
+          id: marquee
           running: titleText.needsScroll
           loops: Animation.Infinite
           duration: Math.max(6000, titleText.implicitWidth * 25)
@@ -156,6 +223,7 @@ BarWidget {
           to: -titleText.implicitWidth
           easing.type: Easing.Linear
         }
+        onTextChanged: if (marquee.running) { marquee.restart() }
       }
     }
   }

@@ -36,6 +36,9 @@
       ],
       "right": [
         {
+          "id": "fuck-omarchy.tray"
+        },
+        {
           "id": "skyystats",
           "type": "command",
           "exec": "~/.config/fuck-omarchy/bar/scripts/skyystats",
@@ -43,9 +46,6 @@
           "horizontalMargin": 5,
           "onClick": "fuck-omarchy-launch-or-focus-tui btop",
           "tooltip": "CPU / GPU / memory"
-        },
-        {
-          "id": "fuck-omarchy.tray"
         },
         {
           "exec": "~/.config/fuck-omarchy/bar/scripts/autostart",

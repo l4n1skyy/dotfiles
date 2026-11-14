@@ -41,7 +41,8 @@
     "/^set -e\ncd '/home/l4n1skyy/Shared/03 AREAS/42kl-piscine-0426'\nbash -n scripts/prep-code scripts/prep-main scripts/prep-files scripts/prep-header scripts/prep-norminette$/": {
       "approve": true,
       "matchCommandLine": true
-    }
+    },
+    "/^node --check static/app\\.js$/": true
   },
   "chat.agent.maxRequests": 50,
   "chat.viewSessions.orientation": "stacked",
