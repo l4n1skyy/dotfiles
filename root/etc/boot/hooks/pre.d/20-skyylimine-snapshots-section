@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# limine pre-hook: give limine-snapper-sync / limine-entry-tool / limine-install the layout
+# they expect, before they read limine.conf.
+#
+# The boot menu shows the newest snapshot as the last entry of /+OS (Arch Linux, Windows,
+# snapshot-latest), with no Snapshots header. limine-snapper-sync only knows where to write
+# its snapshot entries from a top-level "/Snapshots" section, so this moves //snapshot-latest
+# out of /+OS into a trailing /+Snapshots section (or adds an empty one). The post-hooks put
+# it back afterwards: 40 layout, 50 flatten, 60-skyylimine-snapshot-in-os.
+# Usage: 20-skyylimine-snapshots-section [limine.conf]  (default: $ESP_PATH/limine.conf)
+
+set -euo pipefail
+
+conf="${1:-${ESP_PATH:-/boot}/limine.conf}"
+[[ -f "$conf" ]] || exit 0
+# Already in the tools' layout
+grep -q -E '^/\+?Snapshots[[:space:]]*$' "$conf" && exit 0
+mid="$(cat /etc/machine-id 2>/dev/null || true)"
+
+tmp="$(mktemp "$(dirname "$conf")/.limine.conf.XXXXXX")"
+trap 'rm -f "$tmp"' EXIT
+
+awk -v mid="$mid" '
+function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
+function secname(s) { sub(/^\/\+?/, "", s); return trim(s) }
+function depth(s,   m) { match(s, /^[[:space:]]*\/+/); m = substr(s, RSTART, RLENGTH); gsub(/[^\/]/, "", m); return length(m) }
+function entname(s) { s = trim(s); sub(/^\/+\+?/, "", s); return trim(s) }
+{ L[NR] = $0 }
+END {
+    ns = 0
+    for (i = 1; i <= NR; i++) if (L[i] ~ /^\/[^\/]/) { ns++; sstart[ns] = i }
+    for (s = 1; s <= ns; s++) send[s] = (s < ns ? sstart[s + 1] - 1 : NR)
+
+    # The OS section is the one carrying this machine-id (fallback: named "OS")
+    os = 0
+    for (s = 1; s <= ns && !os; s++)
+        for (i = sstart[s] + 1; i <= send[s] && L[i] !~ /^[[:space:]]*\/\//; i++)
+            if (mid != "" && L[i] ~ ("^[[:space:]]*comment:[[:space:]]*machine-id=" mid)) os = s
+    for (s = 1; s <= ns && !os; s++) if (secname(L[sstart[s]]) == "OS") os = s
+    if (!os) { for (i = 1; i <= NR; i++) print L[i]; exit }
+
+    # Everything but the //snapshot-latest entry (and anything nested under it) stays put
+    insnap = 0; nsnap = 0
+    for (i = 1; i <= NR; i++) {
+        if (i > sstart[os] && i <= send[os] && L[i] ~ /^[[:space:]]*\/\//) {
+            if (depth(L[i]) == 2) insnap = (entname(L[i]) == "snapshot-latest")
+        } else if (i > send[os] || i <= sstart[os]) insnap = 0
+        if (insnap) snap[++nsnap] = L[i]; else print L[i]
+    }
+    print "/+Snapshots"
+    for (i = 1; i <= nsnap; i++) print snap[i]
+}
+' "$conf" > "$tmp"
+
+# Sanity: a pure move (same lines, plus the one /+Snapshots header), unless there was no OS section
+if ! grep -q -x '/+Snapshots' "$tmp"; then exit 0; fi
+if ! cmp -s <(sort "$conf") <(grep -v -x '/+Snapshots' "$tmp" | sort); then
+    echo "snapshots-section: result failed sanity checks, leaving $conf alone" >&2
+    exit 1
+fi
+mv -f "$tmp" "$conf"
+sync -f "$conf" 2>/dev/null || sync
+echo "snapshots-section: moved snapshot-latest to /+Snapshots for the limine tools in $conf"

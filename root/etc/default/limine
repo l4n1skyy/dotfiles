@@ -8,10 +8,14 @@ KERNEL_CMDLINE[default]+=" quiet splash loglevel=0 systemd.show_status=false rd.
 ENABLE_UKI=yes
 CUSTOM_UKI_NAME="arch"
 
+# Keep EFI/BOOT/BOOTX64.EFI (a copy of Limine) updated: the firmware boots through that
+# path ("HDD0" is first in the UEFI boot order), so the file must stay
 ENABLE_LIMINE_FALLBACK=yes
 
-# Find and add other bootloaders
-FIND_BOOTLOADERS=yes
+# Don't add other bootloaders (systemd-boot, rEFInd, "EFI fallback") to the menu: the only one
+# here is EFI/BOOT/BOOTX64.EFI, i.e. Limine itself. Windows has its own entry under /+OS, and
+# 40-skyylimine-menu-layout drops a stray "EFI fallback" entry anyway
+FIND_BOOTLOADERS=no
 
 
 MAX_SNAPSHOT_ENTRIES=1

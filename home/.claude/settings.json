@@ -1,5 +1,8 @@
 {
   "theme": "custom:omarchy",
+  "permissions": {
+    "additionalDirectories": ["/mnt/shared"]
+  },
   "modelSettings": {
     "claude-opus-5-5": {
       "effortLevel": "xhigh"

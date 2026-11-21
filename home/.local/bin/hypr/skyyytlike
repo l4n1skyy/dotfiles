@@ -12,58 +12,30 @@ PROFILE = os.path.expanduser("~/.config/zen-youtube-music")
 BASE = "https://music.youtube.com/youtubei/v1/"
 ORIGIN = "https://music.youtube.com"
 
-# --- Preferred path: drive the real YouTube Music page over Marionette --------
-# skyyytmusic starts the window with Marionette on this port, so the page's own
-# like button is read and clicked: its heart updates instantly, no reload.
-MN_PORT = 28281
-PAGE_JS = """
-const r = document.querySelector('ytmusic-player-bar ytmusic-like-button-renderer');
-if (r) {
-  if (arguments[0]) (r.querySelector('#button-shape-like button') || r.querySelector('#like')).click();
-  return r.getAttribute('like-status') || 'INDIFFERENT';
-}
-const v = document.querySelector('segmented-like-dislike-button-view-model like-button-view-model button');
-if (!v) return null;
-if (arguments[0]) v.click();
-return v.getAttribute('aria-pressed') === 'true' ? 'LIKE' : 'INDIFFERENT';
-"""
-
-def _mn_read(sock):
-    buf = b""
-    while b":" not in buf:
-        buf += sock.recv(1)
-    n = int(buf.split(b":")[0])
-    data = buf.split(b":", 1)[1]
-    while len(data) < n:
-        data += sock.recv(n - len(data))
-    return json.loads(data)
-
-def _mn_send(sock, i, name, params):
-    msg = json.dumps([0, i, name, params])
-    sock.sendall(f"{len(msg.encode())}:{msg}".encode())
-    while True:
-        r = _mn_read(sock)
-        if isinstance(r, list) and r[0] == 1 and r[1] == i:
-            if r[2]:
-                raise RuntimeError(r[2])
-            return r[3]
+# --- Preferred path: the real YouTube Music page, through the bridge ----------
+# skyyytmusic loads a small extension into the window whose native host listens
+# on this socket, so the page's own like button is read and clicked: its heart
+# updates instantly, no reload. (Not Marionette: with it YouTube stops
+# streaming after one minute.)
+BRIDGE = os.path.join(os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}", "skyyytmusic.sock")
 
 def page(click):
     """Returns the page's like status (after clicking if asked), None if the
-    page has no like button, raises if Marionette isn't reachable."""
-    sock = socket.create_connection(("127.0.0.1", MN_PORT), 3)
-    sock.settimeout(8)
-    try:
-        _mn_read(sock)  # greeting
-        _mn_send(sock, 1, "WebDriver:NewSession", {"capabilities": {}})
-        try:
-            r = _mn_send(sock, 2, "WebDriver:ExecuteScript", {"script": PAGE_JS, "args": [click]})
-        finally:
-            try: _mn_send(sock, 3, "WebDriver:DeleteSession", {})
-            except Exception: pass
-        return r.get("value") if isinstance(r, dict) else r
-    finally:
-        sock.close()
+    page has no like button, raises if the bridge isn't reachable."""
+    with socket.socket(socket.AF_UNIX) as sock:
+        sock.settimeout(8)
+        sock.connect(BRIDGE)
+        sock.sendall(json.dumps({"click": click}).encode() + b"\n")
+        buf = b""
+        while not buf.endswith(b"\n"):
+            chunk = sock.recv(4096)
+            if not chunk:
+                break
+            buf += chunk
+    r = json.loads(buf)
+    if r.get("error"):
+        raise RuntimeError(r["error"])
+    return r.get("value")
 
 def cookies():
     tmp = tempfile.mkdtemp()
@@ -137,7 +109,7 @@ def main():
                 st = page(False) or st
             print(st.replace("LIKE_STATUS_", "")); return
     except Exception:
-        pass  # window not started with Marionette: fall back to the API
+        pass  # bridge not running (window closed or extension not loaded): fall back to the API
     cur = status(vid)
     if cmd == "status":
         print(cur); return

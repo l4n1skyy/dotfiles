@@ -1,0 +1,9 @@
+{
+  "manifest_version": 2,
+  "name": "skyyytmusic bridge",
+  "version": "1.0",
+  "description": "Lets skyyytlike read and press the YouTube Music like button in this window, without WebDriver.",
+  "browser_specific_settings": { "gecko": { "id": "skyyytmusic@skyy" } },
+  "permissions": ["nativeMessaging", "tabs", "https://music.youtube.com/*"],
+  "background": { "scripts": ["background.js"] }
+}

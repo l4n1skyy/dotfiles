@@ -2,13 +2,21 @@
 # limine post-hook: keep the custom boot menu layout after every limine-entry-tool /
 # limine-snapper-sync update (runs before 50-snapshot-latest and config enrollment):
 #
-#   /+OS        FrAnkEnArch (kernel-id=linux-cachyos-bore, the default), any other
-#               kernels, then Windows
-#   /+Snapshots always last (50-snapshot-latest flattens it to "snapshot-latest")
+#   /+OS        Arch Linux (kernel-id=linux-cachyos-bore, the default), any other
+#               kernels, Windows, then snapshot-latest if it is already in here
+#   /+Snapshots always last (50-snapshot-latest flattens it to "snapshot-latest", then
+#               60-skyylimine-snapshot-in-os moves that entry into /+OS and drops the header)
+#
+# The menu the user sees is OS > Arch Linux, Windows, snapshot-latest. limine-snapper-sync
+# needs a top-level /Snapshots section to write into, so pre.d/20-skyylimine-snapshots-section
+# moves snapshot-latest back out to /+Snapshots before every tool run.
 #
 # Kernel entries are matched by their "comment: kernel-id=" line, so the tools can name
 # them however they like. Kernel sections the tools create elsewhere (e.g. "/+Omarchy")
-# are merged into /+OS. Usage: 40-menu-layout [limine.conf]  (default: $ESP_PATH/limine.conf)
+# are merged into /+OS. A top-level "EFI fallback" entry (limine-install adds one for
+# EFI/BOOT/BOOTX64.EFI when FIND_BOOTLOADERS=yes) is dropped: that file is a copy of Limine
+# itself, so the entry only reopens this menu.
+# Usage: 40-skyylimine-menu-layout [limine.conf]  (default: $ESP_PATH/limine.conf)
 
 set -euo pipefail
 
@@ -23,8 +31,18 @@ awk -v mid="$mid" '
 function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
 function secname(s) { sub(/^\/\+?/, "", s); return trim(s) }
 function display(kid, name) {
-    if (kid == "linux-cachyos-bore") return "FrAnkEnArch"
+    if (kid == "linux-cachyos-bore") return "Arch Linux"
     return name
+}
+# A top-level entry named "EFI fallback", or any single entry (no sub-entries) that boots
+# the removable-media path EFI/BOOT/BOOT<arch>.EFI
+function efi_fallback(s,   i) {
+    if (tolower(secname(L[sstart[s]])) == "efi fallback") return 1
+    for (i = sstart[s] + 1; i <= send[s]; i++) {
+        if (L[i] ~ /^[[:space:]]*\/\//) return 0
+        if (toupper(L[i]) ~ /^[[:space:]]*PATH:[[:space:]]*BOOT\(\):\/EFI\/BOOT\/BOOT[A-Z0-9]+\.EFI[[:space:]]*$/) return 1
+    }
+    return 0
 }
 { L[NR] = $0 }
 END {
@@ -47,6 +65,7 @@ END {
     for (s = 1; s <= ns; s++) {
         nm = secname(L[sstart[s]])
         if (nm == "Snapshots") { snap = s; continue }
+        if (s != os && efi_fallback(s)) continue
         is_kernel_sec = 0
         for (i = sstart[s]; i <= send[s]; i++) if (L[i] ~ /comment:[[:space:]]*kernel-id=/) is_kernel_sec = 1
         if (s != os && !is_kernel_sec && nm !~ /^[Ww]indows/) { keep[s] = 1; continue }
@@ -62,10 +81,12 @@ END {
             if (L[i] ~ /^[[:space:]]*\/\/[^\/]/) {
                 ne++; cur = ne; ename[ne] = trim(substr(trim(L[i]), 3)); sub(/^\+/, "", ename[ne])
                 ekid[ne] = ""; elines[ne] = ""
+                # The snapshot entry also carries a kernel-id; keep it out of the kernel dedup
+                esnap[ne] = (ename[ne] == "snapshot-latest")
                 continue
             }
             if (!cur) { if (s == os) hl[++nh] = L[i]; continue }
-            if (L[i] ~ /comment:[[:space:]]*kernel-id=/) { k = L[i]; sub(/.*kernel-id=/, "", k); ekid[cur] = trim(k) }
+            if (L[i] ~ /comment:[[:space:]]*kernel-id=/ && !esnap[cur]) { k = L[i]; sub(/.*kernel-id=/, "", k); ekid[cur] = trim(k) }
             elines[cur] = elines[cur] L[i] "\n"
         }
     }
@@ -83,8 +104,9 @@ END {
     for (h = 1; h <= nh; h++) print hl[h]
     if ("linux-cachyos-bore" in best) { e = best["linux-cachyos-bore"]; done[e] = 1; printf "  //%s\n%s", display(ekid[e], ename[e]), elines[e] }
     for (e = 1; e <= ne; e++) if (ekid[e] != "" && best[ekid[e]] == e && !done[e]) { done[e] = 1; printf "  //%s\n%s", display(ekid[e], ename[e]), elines[e] }
-    for (e = 1; e <= ne; e++) if (ekid[e] == "" && ename[e] !~ /^[Ww]indows/) printf "  //%s\n%s", ename[e], elines[e]
-    for (e = 1; e <= ne; e++) if (ekid[e] == "" && ename[e] ~ /^[Ww]indows/) printf "  //%s\n%s", ename[e], elines[e]
+    for (e = 1; e <= ne; e++) if (ekid[e] == "" && !esnap[e] && ename[e] !~ /^[Ww]indows/) printf "  //%s\n%s", ename[e], elines[e]
+    for (e = 1; e <= ne; e++) if (ekid[e] == "" && !esnap[e] && ename[e] ~ /^[Ww]indows/) printf "  //%s\n%s", ename[e], elines[e]
+    for (e = 1; e <= ne; e++) if (esnap[e]) printf "  //%s\n%s", ename[e], elines[e]
 
     for (s = 1; s <= ns; s++) if (keep[s]) for (i = sstart[s]; i <= send[s]; i++) if (trim(L[i]) != "") print L[i]
     if (snap) for (i = sstart[snap]; i <= send[snap]; i++) print L[i]
@@ -95,7 +117,8 @@ END {
 snaps() { awk '/^\/\+?Snapshots[[:space:]]*$/ {s = 1; print; next} s && /^\/[^\/]/ {s = 0} s' "$1"; }
 os_kids() { awk '/^\/\+?Snapshots[[:space:]]*$/ {s = 1; next} s && /^\/[^\/]/ {s = 0} !s' "$1" | grep -o 'kernel-id=[^[:space:]]*' | sort -u; }
 if [[ ! -s "$tmp" ]] || ! cmp -s <(os_kids "$conf") <(os_kids "$tmp") || ! cmp -s <(snaps "$conf") <(snaps "$tmp") \
-    || [[ $(grep -c 'bootmgfw.efi' "$conf") != $(grep -c 'bootmgfw.efi' "$tmp") ]]; then
+    || [[ $(grep -c 'bootmgfw.efi' "$conf") != $(grep -c 'bootmgfw.efi' "$tmp") ]] \
+    || [[ $(grep -c '//snapshot-latest' "$conf") != $(grep -c '//snapshot-latest' "$tmp") ]]; then
     echo "menu-layout: result failed sanity checks, leaving $conf alone" >&2
     exit 1
 fi

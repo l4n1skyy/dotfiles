@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+"""skyyytmusic native messaging host.
+
+The YouTube Music Zen window starts this for its skyyytmusic bridge extension
+and keeps it running while the window is open. It listens on
+$XDG_RUNTIME_DIR/skyyytmusic.sock: a client (skyyytlike) sends one JSON line
+{"click": true|false} and gets one JSON line back, {"value": "LIKE" |
+"INDIFFERENT" | "DISLIKE" | null} or {"error": "..."}.
+"""
+import json, os, socket, struct, sys, threading
+
+SOCK = os.path.join(os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}", "skyyytmusic.sock")
+
+out_lock = threading.Lock()
+id_lock = threading.Lock()
+waiting = {}  # request id -> [Event, reply]
+next_id = 0
+
+
+def to_browser(msg):
+    data = json.dumps(msg).encode()
+    with out_lock:
+        sys.stdout.buffer.write(struct.pack("=I", len(data)) + data)
+        sys.stdout.buffer.flush()
+
+
+def from_browser():
+    """Replies from the extension. End of input means the window closed."""
+    inp = sys.stdin.buffer
+    while True:
+        head = inp.read(4)
+        if len(head) < 4:
+            break
+        msg = json.loads(inp.read(struct.unpack("=I", head)[0]))
+        slot = waiting.get(msg.get("id"))
+        if slot:
+            slot[1] = msg
+            slot[0].set()
+    try:
+        os.unlink(SOCK)
+    except OSError:
+        pass
+    os._exit(0)
+
+
+def serve(conn):
+    global next_id
+    with conn:
+        try:
+            conn.settimeout(5)
+            buf = b""
+            while b"\n" not in buf:
+                chunk = conn.recv(4096)
+                if not chunk:
+                    return
+                buf += chunk
+            req = json.loads(buf.split(b"\n", 1)[0])
+            with id_lock:
+                next_id += 1
+                rid = next_id
+            slot = waiting[rid] = [threading.Event(), None]
+            to_browser({"id": rid, "click": req.get("click") is True})
+            reply = slot[1] if slot[0].wait(5) else {"error": "no reply from the YouTube Music window"}
+            waiting.pop(rid, None)
+            reply.pop("id", None)
+            conn.sendall(json.dumps(reply).encode() + b"\n")
+        except (OSError, ValueError):
+            pass
+
+
+def main():
+    os.umask(0o077)
+    try:
+        os.unlink(SOCK)
+    except FileNotFoundError:
+        pass
+    srv = socket.socket(socket.AF_UNIX)
+    srv.bind(SOCK)
+    srv.listen()
+    threading.Thread(target=from_browser, daemon=True).start()
+    while True:
+        conn, _ = srv.accept()
+        threading.Thread(target=serve, args=(conn,), daemon=True).start()
+
+
+main()

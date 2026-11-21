@@ -22,7 +22,7 @@ CLEANUP	(part of `up`)	Removes orphans, old package/AUR/mise/uv/micromamba cache
 CLEANUP	(part of `up`)	Keeps only the newest config backup (*.bak.*), newest /var/backups/pacnew dir, latest snapper snapshot pair
 CLEANUP	~/.local/state/fuck-omarchy/updates/	Summary of every update run (what changed, space freed)
 CLEANUP	pacdiff --sudo --backup	Merge leftover .pacnew files (offered at the end of `up`)
-SYSTEM	skyylimine  /  SUPER ALT SHIFT + L	Re-apply the custom Limine boot menu (FrAnkEnArch, Windows, snapshot-latest)
+SYSTEM	skyylimine  /  SUPER ALT SHIFT + L	Re-apply the custom Limine boot menu (OS > Arch Linux, Windows, snapshot-latest)
 SYSTEM	fuck-omarchy-restart-shell	Restart the Quickshell shell (refuses while locked)
 SYSTEM	SUPER ALT + A	Toggle autostart apps
 SYSTEM	SUPER ALT + I	Toggle idle lock
@@ -36,7 +36,7 @@ SHELL	~/.config/quickshell/fuck-omarchy/MODULARITY.md	The rules: plugins are fol
 DOTFILES	dotfiles	Copy configs listed in ~/Shared/03_AREAS/_DOTFILES/dotfiles.conf, scrub secrets, regenerate README
 DOTFILES	dotfiles --push [-m MSG]	Also commit and push to GitHub
 DOTFILES	dotfiles --dry-run  /  --edit	Preview changes / edit dotfiles.conf
-DATA	skyydb	Open my SQLite databases (vocab, workouts, finance, quotes, knowledge) in Datasette
+DATA	skyydb	Open my SQLite databases (HSK vocab, workouts, finance, quotes, thoughts) in Datasette
 DATA	skyydb restart | stop | sync | import FILE	Manage Datasette, sync vocab, import CSVs
 FILES	cdd  (terminal)	Fuzzy-jump to a directory in ~ or /mnt/shared
 FILES	SPACE + cd / cD  (nvim)	Same jump from Neovim, global / local

@@ -12,9 +12,17 @@
 # skyyytmusic focus   jump to the YouTube Music window (switching to its
 #                     workspace), or open it if it isn't running. Used by the
 #                     media title in the bar.
+# skyyytmusic open    the same, but go to workspace 8 first, so a fresh window
+#                     opens there (where the layout puts it at login). Used by
+#                     the "YouTube Music" app menu entry.
 
 profile="$HOME/.config/zen-youtube-music"
 url="https://music.youtube.com"
+
+if [[ ${1:-} == open ]]; then
+  hyprctl dispatch 'hl.dsp.focus({ workspace = "8" })' >/dev/null
+  set -- focus
+fi
 
 # Running? The profile lock is a symlink "host:+PID".
 pid=$(readlink "$profile/lock" 2>/dev/null | sed -n 's/.*+//p')
@@ -62,10 +70,23 @@ rm -f "$profile"/sessionstore.jsonlz4 \
       "$profile"/zen-sessions.jsonlz4 \
       "$profile"/sessionstore-backups/*
 
-# Marionette (local only) lets skyyytlike click the page's own like button, so
-# liking from the bar updates the page without a reload.
-echo 'user_pref("marionette.port", 28281);' > "$profile/user.js.mn"
-grep -qs 'marionette.port' "$profile/user.js" || cat "$profile/user.js.mn" >> "$profile/user.js"
-rm -f "$profile/user.js.mn"
+# Like-button bridge (~/.local/share/skyyytmusic): a small extension plus its
+# native messaging host, so skyyytlike presses the page's own like button and
+# liking from the bar updates the page at once. The extension loads unpacked
+# from a proxy file in the profile; user.js lets Zen pick it up from there,
+# unsigned and enabled. Firefox finds the host via ~/.mozilla/native-messaging-hosts.
+# Not Marionette (used until 2026-11-17): it makes the page see
+# navigator.webdriver = true, and YouTube then stops serving audio after the
+# first minute of every song.
+bridge="$HOME/.local/share/skyyytmusic"
+hosts="$HOME/.mozilla/native-messaging-hosts"
+mkdir -p "$profile/extensions" "$hosts"
+[[ $(cat "$profile/extensions/skyyytmusic@skyy" 2>/dev/null) == "$bridge/extension" ]] ||
+  printf '%s\n' "$bridge/extension" > "$profile/extensions/skyyytmusic@skyy"
+for pref in '"xpinstall.signatures.required", false' '"extensions.startupScanScopes", 1' '"extensions.autoDisableScopes", 14'; do
+  grep -qsF "user_pref($pref);" "$profile/user.js" || echo "user_pref($pref);" >> "$profile/user.js"
+done
+manifest="{\"name\": \"skyyytmusic\", \"description\": \"skyyytmusic like-button bridge\", \"path\": \"$bridge/host\", \"type\": \"stdio\", \"allowed_extensions\": [\"skyyytmusic@skyy\"]}"
+[[ $(cat "$hosts/skyyytmusic.json" 2>/dev/null) == "$manifest" ]] || printf '%s\n' "$manifest" > "$hosts/skyyytmusic.json"
 
-exec zen-browser --new-instance --marionette --profile "$profile" --name ytmusic "$url"
+exec zen-browser --new-instance --profile "$profile" --name ytmusic "$url"

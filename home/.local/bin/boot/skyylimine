@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 # Re-apply the custom Limine boot menu:
-#   OS:        FrAnkEnArch (CachyOS BORE kernel, default), Windows
-#   Snapshots: snapshot-latest
-# The same two root hooks run automatically after every kernel or snapshot update
-# (/etc/boot/hooks/post.d/); this is the manual trigger (SUPER+ALT+SHIFT+L / skyylimine).
+#   OS: Arch Linux (CachyOS BORE kernel, default), Windows, snapshot-latest
+#   (no Snapshots header; no "EFI fallback" entry: it only chainloads Limine itself, so
+#   40-skyylimine-menu-layout drops it)
+# The same root hooks run automatically around every kernel, snapshot or Limine update
+# (/etc/boot/hooks/{pre.d,post.d}/); this is the manual trigger (SUPER+ALT+SHIFT+L / skyylimine).
+# Runs them in the same order the tools do: the pre hook hands the tools their /+Snapshots
+# section, the post hooks arrange the menu, flatten the snapshot and move it into OS.
 
 set -euo pipefail
 
 config=/boot/limine.conf
-hooks=(/etc/boot/hooks/post.d/40-skyylimine-menu-layout /etc/boot/hooks/post.d/50-skyylimine-snapshot-latest)
+hooks=(
+	/etc/boot/hooks/pre.d/20-skyylimine-snapshots-section
+	/etc/boot/hooks/post.d/40-skyylimine-menu-layout
+	/etc/boot/hooks/post.d/50-skyylimine-snapshot-latest
+	/etc/boot/hooks/post.d/60-skyylimine-snapshot-in-os
+)
 
 notify() { notify-send "$@" 2>/dev/null || true; }
 

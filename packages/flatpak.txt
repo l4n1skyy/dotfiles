@@ -1,1 +1,2 @@
+com.pokemmo.PokeMMO
 com.usebottles.bottles

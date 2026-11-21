@@ -276,8 +276,9 @@ fill() {
             gtk-theme|icon-theme)
                    val="$(gsettings get org.gnome.desktop.interface "$key" 2>/dev/null | tr -d "'" || true)" ;;
             webapps)
-                   val="$(grep -h '^Name=' "$DOTFILES_DIR"/home/.local/share/applications/*.desktop 2>/dev/null \
-                          | cut -d= -f2- | sort -f | paste -sd, | sed 's/,/, /g' || true)" ;;
+                   # only real web apps (Chromium app windows), not other menu entries kept there
+                   val="$(grep -lE 'fuck-omarchy-launch-webapp|--app=' "$DOTFILES_DIR"/home/.local/share/applications/*.desktop 2>/dev/null \
+                          | xargs -r -d '\n' grep -h '^Name=' | cut -d= -f2- | sort -f | paste -sd, | sed 's/,/, /g' || true)" ;;
         esac
         [[ -n "$val" ]] || { printf '%s' "$whole"; return 1; }
         s="${s/"$whole"/"$val"}"
