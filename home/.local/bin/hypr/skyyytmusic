@@ -1,92 +1,34 @@
 #!/bin/bash
-# skyyytmusic: open YouTube Music in its own Zen window (profile zen-youtube-music,
-# class "ytmusic") without piling up tabs.
+# skyyytmusic: YouTube Music in Pear Desktop (AUR pear-desktop-bin, command
+# youtube-music, window class com.github.th-ch.youtube-music) on workspace 8.
+# The old Zen window is kept as a backup (not in use): skyyytmusic-zen/README.md.
 #
-# Zen restores the previous session on start and then also opens the URL, so every
-# login added one more YouTube Music tab. This forgets the saved tabs first, so the
-# window always starts with the single fresh tab. Logins and cookies are untouched.
-# If that Zen instance is already running it is left alone, and a YouTube Music tab
-# is only opened in it when none is open yet (read from the session file Zen keeps
-# up to date, so a tab in the background counts too).
-#
-# skyyytmusic focus   jump to the YouTube Music window (switching to its
-#                     workspace), or open it if it isn't running. Used by the
-#                     media title in the bar.
+# skyyytmusic         start Pear (login autostart, see layout.conf)
+# skyyytmusic focus   jump to the Pear window (switching to its workspace), or
+#                     start it if it isn't running. Used by the media title in the bar.
 # skyyytmusic open    the same, but go to workspace 8 first, so a fresh window
 #                     opens there (where the layout puts it at login). Used by
 #                     the "YouTube Music" app menu entry.
+#
+# Pear plugins this setup relies on (~/.config/YouTube Music/config.json):
+#   shortcuts    its MPRIS player carries the song URL, which gives the bar its heart
+#   api-server   127.0.0.1 only, client "skyyytlike" pre-authorised: the heart's likes
+#   do-not-track the ad blocker
+#   discord      Rich Presence through Vesktop (its arRPC socket)
+#   in-app-menu  Pear's menu bar drawn in the page, so the theme colours it too
+# Theme: ~/.config/YouTube Music/themes/github-dark.css (Options > Visual Tweaks > Theme).
+# Size: Chromium zoom 83% (View > Zoom Out/In; kept in Pear's Preferences file).
 
-profile="$HOME/.config/zen-youtube-music"
-url="https://music.youtube.com"
+class="com.github.th-ch.youtube-music"
 
-if [[ ${1:-} == open ]]; then
-  hyprctl dispatch 'hl.dsp.focus({ workspace = "8" })' >/dev/null
-  set -- focus
-fi
+running() { hyprctl clients -j 2>/dev/null | jq -e --arg c "$class" 'any(.[]; .class == $c)' >/dev/null; }
 
-# Running? The profile lock is a symlink "host:+PID".
-pid=$(readlink "$profile/lock" 2>/dev/null | sed -n 's/.*+//p')
-if [[ -n $pid ]] && kill -0 "$pid" 2>/dev/null; then
-  # Is a YouTube Music tab open? Unknown (no session file yet, unreadable) counts as yes: never add a second one.
-  has_tab=$(python3 - "$profile/sessionstore-backups/recovery.jsonlz4" <<'PY'
-import json, sys
-def unlz4(b):  # Mozilla's session files: "mozLz40\0", 4-byte size, one LZ4 block
-    src, out, i = b[12:], bytearray(), 0
-    while i < len(src):
-        t = src[i]; i += 1
-        n = t >> 4
-        if n == 15:
-            while True:
-                x = src[i]; i += 1; n += x
-                if x != 255: break
-        out += src[i:i + n]; i += n
-        if i >= len(src): break
-        off = src[i] | src[i + 1] << 8; i += 2
-        m = t & 15
-        if m == 15:
-            while True:
-                x = src[i]; i += 1; m += x
-                if x != 255: break
-        m += 4
-        for _ in range(m): out.append(out[-off])
-    return bytes(out)
-try:
-    data = json.loads(unlz4(open(sys.argv[1], "rb").read()))
-    urls = [e.get("url", "") for w in data["windows"] for t in w["tabs"] for e in t["entries"][-1:]]
-    print("yes" if any("music.youtube.com" in u for u in urls) else "no")
-except Exception:
-    print("yes")
-PY
-)
-  if [[ $has_tab == no ]]; then
-    zen-browser --profile "$profile" --name ytmusic "$url" >/dev/null 2>&1 &
+if [[ ${1:-} == open || ${1:-} == focus ]]; then
+  if running; then
+    hyprctl dispatch "hl.dsp.focus({ window = \"class:$class\" })" >/dev/null
+    exit 0
   fi
-  [[ ${1:-} == focus ]] && hyprctl dispatch 'hl.dsp.focus({ window = "class:ytmusic" })' >/dev/null
-  exit 0
+  [[ $1 == open ]] && hyprctl dispatch 'hl.dsp.focus({ workspace = "8" })' >/dev/null
 fi
 
-# Forget the saved tabs
-rm -f "$profile"/sessionstore.jsonlz4 \
-      "$profile"/zen-sessions.jsonlz4 \
-      "$profile"/sessionstore-backups/*
-
-# Like-button bridge (~/.local/share/skyyytmusic): a small extension plus its
-# native messaging host, so skyyytlike presses the page's own like button and
-# liking from the bar updates the page at once. The extension loads unpacked
-# from a proxy file in the profile; user.js lets Zen pick it up from there,
-# unsigned and enabled. Firefox finds the host via ~/.mozilla/native-messaging-hosts.
-# Not Marionette (used until 2026-11-17): it makes the page see
-# navigator.webdriver = true, and YouTube then stops serving audio after the
-# first minute of every song.
-bridge="$HOME/.local/share/skyyytmusic"
-hosts="$HOME/.mozilla/native-messaging-hosts"
-mkdir -p "$profile/extensions" "$hosts"
-[[ $(cat "$profile/extensions/skyyytmusic@skyy" 2>/dev/null) == "$bridge/extension" ]] ||
-  printf '%s\n' "$bridge/extension" > "$profile/extensions/skyyytmusic@skyy"
-for pref in '"xpinstall.signatures.required", false' '"extensions.startupScanScopes", 1' '"extensions.autoDisableScopes", 14'; do
-  grep -qsF "user_pref($pref);" "$profile/user.js" || echo "user_pref($pref);" >> "$profile/user.js"
-done
-manifest="{\"name\": \"skyyytmusic\", \"description\": \"skyyytmusic like-button bridge\", \"path\": \"$bridge/host\", \"type\": \"stdio\", \"allowed_extensions\": [\"skyyytmusic@skyy\"]}"
-[[ $(cat "$hosts/skyyytmusic.json" 2>/dev/null) == "$manifest" ]] || printf '%s\n' "$manifest" > "$hosts/skyyytmusic.json"
-
-exec zen-browser --new-instance --profile "$profile" --name ytmusic "$url"
+exec youtube-music >/dev/null 2>&1

@@ -1,0 +1,103 @@
+#!/bin/bash
+# skyyytmusic-zen: BACKUP, not in use since 2026-11-22 (YouTube Music runs in Pear
+# Desktop now: ~/.local/bin/hypr/skyyytmusic). Everything this old setup needs lives
+# in this folder; README.md here says how to bring it back (it recreates the Zen
+# profile by itself on first start).
+#
+# Open YouTube Music in its own Zen window (profile zen-youtube-music,
+# class "ytmusic") without piling up tabs.
+#
+# Zen restores the previous session on start and then also opens the URL, so every
+# login added one more YouTube Music tab. This forgets the saved tabs first, so the
+# window always starts with the single fresh tab. Logins and cookies are untouched.
+# If that Zen instance is already running it is left alone, and a YouTube Music tab
+# is only opened in it when none is open yet (read from the session file Zen keeps
+# up to date, so a tab in the background counts too).
+#
+# skyyytmusic-zen focus   jump to the YouTube Music window (switching to its
+#                         workspace), or open it if it isn't running.
+# skyyytmusic-zen open    the same, but go to workspace 8 first, so a fresh window
+#                         opens there. Used by the "YouTube Music (Zen backup)"
+#                         app menu entry (skyyytmusic-zen.desktop in this folder).
+
+profile="$HOME/.config/zen-youtube-music"
+url="https://music.youtube.com"
+
+if [[ ${1:-} == open ]]; then
+  hyprctl dispatch 'hl.dsp.focus({ workspace = "8" })' >/dev/null
+  set -- focus
+fi
+
+# Running? The profile lock is a symlink "host:+PID". It outlives a crash or a reboot, and by
+# then its number can belong to anything (once a thread of another program: "kill -0" said yes,
+# so nothing opened), so it only counts when that process really is Zen on this profile.
+pid=$(readlink "$profile/lock" 2>/dev/null | sed -n 's/.*+//p')
+running() { [[ -n $pid ]] && tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null | grep -qF -- "$profile"; }
+if ! running && [[ -L $profile/lock ]]; then
+  rm -f "$profile/lock"  # stale: Zen would think the profile is still in use and not start
+fi
+if running; then
+  # Is a YouTube Music tab open? Unknown (no session file yet, unreadable) counts as yes: never add a second one.
+  has_tab=$(python3 - "$profile/sessionstore-backups/recovery.jsonlz4" <<'PY'
+import json, sys
+def unlz4(b):  # Mozilla's session files: "mozLz40\0", 4-byte size, one LZ4 block
+    src, out, i = b[12:], bytearray(), 0
+    while i < len(src):
+        t = src[i]; i += 1
+        n = t >> 4
+        if n == 15:
+            while True:
+                x = src[i]; i += 1; n += x
+                if x != 255: break
+        out += src[i:i + n]; i += n
+        if i >= len(src): break
+        off = src[i] | src[i + 1] << 8; i += 2
+        m = t & 15
+        if m == 15:
+            while True:
+                x = src[i]; i += 1; m += x
+                if x != 255: break
+        m += 4
+        for _ in range(m): out.append(out[-off])
+    return bytes(out)
+try:
+    data = json.loads(unlz4(open(sys.argv[1], "rb").read()))
+    urls = [e.get("url", "") for w in data["windows"] for t in w["tabs"] for e in t["entries"][-1:]]
+    print("yes" if any("music.youtube.com" in u for u in urls) else "no")
+except Exception:
+    print("yes")
+PY
+)
+  if [[ $has_tab == no ]]; then
+    zen-browser --profile "$profile" --name ytmusic "$url" >/dev/null 2>&1 &
+  fi
+  [[ ${1:-} == focus ]] && hyprctl dispatch 'hl.dsp.focus({ window = "class:ytmusic" })' >/dev/null
+  exit 0
+fi
+
+# Forget the saved tabs
+rm -f "$profile"/sessionstore.jsonlz4 \
+      "$profile"/zen-sessions.jsonlz4 \
+      "$profile"/sessionstore-backups/*
+
+# Like-button bridge (bridge/ in this folder): a small extension plus its
+# native messaging host, so skyyytlike-zen presses the page's own like button and
+# liking from the bar updates the page at once. The extension loads unpacked
+# from a proxy file in the profile; user.js lets Zen pick it up from there,
+# unsigned and enabled. Firefox finds the host via ~/.mozilla/native-messaging-hosts.
+# Not Marionette (used until 2026-11-17): it makes the page see
+# navigator.webdriver = true, and YouTube then stops serving audio after the
+# first minute of every song.
+bridge="$(dirname "$(realpath "$0")")/bridge"
+hosts="$HOME/.mozilla/native-messaging-hosts"
+mkdir -p "$profile/extensions" "$hosts"
+[[ $(cat "$profile/extensions/skyyytmusic@skyy" 2>/dev/null) == "$bridge/extension" ]] ||
+  printf '%s\n' "$bridge/extension" > "$profile/extensions/skyyytmusic@skyy"
+for pref in '"xpinstall.signatures.required", false' '"extensions.startupScanScopes", 1' '"extensions.autoDisableScopes", 14' \
+            '"zen.view.compact.enable-at-startup", true'; do
+  grep -qsF "user_pref($pref);" "$profile/user.js" || echo "user_pref($pref);" >> "$profile/user.js"
+done
+manifest="{\"name\": \"skyyytmusic\", \"description\": \"skyyytmusic like-button bridge\", \"path\": \"$bridge/host\", \"type\": \"stdio\", \"allowed_extensions\": [\"skyyytmusic@skyy\"]}"
+[[ $(cat "$hosts/skyyytmusic.json" 2>/dev/null) == "$manifest" ]] || printf '%s\n' "$manifest" > "$hosts/skyyytmusic.json"
+
+exec zen-browser --new-instance --profile "$profile" --name ytmusic "$url"

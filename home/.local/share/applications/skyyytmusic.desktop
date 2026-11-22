@@ -1,10 +1,11 @@
 [Desktop Entry]
 Version=1.0
 Name=YouTube Music
-Comment=Open YouTube Music on workspace 8
+Comment=Pear Desktop on workspace 8
 Exec=/home/l4n1skyy/.local/bin/hypr/skyyytmusic open
 Terminal=false
 Type=Application
 Icon=/home/l4n1skyy/.local/share/applications/icons/YouTube Music.png
 Categories=AudioVideo;Audio;Player;
+StartupWMClass=com.github.th-ch.youtube-music
 StartupNotify=false

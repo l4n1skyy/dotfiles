@@ -291,7 +291,7 @@ repo_link() { # where an include spec lives in the repo; a glob links to its fol
     [[ "$spec" == /* ]] || spec="$HOME/$spec"
     p="$(repo_path "$spec")"
     case "$p" in *[*?[]*) p="${p%/*}" ;; esac
-    printf '%s' "$p"
+    printf '%s' "${p// /%20}"  # a space would end the Markdown link
 }
 
 count_files() { # files in the repo that came from one include spec

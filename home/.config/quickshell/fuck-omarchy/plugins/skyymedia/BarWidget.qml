@@ -73,11 +73,14 @@ BarWidget {
     running: root.visible && root.showTitle && !root.beingDragged
     onTriggered: root.measure()
   }
-  // YouTube Music like button: only for tracks playing on music.youtube.com.
-  // The video id comes from the MPRIS url; skyyytlike talks to YouTube Music
-  // with the login of the zen-youtube-music profile.
+  // YouTube Music like button: only for Pear Desktop's player (MPRIS name
+  // org.mpris.MediaPlayer2.YoutubeMusic, from Pear's shortcuts plugin), the one
+  // skyyytlike can like through Pear's API server. The video id comes from its
+  // MPRIS url. (Old Zen window: ~/.local/bin/hypr/skyyytmusic-zen/README.md.)
+  readonly property bool isPear: player !== null && String(player.dbusName || "").indexOf("YoutubeMusic") !== -1
   readonly property string trackUrl: player && player.metadata ? (player.metadata["xesam:url"] || "") : ""
   readonly property string videoId: {
+    if (!isPear) return ""
     var m = /^https:\/\/music\.youtube\.com\/watch\?(?:.*&)?v=([\w-]{11})/.exec(trackUrl)
     return m ? m[1] : ""
   }

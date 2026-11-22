@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=YouTube Music (Zen backup)
+Comment=The old YouTube Music window in Zen, on workspace 8
+Exec=/home/l4n1skyy/.local/bin/hypr/skyyytmusic-zen/skyyytmusic-zen open
+Terminal=false
+Type=Application
+Icon=/home/l4n1skyy/.local/share/applications/icons/YouTube Music.png
+Categories=AudioVideo;Audio;Player;
+StartupWMClass=ytmusic
+StartupNotify=false

@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+"""skyyytlike-zen: BACKUP, not in use since 2026-11-22 (the old skyyytlike; the
+bar's heart now uses ~/.local/bin/hypr/skyyytlike, which talks to Pear Desktop).
+See README.md in this folder to bring it back. Like / unlike a YouTube Music track using the login of the
+zen-youtube-music profile (no extra packages, no browser automation).
+
+  skyyytlike-zen status VIDEO_ID   prints LIKE or INDIFFERENT (or DISLIKE)
+  skyyytlike-zen toggle VIDEO_ID   like if not liked, otherwise remove the like;
+                                   prints the new state
+"""
+import hashlib, json, os, shutil, socket, sqlite3, sys, tempfile, time, urllib.request
+
+PROFILE = os.path.expanduser("~/.config/zen-youtube-music")
+BASE = "https://music.youtube.com/youtubei/v1/"
+ORIGIN = "https://music.youtube.com"
+
+# --- Preferred path: the real YouTube Music page, through the bridge ----------
+# skyyytmusic loads a small extension into the window whose native host listens
+# on this socket, so the page's own like button is read and clicked: its heart
+# updates instantly, no reload. (Not Marionette: with it YouTube stops
+# streaming after one minute.)
+BRIDGE = os.path.join(os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}", "skyyytmusic.sock")
+
+def page(click):
+    """Returns the page's like status (after clicking if asked), None if the
+    page has no like button, raises if the bridge isn't reachable."""
+    with socket.socket(socket.AF_UNIX) as sock:
+        sock.settimeout(8)
+        sock.connect(BRIDGE)
+        sock.sendall(json.dumps({"click": click}).encode() + b"\n")
+        buf = b""
+        while not buf.endswith(b"\n"):
+            chunk = sock.recv(4096)
+            if not chunk:
+                break
+            buf += chunk
+    r = json.loads(buf)
+    if r.get("error"):
+        raise RuntimeError(r["error"])
+    return r.get("value")
+
+def cookies():
+    tmp = tempfile.mkdtemp()
+    try:
+        for ext in ("", "-wal", "-shm"):
+            src = f"{PROFILE}/cookies.sqlite{ext}"
+            if os.path.exists(src):
+                shutil.copy(src, f"{tmp}/c.sqlite{ext}")
+        db = sqlite3.connect(f"{tmp}/c.sqlite")
+        rows = db.execute("select name, value from moz_cookies where host like '%youtube.com'").fetchall()
+        return dict(rows)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+def call(endpoint, body):
+    ck = cookies()
+    sid = ck.get("SAPISID") or ck.get("__Secure-3PAPISID")
+    if not sid:
+        sys.exit("not logged in to YouTube Music")
+    ts = str(int(time.time()))
+    sig = hashlib.sha1(f"{ts} {sid} {ORIGIN}".encode()).hexdigest()
+    body = dict(body, context={"client": {"clientName": "WEB_REMIX", "clientVersion": "1." + time.strftime("%Y%m%d") + ".01.00", "hl": "en"}})
+    req = urllib.request.Request(BASE + endpoint + "?prettyPrint=false", json.dumps(body).encode(), {
+        "Content-Type": "application/json",
+        "Authorization": f"SAPISIDHASH {ts}_{sig}",
+        "Cookie": "; ".join(f"{k}={v}" for k, v in ck.items()),
+        "Origin": ORIGIN, "X-Origin": ORIGIN, "Referer": ORIGIN + "/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0",
+        "X-Goog-AuthUser": "0",
+    })
+    return json.load(urllib.request.urlopen(req, timeout=10))
+
+def find(obj, key):
+    if isinstance(obj, dict):
+        if key in obj: return obj[key]
+        for v in obj.values():
+            r = find(v, key)
+            if r is not None: return r
+    elif isinstance(obj, list):
+        for v in obj:
+            r = find(v, key)
+            if r is not None: return r
+
+def status(vid):
+    import base64, urllib.parse
+    data = call("next", {"videoId": vid, "isAudioOnly": True})
+    found = []
+    for m in data.get("frameworkUpdates", {}).get("entityBatchUpdate", {}).get("mutations", []):
+        e = m.get("payload", {}).get("likeStatusEntity")
+        if e and e.get("likeStatus"):
+            found.append(e)
+    for e in found:  # entity key is base64 of a protobuf containing the video id
+        try:
+            raw = base64.urlsafe_b64decode(urllib.parse.unquote(e["key"]) + "==")
+        except Exception:
+            continue
+        if vid.encode() in raw:
+            return e["likeStatus"].replace("LIKE_STATUS_", "")
+    st = find(data.get("playerOverlays", {}), "likeStatus")
+    return (st or "INDIFFERENT").replace("LIKE_STATUS_", "")
+
+def main():
+    if len(sys.argv) != 3 or sys.argv[1] not in ("status", "toggle"):
+        sys.exit(__doc__)
+    cmd, vid = sys.argv[1:]
+    try:
+        st = page(cmd == "toggle")
+        if st:
+            if cmd == "toggle":
+                time.sleep(0.4)
+                st = page(False) or st
+            print(st.replace("LIKE_STATUS_", "")); return
+    except Exception:
+        pass  # bridge not running (window closed or extension not loaded): fall back to the API
+    cur = status(vid)
+    if cmd == "status":
+        print(cur); return
+    new = "INDIFFERENT" if cur == "LIKE" else "LIKE"
+    call("like/" + ("removelike" if cur == "LIKE" else "like"), {"target": {"videoId": vid}})
+    print(new)
+
+main()

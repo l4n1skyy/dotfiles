@@ -12,6 +12,7 @@ micromamba-bin
 mise-bin
 ngrok
 osu-lazer-bin
+pear-desktop-bin
 pixora-icons-git
 spicetify-cli
 spotify
