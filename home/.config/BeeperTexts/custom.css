@@ -1,0 +1,160 @@
+/*
+# Custom Beeper.app style
+Pomodoro Slate & Lavender Theme
+*/
+
+:root {
+  /* ==========================================
+     COLOR PALETTE - FROM UPLOADED IMAGE
+     ========================================== */
+  --pomo-bg-deep: #080a0b;       /* Sidebar background (Darkest) */
+  --pomo-bg-base: #101315;       /* Main chat background */
+  --pomo-bg-elevated: #101315;   /* Menus, chat input bar, received bubbles */
+  
+  --pomo-accent: #798186;        /* The lavender timer text (Badges, toggles) */
+  --pomo-text-main: #cacccc;     /* Clean off-white text */
+  --pomo-text-muted: #4b4e55;    /* The bottom gray text (Sent bubbles, muted UI) */
+}
+
+/* ==========================================
+   DARK MODE OVERRIDES
+   ========================================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* --- Main UI Backgrounds --- */
+    --color-bg: var(--pomo-bg-base) !important;
+    --color-surface: var(--pomo-bg-base) !important;
+    --color-surface-bright: var(--pomo-bg-elevated) !important;
+    --color-base-white: var(--pomo-bg-base) !important;
+    --right-pane-bg: var(--pomo-bg-base) !important;
+    
+    /* --- Sidebar Variables --- */
+    --left-pane-bg: var(--pomo-bg-deep) !important;
+    --color-background-sidebar: var(--pomo-bg-deep) !important; 
+    --color-background-sidebar-opaque: var(--pomo-bg-deep) !important;
+    
+    /* --- Headers & Command Bar --- */
+    --color-background-header-right: var(--pomo-bg-base) !important;
+    --color-background-header-right-opaque: var(--pomo-bg-base) !important;
+    --color-background-commandbar-opaque: var(--pomo-bg-elevated) !important;
+
+    /* --- Chat Input Bar --- */
+    --color-background-input: var(--pomo-bg-elevated) !important;
+    --color-border-input: var(--pomo-bg-elevated) !important;
+
+    /* --- Floating Menus & Grouped Elements --- */
+    --color-background-grouped: var(--pomo-bg-base) !important;
+    --color-background-grouped-weak: var(--pomo-bg-deep) !important;
+    --color-background-elevated: var(--pomo-bg-elevated) !important;
+    --color-secondary-container: var(--pomo-bg-elevated) !important;
+    --color-tertiary-container: var(--pomo-bg-elevated) !important;
+
+    /* --- Accents & Gradients (Using the Lavender) --- */
+    --color-primary: var(--pomo-accent) !important;
+    --color-brand: var(--pomo-accent) !important;
+    --color-gradient: linear-gradient(190deg, var(--pomo-text-muted) 0%, var(--pomo-accent) 100%) !important;
+    --color-outline: var(--pomo-text-muted) !important;
+
+    /* --- Borders --- */
+    --color-border-neutrals: var(--pomo-bg-elevated) !important;
+    --color-border-neutrals-weak: var(--pomo-bg-deep) !important;
+
+    /* --- Buttons --- */
+    --color-background-button-secondary: var(--pomo-bg-elevated) !important;
+    --color-border-button-secondary: transparent !important;
+    --color-text-button-secondary: var(--pomo-text-main) !important;
+    --color-text-primary: var(--pomo-text-main) !important;
+
+    /* --- The Message Bubbles --- */
+    --color-background-message-bubble-received: var(--pomo-bg-elevated) !important;
+    --color-background-message-bubble-sent: var(--pomo-text-muted) !important;
+    --color-message-bubble-outgoing: var(--pomo-text-muted) !important;
+    --color-text-on-accent: var(--pomo-text-main) !important;
+  }
+}
+
+/* ==========================================
+   FORCED LAYOUT HACKS & FIXES
+   ========================================== */
+
+/* Hard override for the sidebar to fix Beeper ignoring variables */
+.left-pane, 
+.App-module__left___2A9_j, 
+[data-testid="sidebar"] {
+  background-color: var(--pomo-bg-deep) !important;
+}
+
+/* Fix transparency settings */
+.no-transparency, .reduce-transparency {
+  --left-pane-bg: var(--pomo-bg-deep) !important;
+  --color-background-header-right: var(--pomo-bg-base) !important;
+}
+
+.menu-list,
+.emoji-mart {
+  background: var(--color-background-elevated) !important;
+}
+
+.emoji-mart-category-label span {
+  background: var(--color-secondary-container) !important;
+}
+
+.ThreadListItem-module__internal {
+  color: var(--pomo-text-main) !important;
+}
+
+/* Inbox - Favourites - Support Unread Filter */
+.left .threads-list-container .threads:has(.AccountFilters button[data-text="Unread"][class*="AccountFilters-module__selected"]) .pinned-threads .sidebar-thread:not(.isUnread) {
+  display: none;
+}
+
+/* Inbox - Favourites Grid Constraints */
+.left .threads-list-container .threads .virtual-list > div > div:first-child {
+  overflow-y: auto;
+  max-height: 30vh;
+  overflow-x: hidden;
+}
+
+.left .threads-list-container .threads .virtual-list > div > div:first-child .pinned-threads .sidebar-thread {
+  width: 20%;
+}
+
+.left .threads-list-container .threads .virtual-list > div > div:first-child .pinned-threads .sidebar-thread.isPinned > section[data-sentry-component="PinnedThreadListItem"] {
+  --avatar-size: 30px;
+}
+
+.left .threads-list-container .threads .virtual-list > div > div:first-child .pinned-threads .sidebar-thread.isPinned > section[data-sentry-component="PinnedThreadListItem"] .participant-avatar > div[data-sentry-component="GroupAvatar"] {
+  width: var(--avatar-size) !important;
+  height: var(--avatar-size) !important;
+}
+
+/* ==========================================
+   COZETTE FONT (added 2026-11-22)
+   CozetteVector is drawn on a 13px pixel grid, so it is only sharp at 13 or 26
+   screen pixels. Beeper's zoom is set to 80% (Ctrl+- twice; Beeper remembers it),
+   which with the desktop's 125% scale makes 1px here = 1 screen pixel, so the
+   13px and 26px land exactly on the grid (at 100% zoom even those blur sideways).
+   20px below sits in between (2026-11-22: 13px was too small, 26px too big), so it
+   is a little soft. Line height is a whole number too (24px): Beeper's own
+   fractional line heights put some text on half pixels.
+   Chinese/Japanese/Korean fall back to Zpix (scaled to match), emoji to
+   Beeper's Twemoji. No fake bold (Cozette has one weight).
+   ========================================== */
+@font-face {
+  font-family: "skyy-zpix";
+  src: local("Zpix");
+  size-adjust: 92.3077%; /* Zpix's 12px grid sits at 13px Cozette: keep that ratio */
+  unicode-range: U+1100-11FF, U+2E80-2FFF, U+3000-30FF, U+3100-9FFF, U+A960-A97F, U+AC00-D7FF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF, U+20000-2FFFF;
+}
+:root {
+  --font-family: "CozetteVector", "skyy-zpix", "Twemoji", "TwemojiFlags", "Noto Color Emoji", sans-serif !important;
+  --font-mono: var(--font-family) !important;
+  --font-family-mono: var(--font-family) !important;
+}
+:where(html, body, *:not([class*="fc-icon"])) {
+  font-family: var(--font-family) !important;
+  font-size: 20px !important;
+  line-height: 24px !important;
+  font-synthesis: none !important;
+  letter-spacing: 0 !important;
+}

@@ -1,9 +1,9 @@
 /* GitHub Dark for Pear Desktop (YouTube Music).
  * Base: Catppuccin for YouTube Music, src/mocha.css (github.com/catppuccin/youtubemusic, MIT,
  * (c) Catppuccin Org), with its palette swapped for GitHub's dark colours (Primer "dark"),
- * accent = GitHub blue, its Mocha-coloured images removed. The "skyy extras" section at the
+ * accent = soft GitHub purple (#bc8cff), its Mocha-coloured images removed. The "skyy extras" section at the
  * end themes what it misses: the sidebar, Pear's own menu bar (in-app-menu plugin), popups,
- * YouTube's newer buttons and YouTube Music's own colour variables.
+ * YouTube's newer buttons and YouTube Music's own colour variables; then the Cozette pixel font.
  * Built 2026-11-22; edit freely, Pear re-reads it on every page load (View > Reload). */
 html:not(.style-scope)
 {
@@ -34,7 +34,7 @@ html:not(.style-scope)
   --gh-mantle: #010409;
   --gh-crust: #010409;
 
-  --gh-accent: var(--gh-blue);
+  --gh-accent: #bc8cff; /* GitHub purple-3: a softer step than done-purple #a371f7 */
 
   --unthemed-yet: inherit !important;
 
@@ -1958,6 +1958,8 @@ html:not(.style-scope), ytmusic-app {
   --ytmusic-themed-blue: var(--gh-accent) !important;
   --ytmusic-color-lightblue: var(--gh-accent) !important;
   --ytmusic-focus-active: var(--gh-accent) !important;
+  --ytmusic-search-suggestion-focus-active: var(--gh-accent) !important;
+  --ytmusic-color-blue-1: var(--gh-accent) !important;
   --ytmusic-setting-item-toggle-active: var(--gh-accent) !important;
   --ytmusic-playback-progress-color: var(--gh-accent) !important;
   --yt-spec-menu-background: var(--gh-surface0) !important;
@@ -2078,4 +2080,44 @@ ul[data-ytmd-sub-panel] li:hover {
 }
 ul[data-ytmd-sub-panel] li[data-selected="true"] {
   background-color: rgba(177, 186, 196, 0.2) !important;
+}
+
+/* ===================== Cozette font ===================== */
+/* CozetteVector is drawn on a 13px pixel grid, so it is sharp only at 13px (and 26px).
+   Pear's zoom is exactly 80% (View > Zoom; set in Pear's Preferences file), which with the
+   desktop's 125% scaling makes 1 CSS px = 1 screen pixel: 13px here = 13 real pixels.
+   Body text is 16px (chosen 2026-11-22: a bit bigger, a bit soft); 13px would be pixel-sharp.
+   Headings stay at 26px, which is sharp.
+   Text Cozette has no glyph for (Chinese, Japanese, Korean) falls back to Zpix, scaled so it
+   lands on its own 12px grid. Cozette has one weight: no fake bold (it smears the pixels). */
+@font-face {
+  font-family: "skyy-zpix";
+  src: local("Zpix");
+  size-adjust: 92.3077%; /* 13px -> 12px */
+  unicode-range: U+1100-11FF, U+2E80-2FFF, U+3000-30FF, U+3100-9FFF, U+A960-A97F, U+AC00-D7FF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF, U+20000-2FFFF;
+}
+/* :where() keeps this at zero specificity, so the heading sizes below win */
+:where(html, body, *:not(.material-icons):not(.material-symbols-outlined):not(.material-icons-extended)) {
+  font-family: "CozetteVector", "skyy-zpix", "Zpix", monospace !important;
+  font-size: 16px !important;
+  font-synthesis: none !important;
+  letter-spacing: 0 !important;
+}
+/* Headings at twice the size (still on the pixel grid) */
+h1, h1 *, h2:not(.a11y-label), h2:not(.a11y-label) *,
+ytmusic-carousel-shelf-basic-header-renderer .title, ytmusic-carousel-shelf-basic-header-renderer .title *,
+ytmusic-responsive-header-renderer .title, ytmusic-responsive-header-renderer .title *,
+ytmusic-immersive-header-renderer .title, ytmusic-immersive-header-renderer .title *,
+ytmusic-detail-header-renderer .title, ytmusic-detail-header-renderer .title *,
+ytmusic-visual-header-renderer .title, ytmusic-visual-header-renderer .title *,
+ytmusic-editable-playlist-detail-header-renderer .title,
+ytmusic-shelf-renderer > #header .title, ytmusic-shelf-renderer > #header .title *,
+ytmusic-card-shelf-renderer .title, ytmusic-card-shelf-renderer .title * {
+  font-size: 26px !important;
+  line-height: 32px !important;
+}
+/* The player bar is its own compositing layer (will-change: transform) and its text sits on
+   half pixels there, which blurred it; without the layer hint the text snaps to whole pixels. */
+ytmusic-player-bar {
+  will-change: auto !important;
 }

@@ -1,0 +1,129 @@
+/*
+# Custom Beeper.app style
+Pomodoro Slate & Lavender Theme
+*/
+
+:root {
+  /* ==========================================
+     COLOR PALETTE - FROM UPLOADED IMAGE
+     ========================================== */
+  --pomo-bg-deep: #181825;       /* Sidebar background (Darkest) */
+  --pomo-bg-base: #1e1e2e;       /* Main chat background */
+  --pomo-bg-elevated: #313244;   /* Menus, chat input bar, received bubbles */
+  
+  --pomo-accent: #b4befe;        /* The lavender timer text (Badges, toggles) */
+  --pomo-text-main: #cdd6f4;     /* Clean off-white text */
+  --pomo-text-muted: #6c7086;    /* The bottom gray text (Sent bubbles, muted UI) */
+}
+
+/* ==========================================
+   DARK MODE OVERRIDES
+   ========================================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* --- Main UI Backgrounds --- */
+    --color-bg: var(--pomo-bg-base) !important;
+    --color-surface: var(--pomo-bg-base) !important;
+    --color-surface-bright: var(--pomo-bg-elevated) !important;
+    --color-base-white: var(--pomo-bg-base) !important;
+    --right-pane-bg: var(--pomo-bg-base) !important;
+    
+    /* --- Sidebar Variables --- */
+    --left-pane-bg: var(--pomo-bg-deep) !important;
+    --color-background-sidebar: var(--pomo-bg-deep) !important; 
+    --color-background-sidebar-opaque: var(--pomo-bg-deep) !important;
+    
+    /* --- Headers & Command Bar --- */
+    --color-background-header-right: var(--pomo-bg-base) !important;
+    --color-background-header-right-opaque: var(--pomo-bg-base) !important;
+    --color-background-commandbar-opaque: var(--pomo-bg-elevated) !important;
+
+    /* --- Chat Input Bar --- */
+    --color-background-input: var(--pomo-bg-elevated) !important;
+    --color-border-input: var(--pomo-bg-elevated) !important;
+
+    /* --- Floating Menus & Grouped Elements --- */
+    --color-background-grouped: var(--pomo-bg-base) !important;
+    --color-background-grouped-weak: var(--pomo-bg-deep) !important;
+    --color-background-elevated: var(--pomo-bg-elevated) !important;
+    --color-secondary-container: var(--pomo-bg-elevated) !important;
+    --color-tertiary-container: var(--pomo-bg-elevated) !important;
+
+    /* --- Accents & Gradients (Using the Lavender) --- */
+    --color-primary: var(--pomo-accent) !important;
+    --color-brand: var(--pomo-accent) !important;
+    --color-gradient: linear-gradient(190deg, var(--pomo-text-muted) 0%, var(--pomo-accent) 100%) !important;
+    --color-outline: var(--pomo-text-muted) !important;
+
+    /* --- Borders --- */
+    --color-border-neutrals: var(--pomo-bg-elevated) !important;
+    --color-border-neutrals-weak: var(--pomo-bg-deep) !important;
+
+    /* --- Buttons --- */
+    --color-background-button-secondary: var(--pomo-bg-elevated) !important;
+    --color-border-button-secondary: transparent !important;
+    --color-text-button-secondary: var(--pomo-text-main) !important;
+    --color-text-primary: var(--pomo-text-main) !important;
+
+    /* --- The Message Bubbles --- */
+    --color-background-message-bubble-received: var(--pomo-bg-elevated) !important;
+    --color-background-message-bubble-sent: var(--pomo-text-muted) !important;
+    --color-message-bubble-outgoing: var(--pomo-text-muted) !important;
+    --color-text-on-accent: var(--pomo-text-main) !important;
+  }
+}
+
+/* ==========================================
+   FORCED LAYOUT HACKS & FIXES
+   ========================================== */
+
+/* Hard override for the sidebar to fix Beeper ignoring variables */
+.left-pane, 
+.App-module__left___2A9_j, 
+[data-testid="sidebar"] {
+  background-color: var(--pomo-bg-deep) !important;
+}
+
+/* Fix transparency settings */
+.no-transparency, .reduce-transparency {
+  --left-pane-bg: var(--pomo-bg-deep) !important;
+  --color-background-header-right: var(--pomo-bg-base) !important;
+}
+
+.menu-list,
+.emoji-mart {
+  background: var(--color-background-elevated) !important;
+}
+
+.emoji-mart-category-label span {
+  background: var(--color-secondary-container) !important;
+}
+
+.ThreadListItem-module__internal {
+  color: var(--pomo-text-main) !important;
+}
+
+/* Inbox - Favourites - Support Unread Filter */
+.left .threads-list-container .threads:has(.AccountFilters button[data-text="Unread"][class*="AccountFilters-module__selected"]) .pinned-threads .sidebar-thread:not(.isUnread) {
+  display: none;
+}
+
+/* Inbox - Favourites Grid Constraints */
+.left .threads-list-container .threads .virtual-list > div > div:first-child {
+  overflow-y: auto;
+  max-height: 30vh;
+  overflow-x: hidden;
+}
+
+.left .threads-list-container .threads .virtual-list > div > div:first-child .pinned-threads .sidebar-thread {
+  width: 20%;
+}
+
+.left .threads-list-container .threads .virtual-list > div > div:first-child .pinned-threads .sidebar-thread.isPinned > section[data-sentry-component="PinnedThreadListItem"] {
+  --avatar-size: 30px;
+}
+
+.left .threads-list-container .threads .virtual-list > div > div:first-child .pinned-threads .sidebar-thread.isPinned > section[data-sentry-component="PinnedThreadListItem"] .participant-avatar > div[data-sentry-component="GroupAvatar"] {
+  width: var(--avatar-size) !important;
+  height: var(--avatar-size) !important;
+}

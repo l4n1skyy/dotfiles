@@ -1,0 +1,100 @@
+@import url("../../.cache/wal/colors-waybar.css");
+
+/* random colors */
+@define-color main_text_color @cursor;
+@define-color bar_bg @background;
+
+/* the colors for the left side's workspace stuff */
+@define-color active_workspace @cursor;
+@define-color empty_workspace @color8;
+@define-color inactive_workspace @color4;
+@define-color empty_but_active_workspace @color11;
+@define-color urgent_workspace orange;
+
+* {
+	border: none;
+	font-family: FontAwesome, JetbrainsMono Nerd Font;
+	font-size: 15px;
+}
+
+window#waybar {
+	background: @bar_bg;
+}
+
+/*general styles */
+#workspaces,
+#workspaces button,
+#window,
+#custom-vesktop-toggle,
+#keyboard-state,
+#network,
+#battery,
+#pulseaudio,
+#clock,
+#custom-power,
+#custom-weather,
+#custom-theme-menu,
+#custom-theme-menu-creator,
+#custom-game-launcher,
+#custom-random-theme {
+	color: @main_text_color;
+	box-shadow: none;
+	transition: none;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+#workspaces {
+	border-radius: 10px;
+	padding: 0px 6px;
+}
+
+#workspaces button {
+	box-shadow: none;
+	padding: 4px 8px;
+	margin-left: 0;
+	margin-right: 0;
+	background: transparent;
+	color: @inactive_workspace;
+}
+
+#workspaces button.urgent {
+	color: @urgent_workspace;
+}
+
+#workspaces button.active {
+	color: @active_workspace;
+}
+
+#workspaces button.empty {
+	color: @empty_workspace;
+}
+
+#workspaces button.empty.active {
+	color: @empty_but_active_workspace;
+}
+
+/* middle specifics */
+#window {
+	border-radius: 10px;
+}
+
+window#waybar.empty #window {
+	padding: 0px;
+	margin: 0px;
+	border: 0px;
+	background-color: transparent;
+}
+
+#custom-power {
+	margin-bottom: 4px;
+	margin-right: 5px;
+}
+
+window#waybar.empty {
+	background: rgba(0, 0, 0, 0.8);
+}
+
+window#waybar.vesktop {
+	background: rgba(0, 0, 0, 0.8);
+}

@@ -1,0 +1,33 @@
+/* ==========================================
+   RUNESCAPE QUILL 8 FONT (added 2026-11-22)
+   Quill 8 (~/.local/share/fonts/runescape, from RuneStar) is drawn on a 16px
+   pixel grid, so text is 16px everywhere: only 16px (and 32px) is sharp.
+   Vesktop's zoom is exactly 80% (set in sessionData/Preferences), which with the
+   desktop's 125% scaling makes 1px here = 1 screen pixel; Ctrl+-/= or Ctrl+0
+   would move it off the grid and blur the text.
+   Characters Quill lacks fall back to Cozette (13px grid) and, for Chinese/
+   Japanese/Korean, Zpix (12px grid), each scaled onto its own grid. Code keeps
+   the theme's monospace font. One weight only: no fake bold.
+   ========================================== */
+@font-face {
+  font-family: "skyy-cozette16";
+  src: local("CozetteVector");
+  size-adjust: 81.25%; /* 16px -> 13px */
+}
+@font-face {
+  font-family: "skyy-zpix16";
+  src: local("Zpix");
+  size-adjust: 75%; /* 16px -> 12px */
+  unicode-range: U+1100-11FF, U+2E80-2FFF, U+3000-30FF, U+3100-9FFF, U+A960-A97F, U+AC00-D7FF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF, U+20000-2FFFF;
+}
+body {
+  --font: "RuneScape Quill 8" !important;
+  letter-spacing: 0 !important;
+}
+:where(body, body *:not(code):not(pre):not(code *):not(pre *)) {
+  font-family: "RuneScape Quill 8", "skyy-zpix16", "skyy-cozette16", "Noto Color Emoji", sans-serif !important;
+  font-size: 16px !important;
+  line-height: 20px !important;
+  font-synthesis: none !important;
+  letter-spacing: 0 !important;
+}
