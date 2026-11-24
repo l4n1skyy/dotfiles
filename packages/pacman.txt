@@ -50,6 +50,7 @@ gnome-themes-extra
 go
 gpu-screen-recorder
 grim
+gst-libav
 gst-plugin-pipewire
 gthumb
 gum
