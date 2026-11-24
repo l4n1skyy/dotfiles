@@ -51,6 +51,7 @@ go
 gpu-screen-recorder
 grim
 gst-plugin-pipewire
+gthumb
 gum
 gvfs-mtp
 gvfs-nfs
