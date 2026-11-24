@@ -1,0 +1,146 @@
+#!/usr/bin/env python3
+"""skyypearrpc: stop Pear Desktop's Discord plugin from flooding Discord, so the
+Discord status (through Vesktop) keeps up with the song that is playing.
+
+Why: Pear's discord plugin calls SET_ACTIVITY on every time update (~every 6 s).
+Its seek check compares the new position with the one from the previous update,
+so every 6-second step counts as a "seek" and skips the plugin's own 15 s
+throttle. Vesktop (1.6+) hands each request to Discord's own RPC code, which
+turns the cover-art URL into a Discord asset with a POST to
+/applications/<id>/external-assets, and only caches the answer once that POST
+returns. When that endpoint rate-limits, Discord queues every further POST to
+that URL in order, and with a new one every 6 s the queue never drains: the
+status falls further and further behind (an hour behind after a few hours).
+
+The patch (same byte length, asar integrity hashes updated):
+  seek check   only a jump back of more than 1 s or forward of more than 20 s
+               counts as a seek (was: any change of more than 2 s)
+  refresh      a plain progress refresh at most every 60 s (was: 15 s)
+So it sends on song change, pause/play and seeks, plus one refresh a minute.
+
+  skyypearrpc            patch (root; also run by /etc/pacman.d/hooks/95-skyypearrpc.hook
+                         after every pear-desktop-bin install/upgrade)
+  skyypearrpc --check    only report whether the patch is in place
+
+Fails without writing anything when the code it looks for isn't there (a new
+Pear version changed it): then check whether upstream fixed it, or adapt this.
+"""
+import hashlib, json, os, re, struct, sys, tempfile
+
+ASAR = "/opt/YouTube Music/resources/app.asar"
+FILE_RE = re.compile(r"^/dist/main/discord-[\w-]+\.js$")
+
+
+def read_header(data):
+    _, hsize = struct.unpack_from("<II", data, 0)
+    _, slen = struct.unpack_from("<II", data, 8)
+    return json.loads(data[16:16 + slen]), 8 + hsize, slen
+
+
+def walk(node, prefix=""):
+    for name, n in node.get("files", {}).items():
+        path = f"{prefix}/{name}"
+        if "files" in n:
+            yield from walk(n, path)
+        else:
+            yield path, n
+
+
+def dump(header):
+    return json.dumps(header, separators=(",", ":"), ensure_ascii=False).encode()
+
+
+def fit(new, length):
+    if len(new) > length:
+        raise SystemExit(f"skyypearrpc: replacement longer than original: {new!r}")
+    return new + " " * (length - len(new))
+
+
+# (name, regex on the original code, function building the same-length replacement,
+#  regex that recognises the patched code)
+PATCHES = [
+    ("seek check",
+     re.compile(rb"([\w$]+) = \((\w), (\w)\) => Math\.abs\(\3 - \2\) > 2(?=,)"),
+     lambda m: fit(f"{m[1].decode()} = ({m[2].decode()},{m[3].decode()})=>"
+                   f"{m[3].decode()}<{m[2].decode()}-1||{m[3].decode()}>{m[2].decode()}+20",
+                   len(m[0])).encode(),
+     re.compile(rb"[\w$]+ = \((\w),(\w)\)=>\2<\1-1\|\|\2>\1\+20 *(?=,)")),
+    ("refresh when called",
+     re.compile(rb"(\w) - this\.lastProgressUpdate > 15e3\)"),
+     lambda m: m[0].replace(b"15e3", b"60e3"),
+     re.compile(rb"\w - this\.lastProgressUpdate > 60e3\)")),
+    ("refresh timer",
+     re.compile(rb"let (\w) = ([\w$]+) - \((\w) - this\.lastProgressUpdate\)"),
+     lambda m: m[0][:m.start(2) - m.start(0)] + fit("6e4-", len(m[2]) + 2).encode()
+               + m[0][m.end(2) + 2 - m.start(0):],
+     re.compile(rb"let \w = 6e4- *\(\w - this\.lastProgressUpdate\)")),
+]
+
+
+def main():
+    args = [a for a in sys.argv[1:] if a != "--check"]
+    check = len(args) != len(sys.argv[1:])
+    asar = args[0] if args else ASAR  # another path only for testing on a copy
+    with open(asar, "rb") as f:
+        data = bytearray(f.read())
+    header, base, slen = read_header(data)
+    if dump(header) != bytes(data[16:16 + slen]):
+        raise SystemExit("skyypearrpc: can't rewrite this asar header byte-for-byte, nothing written")
+    files = [(p, n) for p, n in walk(header) if FILE_RE.match(p)]
+    if len(files) != 1:
+        raise SystemExit(f"skyypearrpc: expected one dist/main/discord-*.js in {ASAR}, found {len(files)}")
+    path, node = files[0]
+    start, size = base + int(node["offset"]), node["size"]
+    code = bytes(data[start:start + size])
+
+    new_code, todo = code, []
+    for name, old_re, build, done_re in PATCHES:
+        old, done = list(old_re.finditer(new_code)), list(done_re.finditer(new_code))
+        if len(done) == 1 and not old:
+            continue
+        if len(old) != 1 or done:
+            raise SystemExit(f"skyypearrpc: {name}: code not found as expected in {path} "
+                             f"({len(old)} original, {len(done)} patched); Pear changed, nothing written")
+        m = old[0]
+        rep = build(m)
+        assert len(rep) == len(m[0]), name
+        new_code = new_code[:m.start()] + rep + new_code[m.end():]
+        todo.append(name)
+
+    if not todo:
+        print(f"skyypearrpc: already patched ({path})")
+        return
+    if check:
+        print(f"skyypearrpc: NOT patched yet ({', '.join(todo)})")
+        sys.exit(1)
+
+    assert len(new_code) == size
+    data[start:start + size] = new_code
+
+    # keep the asar's integrity record honest (same length: hex digests)
+    integ = node.get("integrity")
+    if integ:
+        bs = integ.get("blockSize", 4 * 1024 * 1024)
+        integ["hash"] = hashlib.sha256(new_code).hexdigest()
+        integ["blocks"] = [hashlib.sha256(new_code[i:i + bs]).hexdigest() for i in range(0, size, bs)]
+        hdr = dump(header)
+        if len(hdr) != slen:
+            raise SystemExit("skyypearrpc: header length changed, nothing written")
+        data[16:16 + slen] = hdr
+
+    st = os.stat(asar)
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(asar), prefix=".app.asar.")
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(data)
+        os.chmod(tmp, st.st_mode & 0o7777)
+        os.chown(tmp, st.st_uid, st.st_gid)
+        os.replace(tmp, asar)
+    except BaseException:
+        os.unlink(tmp)
+        raise
+    print(f"skyypearrpc: patched {path}: {', '.join(todo)} (restart Pear to use it)")
+
+
+if __name__ == "__main__":
+    main()
