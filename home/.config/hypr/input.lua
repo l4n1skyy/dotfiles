@@ -58,6 +58,18 @@ hl.config({
 	},
 })
 
+-- Ignore the buttons of the USB-C earphone adapter (Generic AB13X USB Audio).
+-- With earphones that have no mic/button, the adapter reports play/pause as held
+-- down for as long as it is plugged in. Hyprland 0.57's keybind engine then treats
+-- XF86AudioPlay as a held key, and after every Shift/Super/Alt change the next key
+-- is swallowed as an "XF86AudioPlay + key" chord (dropped letters in Obsidian,
+-- wrong passwords). The adapter has no other keys. Remove this block if you use a
+-- headset with working buttons on this adapter.
+hl.device({
+	name = "generic-ab13x-usb-audio",
+	enabled = false,
+})
+
 -- App-specific touchpad scroll speeds.
 -- o.window("(Alacritty|kitty|foot)", { scroll_touchpad = 1.5 })
 -- o.window("com.mitchellh.ghostty", { scroll_touchpad = 0.2 })

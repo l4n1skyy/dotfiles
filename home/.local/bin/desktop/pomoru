@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# pomoru: run pomoru (the Pomodoro timer built in ~/.local/src/pomoru) in this terminal.
+# SUPER+ALT+P (skyypomoru) opens it in its own window on workspace 7 instead.
+# The bar module skyypomoru shows it either way; sessions go to _DATABASE/pomoru.db.
+set -euo pipefail
+
+repo="$HOME/.local/src/pomoru"
+bin="$repo/target/release/pomoru"
+
+# Build it once if the binary is missing
+[[ -x $bin ]] || cargo build --release --quiet --manifest-path "$repo/Cargo.toml"
+
+exec "$bin" "$@"

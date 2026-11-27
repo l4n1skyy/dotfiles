@@ -3,7 +3,8 @@
 # youtube-music, window class com.github.th-ch.youtube-music) on workspace 8.
 # The old Zen window is kept as a backup (not in use): skyyytmusic-zen/README.md.
 #
-# skyyytmusic         start Pear (login autostart, see layout.conf)
+# skyyytmusic         start Pear (login autostart, see layout.conf), paused: see
+#                     pause_once_playing below
 # skyyytmusic focus   jump to the Pear window (switching to its workspace), or
 #                     start it if it isn't running. Used by the media title in the bar.
 # skyyytmusic open    the same, but go to workspace 8 first, so a fresh window
@@ -31,5 +32,33 @@ if [[ ${1:-} == open || ${1:-} == focus ]]; then
   fi
   [[ $1 == open ]] && hyprctl dispatch 'hl.dsp.focus({ workspace = "8" })' >/dev/null
 fi
+
+# At login Pear reopens the last song (Options > Resume on start) and plays it.
+# Pause it, but only once it has played a second: Pear tells MPRIS (the bar's
+# play/pause button, Discord) about a play/pause only when the video is past
+# 0.5 s, and always reports a newly loaded song as playing. So pausing at 0:00
+# (e.g. Pear's own "Disable Autoplay" plugin) leaves the song stopped while the
+# bar and Discord still say it is playing. That second is silent: all outputs
+# start muted at login (wireplumber.service.d/skyymute-on-startup.conf).
+pause_once_playing() {
+  local bus=org.mpris.MediaPlayer2.YoutubeMusic path=/org/mpris/MediaPlayer2
+  local iface=org.mpris.MediaPlayer2.Player status pos up=0
+  for _ in {1..360}; do # wait up to 3 minutes for Pear's player to show up
+    sleep 0.5
+    status=$(busctl --user get-property "$bus" "$path" "$iface" PlaybackStatus 2>/dev/null) || continue
+    pos=$(busctl --user get-property "$bus" "$path" "$iface" Position 2>/dev/null) || continue
+    case $status in
+      's "Paused"') return ;; # paused by hand already
+      's "Playing"')
+        if (( ${pos#x } >= 1000000 )); then
+          busctl --user call "$bus" "$path" "$iface" Pause
+          return
+        fi ;;
+    esac
+    # Nothing played within 90 s (offline?): leave alone whatever gets played later.
+    (( ++up < 180 )) || return
+  done
+}
+[[ -z ${1:-} ]] && pause_once_playing </dev/null >/dev/null 2>&1 &
 
 exec youtube-music >/dev/null 2>&1

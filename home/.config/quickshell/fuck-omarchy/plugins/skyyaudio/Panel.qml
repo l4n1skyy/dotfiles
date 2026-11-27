@@ -168,13 +168,24 @@ Panel {
   // "header" is a virtual section for the hero output mute toggle; it sits
   // above the output section so the speaker can be muted from the keyboard.
   readonly property bool headerHasCursor: cursorActive && focusSection === "header"
-  // Only channels that actually exist get a vote. A box with no default source
-  // would otherwise report "input unmuted" forever, leaving the hero switch
-  // able to mute but never to unmute.
   readonly property bool hasOutput: !!(volumeSink && volumeSink.audio)
   readonly property bool hasInput: !!(source && source.audio)
-  readonly property bool anyAudible: (hasOutput && !outputMuted) || (hasInput && !inputMuted)
-  readonly property string toggleHint: anyAudible ? "Mute" : "Unmute"
+  // Speakers and microphone each have their own switch: the hero one is the
+  // speakers, the one in the INPUT header the microphone. (Outputs start muted at
+  // login while microphones don't: ~/.config/systemd/user/wireplumber.service.d/
+  // skyymute-on-startup.conf.)
+  readonly property bool outputOn: hasOutput && !outputMuted
+  readonly property bool inputOn: hasInput && !inputMuted
+  readonly property string toggleHint: outputOn ? "Mute speakers" : "Unmute speakers"
+  readonly property string inputToggleHint: inputOn ? "Mute microphone" : "Unmute microphone"
+
+  // In the input section the cursor has one more stop above the slider (-1):
+  // the INPUT header's switch, at -2. Without a microphone there is neither.
+  function sectionFloor(section) {
+    if (section === "output") return -1
+    if (section === "input") return source ? -2 : 0
+    return 0
+  }
 
   readonly property color hoverFill: bar
     ? Style.hoverFillFor(bar.foreground, Colors.accent)
@@ -217,23 +228,22 @@ Panel {
     var sections = visibleSections
     if (sections.length === 0) return
     if (focusSection === "header") {
-      if (delta > 0) { focusSection = sections[0]; selectedIndex = sectionHasSlider(sections[0]) ? -1 : 0 }
+      if (delta > 0) { focusSection = sections[0]; selectedIndex = sectionFloor(sections[0]) }
       return
     }
     var sIdx = sections.indexOf(focusSection)
-    if (sIdx < 0) { focusSection = sections[0]; selectedIndex = sectionHasSlider(focusSection) ? -1 : 0; return }
+    if (sIdx < 0) { focusSection = sections[0]; selectedIndex = sectionFloor(focusSection); return }
 
     var idx = selectedIndex
     var max = sectionCount(focusSection) - 1  // last device index
-    var hasSlider = sectionHasSlider(focusSection)
-    var floor = hasSlider ? -1 : 0  // -1 = slider row
+    var floor = sectionFloor(focusSection)  // -1 = slider row, -2 = input switch
 
     if (delta > 0) {
       if (idx < max) { selectedIndex = idx + 1; return }
       // Fall through to next section.
       if (sIdx < sections.length - 1) {
         focusSection = sections[sIdx + 1]
-        selectedIndex = sectionHasSlider(focusSection) ? -1 : 0
+        selectedIndex = sectionFloor(focusSection)
       }
     } else {
       if (idx > floor) { selectedIndex = idx - 1; return }
@@ -241,7 +251,7 @@ Panel {
       if (sIdx > 0) {
         focusSection = sections[sIdx - 1]
         var prevMax = sectionCount(focusSection) - 1
-        selectedIndex = prevMax >= 0 ? prevMax : (sectionHasSlider(focusSection) ? -1 : 0)
+        selectedIndex = prevMax >= 0 ? prevMax : sectionFloor(focusSection)
       } else {
         focusSection = "header"
       }
@@ -288,7 +298,7 @@ Panel {
 
   // Enter/Space: activate whatever the cursor is on.
   function activateCursor() {
-    if (focusSection === "header") { toggleAllMuted(); return }
+    if (focusSection === "header") { toggleOutputMute(); return }
     if (focusSection === "output") {
       if (selectedIndex === -1) { toggleOutputMute(); return }
       var sink = displayAudioSinks[selectedIndex]
@@ -296,7 +306,7 @@ Panel {
       return
     }
     if (focusSection === "input") {
-      if (selectedIndex === -1) { toggleInputMute(); return }
+      if (selectedIndex < 0) { toggleInputMute(); return }
       var src = displayAudioSources[selectedIndex]
       if (src) setDefaultSource(src)
       return
@@ -392,8 +402,7 @@ Panel {
       return
     }
     var count = sectionCount(focusSection)
-    var hasSlider = sectionHasSlider(focusSection)
-    var floor = hasSlider ? -1 : 0
+    var floor = sectionFloor(focusSection)
     if (selectedIndex > count - 1) selectedIndex = Math.max(floor, count - 1)
     if (selectedIndex < floor) selectedIndex = floor
   }
@@ -449,15 +458,6 @@ Panel {
 
   function toggleInputMute() {
     if (source && source.audio) source.audio.muted = !source.audio.muted
-  }
-
-  // The hero switch is the whole panel's on/off, so it carries both channels
-  // at once. It reads as on while anything is still audible, which keeps
-  // muting a single channel from the row below flipping the master switch.
-  function toggleAllMuted() {
-    var mute = anyAudible
-    if (hasOutput) volumeSink.audio.muted = mute
-    if (hasInput) source.audio.muted = mute
   }
 
   function setDefaultSink(node) {
@@ -635,7 +635,7 @@ Panel {
     fontSize: root.outputIcon() === "󰋎" || root.outputIcon() === "󰋐" ? 16 : (root.outputMuted ? 14 : 26)
     horizontalMargin: 8.75
     onPressed: function(b) {
-      if (b === Qt.RightButton) root.toggleAllMuted()
+      if (b === Qt.RightButton) root.toggleOutputMute()
       else root.toggle()
     }
 
@@ -724,17 +724,17 @@ Panel {
             }
 
             // Compact on/off switch on the trailing edge of the hero, and the
-            // header's only cursor target. Checked means something is still
-            // audible, so muting everything reads as switching audio off.
+            // header's only cursor target: the speakers. The microphone has
+            // its own switch in the INPUT header.
             ToggleSwitch {
               id: powerSwitch
-              checked: root.anyAudible
+              checked: root.outputOn
               hasCursor: root.headerHasCursor
               foreground: root.bar.foreground
               anchors.right: parent.right
               anchors.verticalCenter: parent.verticalCenter
               onHovered: function(on) { if (on) root.setHeaderCursor() }
-              onToggled: root.toggleAllMuted()
+              onToggled: root.toggleOutputMute()
 
               PanelToolTip {
                 visible: powerSwitch.containsMouse
@@ -878,7 +878,8 @@ Panel {
 
             Item {
               width: parent.width
-              implicitHeight: Math.max(microphoneHeader.implicitHeight, microphonePercent.implicitHeight)
+              implicitHeight: Math.max(microphoneHeader.implicitHeight, microphonePercent.implicitHeight,
+                                       inputSwitch.visible ? inputSwitch.implicitHeight : 0)
 
               PanelSectionHeader {
                 id: microphoneHeader
@@ -897,10 +898,41 @@ Panel {
                 font.family: root.bar.fontFamily
                 font.pixelSize: Style.font.caption
                 font.bold: true
-                anchors.right: parent.right
+                anchors.right: inputSwitch.visible ? inputSwitch.left : parent.right
                 anchors.rightMargin: Style.space(6)
                 anchors.verticalCenter: parent.verticalCenter
                 opacity: root.inputMuted ? 0.5 : 1.0
+              }
+
+              // The microphone's own on/off, separate from the speakers' switch
+              // in the hero. Sized off the header label (as network's band
+              // switch is) so it reads as part of the header, and centred on
+              // the label's glyphs rather than its padded box.
+              ToggleSwitch {
+                id: inputSwitch
+                visible: !!root.source
+                trackHeight: Math.round(microphoneHeader.font.pixelSize * 1.2)
+                cursorPad: Style.space(3)
+                anchors.right: parent.right
+                anchors.verticalCenter: microphoneHeader.verticalCenter
+                anchors.verticalCenterOffset: Math.round(microphoneHeader.topPadding / 2)
+                checked: root.inputOn
+                hasCursor: root.cursorActive && root.focusSection === "input" && root.selectedIndex === -2
+                onHasCursorChanged: if (hasCursor) root.ensureCursorVisible(inputSwitch)
+                foreground: root.bar.foreground
+                onToggled: root.toggleInputMute()
+                onHovered: function(on) {
+                  if (!on) return
+                  root.cursorActive = true
+                  root.focusSection = "input"
+                  root.selectedIndex = -2
+                }
+
+                PanelToolTip {
+                  visible: inputSwitch.containsMouse
+                  text: root.inputToggleHint
+                  fontFamily: root.bar.fontFamily
+                }
               }
             }
 

@@ -11,8 +11,8 @@ import qs.Commons
 // Previous / play-pause / next plus the track title. Button icons are
 // CozetteVector's own glyphs; the title uses the bar font.
 // Inline settings (shell.json entry): showTitle (default true),
-// maxTitleWidth (default 0 = fill all the free space up to the next module;
-// a number caps it), hideWhenIdle (default true).
+// maxTitleWidth (default 0 = fill all the free space up to the next module
+// group, wherever the module sits; a number caps it), hideWhenIdle (default true).
 BarWidget {
   id: root
   moduleName: "skyymedia"
@@ -26,29 +26,61 @@ BarWidget {
   readonly property bool showTitle: setting("showTitle", true) && !vertical
   readonly property real maxTitleWidth: setting("maxTitleWidth", 0)
 
-  // Space between where the title starts and the first module of the centre
-  // group on this monitor (the clock, or whatever sits before it).
+  // How wide the title may get: its current width plus the empty bar space it
+  // can still grow into before its module group runs into the next one on
+  // this monitor. Works in any region (left, either side of the centre
+  // anchor, right), since each grows a different way.
   property real freeWidth: 160
   readonly property real titleGap: Style.space(12)
 
-  function centerEdge() {
-    if (!bar) return Infinity
+  // Left / right edge (window x) of each region's visible modules on this
+  // bar surface, this one included.
+  function regionExtents() {
     var win = root.Window.window
-    var anchor = bar.centerAnchor
-    var ids = [anchor]
-    var before = bar.entriesBefore(bar.layoutEntries("center"), anchor)
-    for (var i = 0; i < before.length; i++)
-      ids.push(typeof before[i] === "string" ? before[i] : before[i].id)
-    var edge = Infinity
-    for (var k = 0; k < ids.length; k++) {
-      var widgets = bar.moduleWidgets(ids[k])
-      for (var j = 0; j < widgets.length; j++) {
-        var w = widgets[j]
-        if (!w || w.Window.window !== win || !w.visible || w.width <= 0) continue
-        edge = Math.min(edge, w.mapToItem(null, 0, 0).x)
-      }
+    var ext = { left: null, center: null, right: null }
+    var slots = bar && bar.moduleSlots ? bar.moduleSlots : []
+    for (var i = 0; i < slots.length; i++) {
+      var s = slots[i]
+      var w = s ? s.activeItem : null
+      if (!w || !(s.region in ext) || w.Window.window !== win || !w.visible || w.width <= 0) continue
+      var x = w.mapToItem(null, 0, 0).x
+      var e = ext[s.region] || (ext[s.region] = { min: Infinity, max: -Infinity })
+      e.min = Math.min(e.min, x)
+      e.max = Math.max(e.max, x + w.width)
     }
-    return edge
+    return ext
+  }
+
+  function ownRegion() {
+    var slots = bar && bar.moduleSlots ? bar.moduleSlots : []
+    for (var i = 0; i < slots.length; i++)
+      if (slots[i] && slots[i].activeItem === root) return slots[i].region
+    return ""
+  }
+
+  // Empty space the title can still take (negative = it already overlaps).
+  // The left group grows rightwards, the right group leftwards; in the centre
+  // the modules before the anchor grow leftwards, those after it rightwards,
+  // and with no anchor the whole group grows both ways (half each side).
+  function slack() {
+    var region = ownRegion()
+    var ext = regionExtents()
+    var winWidth = root.Window.window ? root.Window.window.width : Infinity
+    var leftEnd = ext.left ? ext.left.max : 0
+    var rightStart = ext.right ? ext.right.min : winWidth
+    var gap = titleGap
+    if (region === "left")
+      return (ext.center ? ext.center.min : rightStart) - ext.left.max - gap
+    if (region === "right")
+      return ext.right.min - (ext.center ? ext.center.max : leftEnd) - gap
+    if (region !== "center" || !ext.center) return NaN
+    var entries = bar.layoutEntries("center")
+    var anchorIdx = bar.entryIndex(entries, bar.centerAnchor)
+    var ownIdx = bar.entryIndex(entries, root.moduleName)
+    if (anchorIdx === -1)
+      return 2 * Math.min(ext.center.min - leftEnd - gap, rightStart - ext.center.max - gap)
+    return ownIdx < anchorIdx ? ext.center.min - leftEnd - gap
+                              : rightStart - ext.center.max - gap
   }
 
   // While this module is being dragged, its title keeps a fixed width so the
@@ -59,11 +91,10 @@ BarWidget {
   readonly property real dragWidth: Style.space(160)
 
   function measure() {
-    if (beingDragged) return
-    var edge = centerEdge()
-    if (!isFinite(edge)) return
-    var start = titleClip.mapToItem(null, 0, 0).x
-    freeWidth = Math.max(0, edge - start - titleGap)
+    if (beingDragged || !bar) return
+    var room = slack()
+    if (!isFinite(room)) return
+    freeWidth = Math.max(0, titleClip.width + room)
   }
 
   Timer {
